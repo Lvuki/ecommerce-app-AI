@@ -1,0 +1,14 @@
+{
+  "development": {
+    "url": "postgres://shopuser:shoppass@localhost:5432/shopdb",
+    "dialect": "postgres"
+  },
+  "test": {
+    "url": "postgres://shopuser:shoppass@localhost:5432/shopdb_test",
+    "dialect": "postgres"
+  },
+  "production": {
+    "url": "postgres://shopuser:shoppass@localhost:5432/shopdb",
+    "dialect": "postgres"
+  }
+}
