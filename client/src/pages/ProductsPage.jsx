@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { getProducts, addProduct, updateProduct, deleteProduct } from "../services/productService";
+import { getCategories, addCategory, updateCategory, deleteCategory } from "../services/categoryService";
 import { addItem } from "../services/cartService";
 import { getToken } from "../services/authService";
 import { useNavigate } from "react-router-dom";
@@ -17,6 +18,9 @@ function ProductsPage() {
     specs: "",
     image: null,
   });
+  const [categories, setCategories] = useState([]);
+  const [showCategoriesPanel, setShowCategoriesPanel] = useState(false);
+  const [catForm, setCatForm] = useState({ id: null, name: '', description: '', imageFile: null, image: '' });
   const [editId, setEditId] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const navigate = useNavigate();
@@ -27,6 +31,7 @@ function ProductsPage() {
       navigate("/login");
     } else {
       getProducts().then(setProducts);
+      getCategories().then((c) => setCategories(c || []));
     }
   }, [navigate]);
 
@@ -146,7 +151,12 @@ function ProductsPage() {
 
               <div style={{ display: 'flex', flexDirection: 'column' }}>
                 <label style={{ fontWeight: 600, marginBottom: 6 }}>Category</label>
-                <input value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} />
+                <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}>
+                  <option value="">— none —</option>
+                  {categories.map(cat => (
+                    <option key={cat.id} value={cat.name}>{cat.name}</option>
+                  ))}
+                </select>
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -237,6 +247,64 @@ function ProductsPage() {
             ))}
           </tbody>
         </table>
+      </div>
+
+      {/* Categories management panel (inline on product admin page) */}
+      <div style={{ marginTop: 20 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h3>Categories</h3>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button onClick={() => { setShowCategoriesPanel(s => !s); setCatForm({ id: null, name: '', description: '', imageFile: null, image: '' }); }}>{showCategoriesPanel ? 'Close' : 'Manage Categories'}</button>
+          </div>
+        </div>
+
+        {showCategoriesPanel ? (
+          <div style={{ marginTop: 12 }}>
+            <div style={{ display: 'grid', gap: 12 }}>
+              {categories.map(c => (
+                <div key={c.id} style={{ display: 'flex', alignItems: 'center', gap: 12, border: '1px solid #eee', padding: 12, borderRadius: 8 }}>
+                  <div style={{ width: 84, height: 64, background: '#fafafa', borderRadius: 6, overflow: 'hidden' }}>
+                    {c.image ? <img src={c.image.startsWith('http') ? c.image : `http://localhost:4000${c.image}`} alt={c.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <div style={{ padding: 8, color: '#888' }}>No image</div>}
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 700 }}>{c.name}</div>
+                    <div style={{ color: '#666' }}>{c.description}</div>
+                  </div>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <button onClick={() => setCatForm({ id: c.id, name: c.name || '', description: c.description || '', imageFile: null, image: c.image || '' })}>Edit</button>
+                    <button onClick={async () => { if (!confirm('Delete this category?')) return; await deleteCategory(c.id); setCategories(await getCategories()); }} style={{ color: 'red' }}>Delete</button>
+                  </div>
+                </div>
+              ))}
+
+              <div style={{ border: '1px dashed #ddd', padding: 12, borderRadius: 8 }}>
+                <h4>{catForm.id ? 'Edit Category' : 'Add Category'}</h4>
+                <form onSubmit={async (e) => {
+                  e.preventDefault();
+                  const fd = new FormData();
+                  fd.append('name', catForm.name);
+                  fd.append('description', catForm.description);
+                  if (catForm.imageFile) fd.append('image', catForm.imageFile);
+                  if (catForm.id) {
+                    await updateCategory(catForm.id, fd);
+                  } else {
+                    await addCategory(fd);
+                  }
+                  setCategories(await getCategories());
+                  setCatForm({ id: null, name: '', description: '', imageFile: null, image: '' });
+                }} style={{ display: 'grid', gap: 8 }}>
+                  <input placeholder="Name" value={catForm.name} required onChange={(e) => setCatForm({ ...catForm, name: e.target.value })} />
+                  <textarea placeholder="Description" value={catForm.description} onChange={(e) => setCatForm({ ...catForm, description: e.target.value })} rows={3} />
+                  <input type="file" accept="image/*" onChange={(e) => setCatForm({ ...catForm, imageFile: e.target.files?.[0] || null })} />
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <button type="submit">Save</button>
+                    <button type="button" onClick={() => setCatForm({ id: null, name: '', description: '', imageFile: null, image: '' })}>Reset</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        ) : null}
       </div>
     </div>
   );
