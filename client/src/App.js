@@ -12,6 +12,7 @@ import CartPage from "./pages/Cart";
 import BlogsPage from "./pages/Blogs";
 import BlogPost from "./pages/BlogPost";
 import BlogsAdmin from "./pages/BlogsAdmin";
+import CategoriesAdmin from "./pages/CategoriesAdmin";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 
@@ -29,6 +30,7 @@ function App() {
          <Route path="/category" element={<Category />} />
   <Route path="/admin/users" element={<AdminUsers />} />
   <Route path="/admin/blogs" element={<BlogsAdmin />} />
+  <Route path="/admin/categories" element={<CategoriesAdmin />} />
   <Route path="/cart" element={<CartPage />} />
         <Route path="/blogs" element={<BlogsPage />} />
         <Route path="/blogs/:id" element={<BlogPost />} />

@@ -14,6 +14,7 @@ const productRoutes = require('./routes/products');
 const orderRoutes = require('./routes/orders');
 const userRoutes = require('./routes/userRoutes');
 const blogRoutes = require('./routes/blogs');
+const categoryRoutes = require('./routes/categories');
 
 const app = express();
 
@@ -30,6 +31,7 @@ app.use(cors({
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/blogs', blogRoutes);
+app.use('/api/categories', categoryRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/users', userRoutes); // includes admin-only routes
 
