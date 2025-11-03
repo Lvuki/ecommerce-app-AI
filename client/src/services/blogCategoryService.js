@@ -46,4 +46,5 @@ export async function deleteBlogCategory(id) {
   return res.json();
 }
 
-export default { getBlogCategories, getBlogCategoryById, addBlogCategory, updateBlogCategory, deleteBlogCategory };
+const blogCategoryService = { getBlogCategories, getBlogCategoryById, addBlogCategory, updateBlogCategory, deleteBlogCategory };
+export default blogCategoryService;

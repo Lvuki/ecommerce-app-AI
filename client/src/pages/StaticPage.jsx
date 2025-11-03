@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { getPageBySlug } from '../services/pageService';
 import { getProducts } from '../services/productService';
+import ModuleRenderer from '../components/ModuleRenderer';
 
 export default function StaticPage() {
   const { slug } = useParams();
@@ -9,6 +10,8 @@ export default function StaticPage() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [slideIndex, setSlideIndex] = useState(0);
+  const sliderTimerRef = useRef(null);
 
   useEffect(() => {
     let mounted = true;
@@ -34,22 +37,68 @@ export default function StaticPage() {
           }
           setProducts(results);
         }
+        // if slider, reset slideIndex
+        if (p.type === 'slider') {
+          setSlideIndex(0);
+        }
       } catch (err) { console.error(err); setError(err.message || 'Failed to load page'); }
       finally { if (mounted) setLoading(false); }
     })();
     return () => { mounted = false; };
   }, [slug]);
 
+  // auto-advance slider when content is slider
+  useEffect(() => {
+    if (!page || page.type !== 'slider') return;
+    const slides = Array.isArray(page.content) ? page.content : (typeof page.content === 'string' ? (() => { try { return JSON.parse(page.content); } catch (_) { return []; } })() : []);
+    if (!slides || !slides.length) return;
+    sliderTimerRef.current = setInterval(() => {
+      setSlideIndex(i => (i + 1) % slides.length);
+    }, 4000);
+    return () => { clearInterval(sliderTimerRef.current); sliderTimerRef.current = null; };
+  }, [page]);
+
   if (loading) return <div className="page-container">Loading...</div>;
   if (!page) return <div className="page-container"><h2>Page not found</h2><div style={{ color: '#666', marginTop: 8 }}>This page does not exist or is not visible.</div></div>;
   if (error) return <div className="page-container"><h2>Error</h2><div style={{ color: 'red' }}>{String(error)}</div></div>;
+
+  const renderSlider = (slides) => {
+    if (!slides || !slides.length) return <div style={{ color: '#666' }}>No slides configured.</div>;
+    const idx = Math.max(0, Math.min(slideIndex, slides.length - 1));
+    const s = slides[idx] || {};
+    return (
+      <div style={{ position: 'relative', maxWidth: 1000, margin: '0 auto' }}>
+        <div style={{ position: 'relative', overflow: 'hidden', borderRadius: 8 }}>
+          <img src={s.image} alt={s.title || ''} style={{ width: '100%', height: 420, objectFit: 'cover', display: 'block' }} />
+          {s.title ? <div style={{ position: 'absolute', left: 24, bottom: 24, color: '#fff', background: 'rgba(0,0,0,0.45)', padding: '8px 12px', borderRadius: 6, fontWeight: 700 }}>{s.title}</div> : null}
+        </div>
+        <button onClick={() => setSlideIndex(i => (i - 1 + slides.length) % slides.length)} style={{ position: 'absolute', left: 8, top: '50%', transform: 'translateY(-50%)', background: 'rgba(0,0,0,0.35)', color: '#fff', border: 'none', padding: 8, borderRadius: 6, cursor: 'pointer' }}>‹</button>
+        <button onClick={() => setSlideIndex(i => (i + 1) % slides.length)} style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', background: 'rgba(0,0,0,0.35)', color: '#fff', border: 'none', padding: 8, borderRadius: 6, cursor: 'pointer' }}>›</button>
+        <div style={{ display: 'flex', gap: 6, justifyContent: 'center', marginTop: 8 }}>
+          {slides.map((_, i) => (
+            <button key={i} onClick={() => setSlideIndex(i)} style={{ width: 10, height: 10, borderRadius: 999, background: i === idx ? '#111' : '#ddd', border: 'none', padding: 0 }} />
+          ))}
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="page-container">
       <h1>{page.title}</h1>
       <div style={{ marginTop: 12 }}>
-        {page.type === 'slider' ? (
-          <div>Slider content: {JSON.stringify(page.content)}</div>
+        {/* If content is an array of modules, render modules in order */}
+        {Array.isArray(page.content) ? (
+          page.content.map((mod, i) => (
+            <div key={i} style={{ marginBottom: 18 }}>
+              <ModuleRenderer mod={mod} />
+            </div>
+          ))
+        ) : page.type === 'slider' ? (
+          (() => {
+            const slides = Array.isArray(page.content) ? page.content : (typeof page.content === 'string' ? (() => { try { return JSON.parse(page.content); } catch (_) { return []; } })() : []);
+            return renderSlider(slides);
+          })()
         ) : page.type === 'blogs' ? (
           <div>Blog list content: {JSON.stringify(page.content)}</div>
         ) : page.type === 'products' ? (

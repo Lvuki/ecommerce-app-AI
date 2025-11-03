@@ -93,4 +93,5 @@ export async function deletePost(id) {
   return res.json();
 }
 
-export default { getPosts, getPostById, addPost, updatePost, deletePost };
+const blogService = { getPosts, getPostById, addPost, updatePost, deletePost };
+export default blogService;

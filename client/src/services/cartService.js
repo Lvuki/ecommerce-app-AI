@@ -121,4 +121,5 @@ async function getCartFull() {
   return await res.json();
 }
 
-export default { getCart, getCount, addItem, updateQty, removeItem, clearCart };
+const cartService = { getCart, getCount, addItem, updateQty, removeItem, clearCart };
+export default cartService;

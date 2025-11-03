@@ -45,4 +45,5 @@ export async function deletePage(id, token) {
   return res.json();
 }
 
-export default { getPublicPages, getPageBySlug, getAllPagesAdmin, addPage, updatePage, deletePage };
+const pageService = { getPublicPages, getPageBySlug, getAllPagesAdmin, addPage, updatePage, deletePage };
+export default pageService;

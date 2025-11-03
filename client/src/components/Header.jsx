@@ -163,13 +163,13 @@ export default function Header() {
             {col.map(cat => (
               <div key={cat.id || cat.name} style={{ marginBottom: 12 }}>
                 <div style={{ fontWeight: 800, marginBottom: 6 }}>
-                  <a href="#" onClick={(e) => { e.preventDefault(); if (onSelect) onSelect(cat.name); }} style={{ color: '#111', textDecoration: 'none' }}>{cat.name}</a>
+                  <button type="button" onClick={() => { if (onSelect) onSelect(cat.name); }} style={{ color: '#111', textDecoration: 'none', background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontSize: 'inherit', fontWeight: 'inherit' }}>{cat.name}</button>
                 </div>
                 {Array.isArray(cat.subcategories) && cat.subcategories.length ? (
                   <ul style={{ listStyle: 'none', paddingLeft: 8, margin: 0 }}>
                     {cat.subcategories.map(sub => (
                       <li key={sub.id || sub.name} style={{ marginBottom: 6 }}>
-                        <a href="#" onClick={(e) => { e.preventDefault(); if (onSelect) onSelect(sub.name); }} style={{ textDecoration: 'none', color: '#444' }}>{sub.name}</a>
+                        <button type="button" onClick={() => { if (onSelect) onSelect(sub.name); }} style={{ textDecoration: 'none', color: '#444', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>{sub.name}</button>
                       </li>
                     ))}
                   </ul>
@@ -190,7 +190,7 @@ export default function Header() {
         {nodes.map(n => (
           <li key={n.id || n.name} style={{ marginBottom: 6 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <a href="#" onClick={(e) => { e.preventDefault(); if (onSelect) onSelect(n.name); }} style={{ textDecoration: 'none', color: '#111', fontWeight: 600 }}>{n.name}</a>
+              <button type="button" onClick={() => { if (onSelect) onSelect(n.name); }} style={{ textDecoration: 'none', color: '#111', fontWeight: 600, background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>{n.name}</button>
             </div>
             {Array.isArray(n.subcategories) && n.subcategories.length ? (
               <div style={{ marginTop: 6, marginLeft: 8 }}>
