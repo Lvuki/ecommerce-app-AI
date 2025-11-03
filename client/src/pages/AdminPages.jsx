@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, useDraggable } from '@dnd-kit/core';
+import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, useDraggable, DragOverlay, useDroppable } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy, arrayMove, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { getToken } from '../services/authService';
@@ -17,6 +17,18 @@ export default function AdminPages() {
   const [sliderSlides, setSliderSlides] = useState([]);
   const [modules, setModules] = useState([]); // array of page modules (drag/drop)
   const sensors = useSensors(useSensor(PointerSensor));
+  const [activeId, setActiveId] = useState(null);
+  const activeType = activeId && String(activeId).startsWith('palette-') ? String(activeId).replace(/^palette-/, '') : null;
+  // stable id generator for modules
+  const createId = () => `id_${Date.now().toString(36)}_${Math.random().toString(36).slice(2,8)}`;
+  const createModule = (t) => {
+    if (t === 'slider') return { id: createId(), type: 'slider', config: [] };
+    if (t === 'text') return { id: createId(), type: 'text', config: { text: '' } };
+    if (t === 'image') return { id: createId(), type: 'image', config: { url: '', alt: '' } };
+    if (t === 'products') return { id: createId(), type: 'products', config: { mode: 'category', categories: [], category: '', items: [], limit: 8 } };
+    return { id: createId(), type: t, config: {} };
+  };
+  const { setNodeRef: setModulesRef } = useDroppable({ id: 'modules-container' });
   
 
   const load = async () => {
@@ -86,7 +98,8 @@ export default function AdminPages() {
     setForm({ title: p.title || '', slug: p.slug || '', type: p.type || 'custom', content: typeof p.content === 'object' ? JSON.stringify(p.content, null, 2) : (p.content || ''), order: p.order || 0, visible: !!p.visible });
     // if page content is modules array, initialize modules editor
     if (Array.isArray(p.content)) {
-      setModules(p.content);
+      // ensure each module has a stable id
+      setModules(p.content.map(m => m && m.id ? m : { ...(m||{}), id: createId() }));
     } else {
       setModules([]);
     }
@@ -181,16 +194,16 @@ export default function AdminPages() {
             <div style={{ width: 180, border: '1px dashed #eee', padding: 10, borderRadius: 6, background: '#fafafa' }}>
               <div style={{ fontWeight: 700, marginBottom: 8 }}>Modules</div>
               <div style={{ display: 'grid', gap: 8 }}>
-                <div onClick={() => setModules(m => [...m, { type: 'slider', config: [] }])}>
+                <div onClick={() => setModules(m => [...m, createModule('slider')])}>
                   <PaletteItem type="slider" label="Slider" />
                 </div>
-                <div onClick={() => setModules(m => [...m, { type: 'text', config: { text: '' } }])}>
+                <div onClick={() => setModules(m => [...m, createModule('text')])}>
                   <PaletteItem type="text" label="Text" />
                 </div>
-                <div onClick={() => setModules(m => [...m, { type: 'image', config: { url: '', alt: '' } }])}>
+                <div onClick={() => setModules(m => [...m, createModule('image')])}>
                   <PaletteItem type="image" label="Image" />
                 </div>
-                <div onClick={() => setModules(m => [...m, { type: 'products', config: { mode: 'category', categories: [], category: '', items: [], limit: 8 } }])}>
+                <div onClick={() => setModules(m => [...m, createModule('products')])}>
                   <PaletteItem type="products" label="Products" />
                 </div>
               </div>
@@ -199,39 +212,42 @@ export default function AdminPages() {
             <div style={{ flex: 1 }}>
               <div style={{ fontWeight: 700, marginBottom: 8 }}>Page layout</div>
               <div style={{ display: 'grid', gap: 8 }}>
-                <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={(e) => {
+                <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={(e) => setActiveId(e.active?.id ?? null)} onDragEnd={(e) => {
                   const { active, over } = e;
-                  if (!over) return;
+                  if (!over) { setActiveId(null); return; }
                   // dragging from palette into modules
                   if (String(active.id).startsWith('palette-')) {
                     const type = String(active.id).replace(/^palette-/, '');
-                    // insertion index: if over is a module id, insert at that index; otherwise append
-                    const insertAt = String(over.id).startsWith('module-') ? Number(String(over.id).replace(/^module-/, '')) : modules.length;
-                    const makeModule = (t) => {
-                      if (t === 'slider') return { type: 'slider', config: [] };
-                      if (t === 'text') return { type: 'text', config: { text: '' } };
-                      if (t === 'image') return { type: 'image', config: { url: '', alt: '' } };
-                      if (t === 'products') return { type: 'products', config: { mode: 'category', categories: [], category: '', items: [], limit: 8 } };
-                      return { type: t, config: {} };
-                    };
-                    const newMod = makeModule(type);
+                    let insertAt = modules.length;
+                    if (String(over.id).startsWith('module-')) {
+                      const overId = String(over.id).replace(/^module-/, '');
+                      const idx = modules.findIndex(m => m.id === overId);
+                      insertAt = idx >= 0 ? idx : modules.length;
+                    } else if (String(over.id) === 'modules-container') {
+                      insertAt = modules.length;
+                    }
+                    const newMod = createModule(type);
                     setModules(ms => {
                       const a = Array.from(ms || []);
                       a.splice(insertAt, 0, newMod);
                       return a;
                     });
+                    setActiveId(null);
                     return;
                   }
                   // reorder existing modules
                   if (String(active.id).startsWith('module-') && String(over.id).startsWith('module-')) {
-                    const idxFrom = Number(String(active.id).replace(/^module-/, ''));
-                    const idxTo = Number(String(over.id).replace(/^module-/, ''));
-                    setModules(ms => arrayMove(ms, idxFrom, idxTo));
+                    const fromId = String(active.id).replace(/^module-/, '');
+                    const toId = String(over.id).replace(/^module-/, '');
+                    const idxFrom = modules.findIndex(m => m.id === fromId);
+                    const idxTo = modules.findIndex(m => m.id === toId);
+                    if (idxFrom >= 0 && idxTo >= 0) setModules(ms => arrayMove(ms, idxFrom, idxTo));
                   }
-                }}>
-                  <SortableContext items={modules.map((_,i)=>`module-${i}`)} strategy={verticalListSortingStrategy}>
+                  setActiveId(null);
+                }} onDragCancel={() => setActiveId(null)}>
+                  <SortableContext items={modules.map(m=>`module-${m.id}`)} strategy={verticalListSortingStrategy}>
                     {modules.map((mod, idx) => {
-                      const id = `module-${idx}`;
+                      const id = `module-${mod.id}`;
                       return (
                         <SortableModule key={id} id={id} idx={idx}>
                           <div style={{ border: '1px solid #eee', padding: 10, borderRadius: 6, background: '#fff', marginBottom: 8 }}>
@@ -308,7 +324,15 @@ export default function AdminPages() {
                         </SortableModule>
                       );
                     })}
-                  </SortableContext>
+                    </SortableContext>
+                    <DragOverlay>
+                      {activeType ? (
+                        <div style={{ padding: 8, borderRadius: 6, border: '1px solid #ddd', background: '#fff', display: 'flex', gap: 8, alignItems: 'center', boxShadow: '0 6px 18px rgba(0,0,0,0.08)' }}>
+                          <div style={{ width: 64, height: 44, background: '#f4f6f8', borderRadius: 4, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700 }}>{activeType.substring(0,3).toUpperCase()}</div>
+                          <div style={{ fontWeight: 700 }}>{activeType.charAt(0).toUpperCase() + activeType.slice(1)}</div>
+                        </div>
+                      ) : null}
+                    </DragOverlay>
                 </DndContext>
               </div>
             </div>
