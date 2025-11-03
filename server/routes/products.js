@@ -37,10 +37,11 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-router.post('/', authenticate, adminOnly, upload.single('image'), addProduct);
+// accept multiple images under the `images` field (max 8)
+router.post('/', authenticate, adminOnly, upload.array('images', 8), addProduct);
 // apply the same ObjectId constraint to update/delete routes to avoid
 // accidentally matching reserved literal paths
-router.put('/:id([0-9]+|[0-9a-fA-F]{24})', authenticate, adminOnly, upload.single('image'), updateProduct);
+router.put('/:id([0-9]+|[0-9a-fA-F]{24})', authenticate, adminOnly, upload.array('images', 8), updateProduct);
 router.delete('/:id([0-9]+|[0-9a-fA-F]{24})', authenticate, adminOnly, deleteProduct);
 
 module.exports = router;

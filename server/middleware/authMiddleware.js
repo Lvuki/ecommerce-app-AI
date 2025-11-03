@@ -3,7 +3,10 @@ const { User } = require("../models");
 require("dotenv").config();
 
 exports.authenticate = async (req, res, next) => {
-  const token = req.headers["authorization"]?.split(" ")[1]; // Bearer <token>
+  // Try Authorization header first, then fall back to cookie token (HttpOnly)
+  let token = req.headers["authorization"]?.split(" ")[1]; // Bearer <token>
+  if (!token && req.cookies && req.cookies.token) token = req.cookies.token;
+
   if (!token) return res.status(401).json({ message: "Unauthorized: No token provided" });
 
   try {

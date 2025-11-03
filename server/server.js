@@ -5,21 +5,30 @@ const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
 
-const { sequelize, Product, Blog } = require('./models');
+const { sequelize, Product, Blog, Order, OrderItem, User } = require('./models');
+const cookieParser = require('cookie-parser');
+const jwt = require('jsonwebtoken');
 const { authenticate, adminOnly } = require('./middleware/authMiddleware');
 
 // Import routes
 const authRoutes = require('./routes/auth');
 const productRoutes = require('./routes/products');
 const orderRoutes = require('./routes/orders');
-const userRoutes = require('./routes/userRoutes');
+// Use the primary users router which includes /me and public profile endpoints
+const userRoutes = require('./routes/users');
 const blogRoutes = require('./routes/blogs');
 const categoryRoutes = require('./routes/categories');
+const blogCategoryRoutes = require('./routes/blogCategories');
+const cartRoutes = require('./routes/cart');
+const adminRoutes = require('./routes/admin');
+const rolesRoutes = require('./routes/roles');
+const pagesRoutes = require('./routes/pages');
 
 const app = express();
 
 // Middleware
 app.use(express.json());
+app.use(cookieParser());
 
 // Enable CORS for frontend
 app.use(cors({
@@ -32,8 +41,13 @@ app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/blogs', blogRoutes);
 app.use('/api/categories', categoryRoutes);
+app.use('/api/blogcategories', blogCategoryRoutes);
+app.use('/api/cart', cartRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/users', userRoutes); // includes admin-only routes
+app.use('/api/admin', adminRoutes);
+app.use('/api/roles', rolesRoutes);
+app.use('/api/pages', pagesRoutes);
 
 // Serve uploaded images
 const uploadsDir = path.join(__dirname, 'uploads');
@@ -42,11 +56,41 @@ if (!fs.existsSync(uploadsDir)) {
 }
 app.use('/uploads', express.static(uploadsDir));
 
-// Serve React frontend build
-app.use(express.static(path.join(__dirname, '../client/build')));
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../client/build', 'index.html'));
+// Protect direct access to /admin and its subroutes on the server-side (use cookie token)
+app.get(['/admin', '/admin/*'], (req, res, next) => {
+  const token = req.cookies && req.cookies.token;
+  if (!token) {
+    // Redirect to login (client will render login page)
+    return res.redirect('/login');
+  }
+  try {
+    const payload = jwt.verify(token, process.env.JWT_SECRET);
+    if (payload && payload.role === 'admin') {
+      // serve index.html (React will handle the rest)
+      return res.sendFile(path.join(__dirname, '../client/build', 'index.html'));
+    }
+    return res.redirect('/login');
+  } catch (err) {
+    return res.redirect('/login');
+  }
 });
+
+// Serve React frontend build (catch-all for non-admin and other routes)
+const clientBuildDir = path.join(__dirname, '../client/build');
+if (fs.existsSync(clientBuildDir)) {
+  app.use(express.static(clientBuildDir));
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(clientBuildDir, 'index.html'));
+  });
+} else {
+  // If the React build is not present (dev environment), redirect unknown routes
+  // to the client dev server so OAuth callbacks and client routes resolve there.
+  const clientUrl = process.env.CLIENT_URL || 'http://localhost:3000';
+  app.get('*', (req, res) => {
+    // preserve path so client can handle /auth/success?token=...
+    return res.redirect(clientUrl + req.originalUrl);
+  });
+}
 
 // Test route
 app.get('/test', (req, res) => res.json({ message: 'Server is running!' }));
@@ -56,52 +100,7 @@ const PORT = process.env.PORT || 4000;
 sequelize.sync({ alter: true })
   .then(() => {
     console.log('Database synced');
-    // Seed dummy products if none exist
-    Product.count().then(async (count) => {
-      if (count === 0) {
-        const items = Array.from({ length: 20 }).map((_, i) => {
-          const id = i + 1;
-          const brand = ["Acme", "Globex", "Umbrella", "Soylent", "Initech"][i % 5];
-          const category = ["Electronics", "Apparel", "Home", "Sports", "Toys"][i % 5];
-          return {
-            name: `Sample Product ${id}`,
-            description: `This is a great product number ${id}.`,
-            price: 9.99 + i,
-            image: `https://picsum.photos/seed/product${id}/600/400`,
-            category,
-            sku: `SKU-${1000 + id}`,
-            brand,
-            stock: 10 + i,
-            specs: { color: ["red","blue","green"][i % 3], size: ["S","M","L"][i % 3], weight: `${0.5 + i*0.1}kg` },
-          };
-        });
-        await Product.bulkCreate(items);
-        console.log('Seeded 20 sample products');
-      }
-    }).catch(() => {});
-
-    // Seed dummy blog posts if none exist
-    if (Blog) {
-      Blog.count().then(async (count) => {
-        if (count === 0) {
-          const categories = ['Announcements','Tips','Development','News','Guides'];
-          const posts = Array.from({ length: 10 }).map((_, i) => {
-            const id = i + 1;
-            return {
-              title: `Sample Blog Post ${id}`,
-              excerpt: `This is a short excerpt for sample blog post ${id}.`,
-              content: `Full content for sample blog post ${id}. Replace this with your actual post content.`,
-              category: categories[i % categories.length],
-              image: `https://picsum.photos/seed/blog${id}/1200/600`,
-              createdAt: new Date(),
-              updatedAt: new Date(),
-            };
-          });
-          await Blog.bulkCreate(posts);
-          console.log('Seeded 10 sample blog posts');
-        }
-      }).catch(() => {});
-    }
+    // No automatic data seeding in server.js. Seeding has been removed to avoid populating test data on startup.
     app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
   })
   .catch(err => console.error('Database connection error:', err));

@@ -1,11 +1,22 @@
 const fs = require('fs');
 const path = require('path');  // <-- Add this line
 const Sequelize = require('sequelize');
+
+// Ensure environment variables from .env are loaded when scripts require models directly
+require('dotenv').config();
+
 const { DB_NAME, DB_USER, DB_PASSWORD, DB_HOST, DB_PORT } = process.env;
 
-const sequelize = new Sequelize(DB_NAME, DB_USER, DB_PASSWORD, {
-  host: DB_HOST,
-  port: DB_PORT,
+// Coerce env values to expected types and provide sensible defaults where appropriate
+const dbName = DB_NAME || 'shopdb';
+const dbUser = DB_USER || 'postgres';
+const dbPassword = DB_PASSWORD === undefined ? '' : String(DB_PASSWORD);
+const dbHost = DB_HOST || 'localhost';
+const dbPort = DB_PORT ? Number(DB_PORT) : undefined;
+
+const sequelize = new Sequelize(dbName, dbUser, dbPassword, {
+  host: dbHost,
+  port: dbPort,
   dialect: 'postgres',
 });
 

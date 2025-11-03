@@ -133,13 +133,22 @@ export default function CategoryPage() {
                   <div style={{ padding: 12 }}>
                     <div style={{ fontWeight: 600 }}>{p.name}</div>
                     <div style={{ color: '#666', fontSize: 14 }}>{p.brand || p.category}</div>
-                    <div style={{ marginTop: 8, fontWeight: 700 }}>${p.price}</div>
-                    <div style={{ marginTop: 10 }}>
-                        <div style={{ display: 'flex', gap: 8 }}>
-                          <Link to={`/products/${p.id}`} style={{ border: '1px solid #111', padding: '6px 10px', borderRadius: 6, color: '#111', textDecoration: 'none' }}>View</Link>
-                          <button onClick={() => { addItem({ id: p.id, name: p.name, price: p.price, image: p.image, sku: p.sku }, 1); alert('Added to cart'); }} style={{ background: '#fff', border: '1px solid #e6e6e6', padding: '6px 8px', borderRadius: 6, fontSize: 13, cursor: 'pointer' }}>🛒 Add</button>
-                          <button onClick={() => { addItem({ id: p.id, name: p.name, price: p.price, image: p.image, sku: p.sku }, 1); navigate('/cart'); }} style={{ background: '#0b79d0', color: '#fff', borderRadius: 6, padding: '6px 10px', fontSize: 13, border: 'none', cursor: 'pointer', boxShadow: '0 2px 6px rgba(11,121,208,0.18)' }}>💳 Buy</button>
+                    <div style={{ marginTop: 8 }}>
+                      {p.salePrice && Number(p.salePrice) > 0 && Number(p.salePrice) !== Number(p.price) ? (
+                        <div>
+                          <div style={{ fontWeight: 700 }}>${Number(p.salePrice).toFixed(2)}</div>
+                          <div style={{ textDecoration: 'line-through', color: '#888', fontSize: 13 }}>${Number(p.price).toFixed(2)}</div>
                         </div>
+                      ) : (
+                        <div style={{ fontWeight: 700 }}>${Number(p.price).toFixed(2)}</div>
+                      )}
+                    </div>
+                    <div style={{ marginTop: 10 }}>
+                         <div style={{ display: 'flex', gap: 8 }}>
+                         <Link to={`/products/${p.id}`} style={{ border: '1px solid #111', padding: '6px 10px', borderRadius: 6, color: '#111', textDecoration: 'none' }}>View</Link>
+                         <button onClick={async () => { try { const priceToUse = (p.offerPrice && Number(p.offerPrice) > 0) ? p.offerPrice : ((p.salePrice && Number(p.salePrice) > 0) ? p.salePrice : p.price); await addItem({ id: p.id, name: p.name, price: priceToUse, image: p.image, sku: p.sku }, 1); alert('Added to cart'); } catch (err) { console.error(err); alert('Failed to add to cart'); } }} style={{ background: '#fff', border: '1px solid #e6e6e6', padding: '6px 8px', borderRadius: 6, fontSize: 13, cursor: 'pointer' }}>🛒 Add</button>
+                         <button onClick={async () => { try { const priceToUse = (p.offerPrice && Number(p.offerPrice) > 0) ? p.offerPrice : ((p.salePrice && Number(p.salePrice) > 0) ? p.salePrice : p.price); await addItem({ id: p.id, name: p.name, price: priceToUse, image: p.image, sku: p.sku }, 1); navigate('/cart'); } catch (err) { console.error(err); alert('Failed to add to cart'); } }} style={{ background: '#0b79d0', color: '#fff', borderRadius: 6, padding: '6px 10px', fontSize: 13, border: 'none', cursor: 'pointer', boxShadow: '0 2px 6px rgba(11,121,208,0.18)' }}>💳 Buy</button>
+                       </div>
                     </div>
                   </div>
                 </div>

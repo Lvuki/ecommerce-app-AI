@@ -1,3 +1,6 @@
+import API_BASE_URL from '../config';
+import { getToken } from './authService';
+
 const BLOG_KEY = 'blog_posts_v1';
 
 function read() {
@@ -50,9 +53,6 @@ function seedIfNeeded() {
 }
 
 seedIfNeeded();
-
-import API_BASE_URL from '../config';
-import { getToken } from './authService';
 
 export async function getPosts() {
   const res = await fetch(`${API_BASE_URL}/blogs`);

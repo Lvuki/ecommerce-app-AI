@@ -1,35 +1,57 @@
 import React, { useEffect, useState } from 'react';
 import { getCart, updateQty, removeItem, clearCart } from '../services/cartService';
+import API_BASE_URL from '../config';
 import { Link, useNavigate } from 'react-router-dom';
 
 export default function CartPage() {
-  const [items, setItems] = useState(getCart());
+  const [items, setItems] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const onStorage = () => setItems(getCart());
+    let mounted = true;
+    async function load() {
+      const data = await getCart();
+      if (mounted) setItems(data);
+    }
+    load();
+
+    const onStorage = async () => { const d = await getCart(); setItems(d); };
     window.addEventListener('storage', onStorage);
-    return () => window.removeEventListener('storage', onStorage);
+    return () => { mounted = false; window.removeEventListener('storage', onStorage); };
   }, []);
 
-  const handleQty = (id, qty) => {
-    const next = updateQty(id, Number(qty));
-    setItems(next);
+  const handleQty = async (id, qty) => {
+    try {
+      const next = await updateQty(id, Number(qty));
+      setItems(next);
+    } catch (err) {
+      console.error(err);
+      alert('Failed to update quantity');
+    }
   };
 
-  const handleRemove = (id) => {
-    const next = removeItem(id);
-    setItems(next);
+  const handleRemove = async (id) => {
+    try {
+      const next = await removeItem(id);
+      setItems(next);
+    } catch (err) {
+      console.error(err);
+      alert('Failed to remove item');
+    }
   };
 
   const total = items.reduce((s, it) => s + (it.price || 0) * (it.qty || 0), 0);
 
-  const handleCheckout = () => {
-    // For now, simulate checkout by clearing the cart and redirecting to home or orders page
-    clearCart();
-    setItems([]);
-    alert('Order placed (simulation). Thank you!');
-    navigate('/');
+  const handleCheckout = async () => {
+    try {
+      await clearCart();
+      setItems([]);
+      alert('Order placed (simulation). Thank you!');
+      navigate('/');
+    } catch (err) {
+      console.error(err);
+      alert('Failed to checkout');
+    }
   };
 
   if (!items || items.length === 0) return (
@@ -58,7 +80,7 @@ export default function CartPage() {
             <tr key={it.id} style={{ borderBottom: '1px solid #f3f3f3' }}>
               <td style={{ padding: 8 }}>
                 <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                  {it.image ? <img src={it.image.startsWith('http') ? it.image : `http://localhost:4000${it.image}`} alt={it.name} style={{ height: 60, width: 60, objectFit: 'cover', borderRadius: 4 }} /> : null}
+                  {it.image ? <img src={it.image.startsWith('http') ? it.image : `${API_BASE_URL.replace(/\/api$/, '')}${it.image}`} alt={it.name} style={{ height: 60, width: 60, objectFit: 'cover', borderRadius: 4 }} /> : null}
                   <div>
                     <div style={{ fontWeight: 700 }}>{it.name}</div>
                     <div style={{ color: '#666', fontSize: 13 }}>{it.sku}</div>
@@ -82,7 +104,7 @@ export default function CartPage() {
       <div style={{ marginTop: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div style={{ fontWeight: 700 }}>Total: ${total.toFixed(2)}</div>
         <div>
-          <button onClick={() => { clearCart(); setItems([]); }}>Clear</button>
+          <button onClick={async () => { try { await clearCart(); setItems([]); } catch (err) { console.error(err); alert('Failed to clear cart'); } }}>Clear</button>
           <button onClick={handleCheckout} style={{ marginLeft: 8 }}>Checkout</button>
         </div>
       </div>

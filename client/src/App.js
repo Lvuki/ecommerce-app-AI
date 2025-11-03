@@ -2,10 +2,18 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
 import Register from './pages/Register';
 import Login from './pages/Login';
+import AuthCallback from './pages/AuthCallback';
 import ProductsPage from "./pages/ProductsPage";
 import AdminUsers from "./pages/AdminUsers";
 import Dashboard from "./pages/Dashboard";
 import Home from "./pages/Home";
+import Admin, { AdminHome } from "./pages/Admin";
+import AdminOrders from './pages/AdminOrders';
+import AdminReports from './pages/AdminReports';
+import AdminProducts from './pages/AdminProducts';
+import AdminPages from './pages/AdminPages';
+import Profile from './pages/Profile';
+import UserProfile from './pages/UserProfile';
 import ProductView from "./pages/ProductView";
 import Category from "./pages/Category";
 import CartPage from "./pages/Cart";
@@ -13,8 +21,10 @@ import BlogsPage from "./pages/Blogs";
 import BlogPost from "./pages/BlogPost";
 import BlogsAdmin from "./pages/BlogsAdmin";
 import CategoriesAdmin from "./pages/CategoriesAdmin";
+import OffersPage from "./pages/Offers";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
+import StaticPage from './pages/StaticPage';
 
 function App() {
   return (
@@ -23,14 +33,26 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/admin" element={<Admin />}>
+          <Route index element={<AdminHome />} />
+          <Route path="orders" element={<AdminOrders />} />
+          <Route path="reports" element={<AdminReports />} />
+          <Route path="products" element={<AdminProducts />} />
+          <Route path="pages" element={<AdminPages />} />
+          <Route path="users" element={<AdminUsers />} />
+          <Route path="blogs" element={<BlogsAdmin />} />
+          <Route path="categories" element={<CategoriesAdmin />} />
+        </Route>
         <Route path="/register" element={<Register />} />
-        <Route path="/login" element={<Login />} />
+  <Route path="/login" element={<Login />} />
+  <Route path="/auth/success" element={<AuthCallback />} />
+  <Route path="/profile" element={<Profile />} />
+  <Route path="/users/:id" element={<UserProfile />} />
         <Route path="/products" element={<ProductsPage />} />
-         <Route path="/products/:id" element={<ProductView />} />
-         <Route path="/category" element={<Category />} />
-  <Route path="/admin/users" element={<AdminUsers />} />
-  <Route path="/admin/blogs" element={<BlogsAdmin />} />
-  <Route path="/admin/categories" element={<CategoriesAdmin />} />
+    <Route path="/products/:id" element={<ProductView />} />
+    <Route path="/category" element={<Category />} />
+        <Route path="/offers" element={<OffersPage />} />
+    <Route path="/pages/:slug" element={<StaticPage />} />
   <Route path="/cart" element={<CartPage />} />
         <Route path="/blogs" element={<BlogsPage />} />
         <Route path="/blogs/:id" element={<BlogPost />} />

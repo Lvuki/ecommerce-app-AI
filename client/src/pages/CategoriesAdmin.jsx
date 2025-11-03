@@ -5,7 +5,7 @@ import { isAdmin, getToken } from '../services/authService';
 export default function CategoriesAdmin() {
   const [categories, setCategories] = useState([]);
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ name: '', description: '', imageFile: null, image: '' });
+  const [form, setForm] = useState({ name: '', description: '', imageFile: null, image: '', parentId: '' });
   const [editId, setEditId] = useState(null);
   const admin = isAdmin();
 
@@ -15,13 +15,13 @@ export default function CategoriesAdmin() {
 
   const openAdd = () => {
     setEditId(null);
-    setForm({ name: '', description: '', imageFile: null, image: '' });
+    setForm({ name: '', description: '', imageFile: null, image: '', parentId: '' });
     setShowForm(true);
   };
 
   const openEdit = (cat) => {
     setEditId(cat.id);
-    setForm({ name: cat.name || '', description: cat.description || '', imageFile: null, image: cat.image || '' });
+    setForm({ name: cat.name || '', description: cat.description || '', imageFile: null, image: cat.image || '', parentId: cat.parentId || '' });
     setShowForm(true);
   };
 
@@ -31,18 +31,44 @@ export default function CategoriesAdmin() {
     fd.append('name', form.name);
     fd.append('description', form.description);
     if (form.imageFile) fd.append('image', form.imageFile);
+    if (form.parentId) fd.append('parentId', form.parentId);
     if (editId) await updateCategory(editId, fd); else await addCategory(fd);
     setCategories(await getCategories());
     setShowForm(false);
   };
 
   const remove = async (id) => {
-    if (!confirm('Delete this category?')) return;
+    if (!window.confirm('Delete this category?')) return;
     await deleteCategory(id);
     setCategories(await getCategories());
   };
 
   if (!admin) return <div style={{ padding: 20 }}>Admin only</div>;
+
+  // helper to render nested categories recursively
+  const renderNode = (node, depth = 0) => (
+    <div key={node.id} style={{ border: '1px solid #eee', padding: 12, borderRadius: 8, marginLeft: depth ? 24 : 0 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <div style={{ width: 84, height: 64, background: '#fafafa', borderRadius: 6, overflow: 'hidden' }}>
+          {node.image ? <img src={node.image.startsWith('http') ? node.image : `http://localhost:4000${node.image}`} alt={node.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <div style={{ padding: 8, color: '#888' }}>No image</div>}
+        </div>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontWeight: 700 }}>{node.name}</div>
+          <div style={{ color: '#666' }}>{node.description}</div>
+        </div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button onClick={() => openEdit(node)}>Edit</button>
+          <button onClick={() => { setForm({ ...form, parentId: node.id }); setShowForm(true); }} title="Add subcategory">Add Sub</button>
+          <button onClick={() => remove(node.id)} style={{ color: 'red' }}>Delete</button>
+        </div>
+      </div>
+      {Array.isArray(node.subcategories) && node.subcategories.length > 0 ? (
+        <div style={{ marginTop: 8, display: 'grid', gap: 8 }}>
+          {node.subcategories.map((child) => renderNode(child, depth + 1))}
+        </div>
+      ) : null}
+    </div>
+  );
 
   return (
     <div className="page-container" style={{ padding: 20 }}>
@@ -51,22 +77,46 @@ export default function CategoriesAdmin() {
         <button onClick={openAdd}>Add Category</button>
       </div>
 
-      <div style={{ marginTop: 12, display: 'grid', gap: 12 }}>
-        {categories.map(c => (
-          <div key={c.id} style={{ display: 'flex', alignItems: 'center', gap: 12, border: '1px solid #eee', padding: 12, borderRadius: 8 }}>
-            <div style={{ width: 84, height: 64, background: '#fafafa', borderRadius: 6, overflow: 'hidden' }}>
-              {c.image ? <img src={c.image.startsWith('http') ? c.image : `http://localhost:4000${c.image}`} alt={c.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <div style={{ padding: 8, color: '#888' }}>No image</div>}
+      <div style={{ marginTop: 12 }}>
+        {/** Render nested categories: top-level and their subcategories */}
+        <div style={{ display: 'grid', gap: 8 }}>
+          {categories.map((c) => (
+            <div key={c.id} style={{ border: '1px solid #eee', padding: 12, borderRadius: 8 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div style={{ width: 84, height: 64, background: '#fafafa', borderRadius: 6, overflow: 'hidden' }}>
+                  {c.image ? <img src={c.image.startsWith('http') ? c.image : `http://localhost:4000${c.image}`} alt={c.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <div style={{ padding: 8, color: '#888' }}>No image</div>}
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontWeight: 700 }}>{c.name}</div>
+                  <div style={{ color: '#666' }}>{c.description}</div>
+                </div>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button onClick={() => openEdit(c)}>Edit</button>
+                  <button onClick={() => { setForm({ ...form, parentId: c.id }); setShowForm(true); }} title="Add subcategory">Add Sub</button>
+                  <button onClick={() => remove(c.id)} style={{ color: 'red' }}>Delete</button>
+                </div>
+              </div>
+
+              {Array.isArray(c.subcategories) && c.subcategories.length > 0 ? (
+                <div style={{ marginLeft: 96, marginTop: 8, display: 'grid', gap: 8 }}>
+                  {c.subcategories.map((s) => (
+                    <div key={s.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: 8, borderRadius: 6, background: '#fafafa' }}>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontWeight: 600 }}>{s.name}</div>
+                        <div style={{ color: '#666' }}>{s.description}</div>
+                      </div>
+                      <div style={{ display: 'flex', gap: 8 }}>
+                        <button onClick={() => openEdit(s)}>Edit</button>
+                        <button onClick={() => { setForm({ ...form, parentId: s.id }); setShowForm(true); }} title="Add child">Add Child</button>
+                        <button onClick={() => remove(s.id)} style={{ color: 'red' }}>Delete</button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
             </div>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontWeight: 700 }}>{c.name}</div>
-              <div style={{ color: '#666' }}>{c.description}</div>
-            </div>
-            <div style={{ display: 'flex', gap: 8 }}>
-              <button onClick={() => openEdit(c)}>Edit</button>
-              <button onClick={() => remove(c.id)} style={{ color: 'red' }}>Delete</button>
-            </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
 
       {showForm && (
@@ -76,6 +126,26 @@ export default function CategoriesAdmin() {
             <form onSubmit={submit} style={{ display: 'grid', gap: 8 }}>
               <input placeholder="Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
               <textarea placeholder="Description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={4} />
+
+              <label style={{ fontSize: 13, color: '#444' }}>Parent category (optional)</label>
+              <select value={form.parentId || ''} onChange={(e) => setForm({ ...form, parentId: e.target.value || '' })}>
+                <option value="">— none —</option>
+                {/** render nested options */}
+                {categories.map(cat => {
+                  const renderOpts = (node, prefix = '') => {
+                    const opts = [];
+                    opts.push(<option key={node.id} value={node.id}>{prefix + node.name}</option>);
+                    if (Array.isArray(node.subcategories) && node.subcategories.length) {
+                      node.subcategories.forEach(child => {
+                        opts.push(...renderOpts(child, prefix + '-- '));
+                      });
+                    }
+                    return opts;
+                  };
+                  return renderOpts(cat);
+                })}
+              </select>
+
               <input type="file" accept="image/*" onChange={(e) => setForm({ ...form, imageFile: e.target.files?.[0] || null })} />
               {form.image && !form.imageFile ? <div style={{ marginTop: 8 }}><img src={form.image} alt="preview" style={{ maxHeight: 120 }} /></div> : null}
               <div style={{ display: 'flex', gap: 8 }}>

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { getPosts, deletePost, addPost, updatePost } from '../services/blogService';
+import { getBlogCategories } from '../services/blogCategoryService';
 import { isAdmin } from '../services/authService';
 
 export default function BlogsPage() {
@@ -22,6 +23,7 @@ export default function BlogsPage() {
   // modal state for add/edit on this page
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ id: null, title: '', excerpt: '', content: '', category: '', image: '', imageFile: null });
+  const [categories, setCategories] = useState([]);
 
   const openAdd = () => {
     setForm({ id: null, title: '', excerpt: '', content: '', category: '', image: '', imageFile: null });
@@ -30,6 +32,7 @@ export default function BlogsPage() {
 
   const openEdit = (post) => {
     setForm({ id: post.id, title: post.title, excerpt: post.excerpt, content: post.content, category: post.category, image: post.image, imageFile: null });
+    getBlogCategories().then(c => setCategories(c || []));
     setShowForm(true);
   };
 
@@ -51,7 +54,7 @@ export default function BlogsPage() {
     <div className="page-container">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h1>Blog</h1>
-        {admin ? <button onClick={openAdd}>Add Blog Post</button> : null}
+        {null}
       </div>
       <div className="responsive-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' }}>
         {posts.map(post => (
@@ -80,7 +83,23 @@ export default function BlogsPage() {
             <h3>{form.id ? 'Edit Blog' : 'New Blog'}</h3>
             <form onSubmit={submit} style={{ display: 'grid', gap: 8 }}>
               <input placeholder='Title' value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
-              <input placeholder='Category' value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} />
+              <label style={{ fontSize: 13, color: '#444' }}>Category</label>
+              <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}>
+                <option value="">— none —</option>
+                {categories.map(cat => {
+                  const renderOpts = (node, prefix = '') => {
+                    const opts = [];
+                    opts.push(<option key={node.id} value={node.name}>{prefix + node.name}</option>);
+                    if (Array.isArray(node.subcategories) && node.subcategories.length) {
+                      node.subcategories.forEach(child => {
+                        opts.push(...renderOpts(child, prefix + '-- '));
+                      });
+                    }
+                    return opts;
+                  };
+                  return renderOpts(cat);
+                })}
+              </select>
               <input type='file' accept='image/*' onChange={(e) => setForm({ ...form, imageFile: e.target.files?.[0] || null })} />
               {form.image && !form.imageFile ? <div style={{ marginTop: 8 }}><img src={form.image.startsWith('http') ? form.image : `http://localhost:4000${form.image}`} alt='blog' style={{ maxHeight: 120 }} /></div> : null}
               <input placeholder='Excerpt' value={form.excerpt} onChange={(e) => setForm({ ...form, excerpt: e.target.value })} />
@@ -93,6 +112,7 @@ export default function BlogsPage() {
           </div>
         </div>
       )}
+      
     </div>
   );
 }

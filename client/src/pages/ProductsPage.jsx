@@ -2,8 +2,9 @@ import React, { useEffect, useState } from "react";
 import { getProducts, addProduct, updateProduct, deleteProduct } from "../services/productService";
 import { getCategories, addCategory, updateCategory, deleteCategory } from "../services/categoryService";
 import { addItem } from "../services/cartService";
+import { priceInfo } from '../utils/priceUtils';
 import { getToken } from "../services/authService";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 function ProductsPage() {
   const [products, setProducts] = useState([]);
@@ -11,16 +12,20 @@ function ProductsPage() {
     name: "",
     description: "",
     price: "",
+    salePrice: "",
+    offerPrice: '',
+    offerFrom: '',
+    offerTo: '',
     category: "",
     sku: "",
     brand: "",
     stock: "",
     specs: "",
-    image: null,
+    images: [],
   });
   const [categories, setCategories] = useState([]);
   const [showCategoriesPanel, setShowCategoriesPanel] = useState(false);
-  const [catForm, setCatForm] = useState({ id: null, name: '', description: '', imageFile: null, image: '' });
+  const [catForm, setCatForm] = useState({ id: null, name: '', description: '', imageFile: null, image: '', parentId: '' });
   const [editId, setEditId] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const navigate = useNavigate();
@@ -39,12 +44,19 @@ function ProductsPage() {
     e.preventDefault();
 
     const payload = { ...form };
+  if (payload.salePrice === "") delete payload.salePrice;
+  if (payload.offerPrice === "" || payload.offerPrice === undefined) delete payload.offerPrice;
+  if (payload.offerFrom === "" || payload.offerFrom === undefined) delete payload.offerFrom;
+  if (payload.offerTo === "" || payload.offerTo === undefined) delete payload.offerTo;
     if (payload.specs && typeof payload.specs !== "string") {
       payload.specs = JSON.stringify(payload.specs);
     }
     if (typeof payload.specs === "string" && payload.specs.trim()) {
       // send as raw string, server will attempt JSON.parse
     }
+
+    // include any selected images (File[]) as 'images' for multipart upload
+    if (form.images && form.images.length) payload.images = form.images;
 
     if (editId) {
       const updated = await updateProduct(editId, payload);
@@ -57,7 +69,7 @@ function ProductsPage() {
       setShowForm(false);
     }
 
-    setForm({ name: "", description: "", price: "", category: "", sku: "", brand: "", stock: "", specs: "", image: null });
+    setForm({ name: "", description: "", price: "", category: "", sku: "", brand: "", stock: "", specs: "", images: [] });
   };
 
   const handleEdit = (product) => {
@@ -66,12 +78,16 @@ function ProductsPage() {
       name: product.name || "",
       description: product.description || "",
       price: product.price ?? "",
+      salePrice: product.salePrice ?? "",
+      offerPrice: product.offerPrice ?? '',
+      offerFrom: product.offerFrom ?? '',
+      offerTo: product.offerTo ?? '',
       category: product.category || "",
       sku: product.sku || "",
       brand: product.brand || "",
       stock: product.stock ?? "",
       specs: product.specs ? JSON.stringify(product.specs, null, 2) : "",
-      image: null,
+      images: [],
     });
     setShowForm(true);
   };
@@ -87,6 +103,10 @@ function ProductsPage() {
       name: "",
       description: "",
       price: "",
+      salePrice: "",
+      offerPrice: '',
+      offerFrom: '',
+      offerTo: '',
       category: "",
       sku: "",
       brand: "",
@@ -122,7 +142,10 @@ function ProductsPage() {
     <div className="page-container" style={{ padding: "20px" }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
         <h2>Product Management</h2>
-        <button onClick={handleStartAdd}>Add Product</button>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button onClick={handleStartAdd}>Add Product</button>
+          <button onClick={() => { setShowCategoriesPanel(s => !s); setCatForm({ id: null, name: '', description: '', imageFile: null, image: '', parentId: '' }); }}>{showCategoriesPanel ? 'Close Categories' : 'Manage Categories'}</button>
+        </div>
       </div>
 
       {/* Form shown in modal — trigger with Add Product / Edit buttons */}
@@ -144,6 +167,26 @@ function ProductsPage() {
                 <input type="number" step="0.01" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} />
               </div>
 
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <label style={{ fontWeight: 600, marginBottom: 6 }}>Sale price (optional)</label>
+                  <input type="number" step="0.01" value={form.salePrice || ''} onChange={(e) => setForm({ ...form, salePrice: e.target.value })} />
+                <div style={{ fontSize: 12, color: '#666', marginTop: 6 }}>If set, this price will be used for purchases.</div>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <label style={{ fontWeight: 600, marginBottom: 6 }}>Offer price (optional)</label>
+                <input type="number" step="0.01" value={form.offerPrice || ''} onChange={(e) => setForm({ ...form, offerPrice: e.target.value })} />
+                <div style={{ fontSize: 12, color: '#666', marginTop: 6 }}>Offer price will be applied during the selected date range below.</div>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <label style={{ fontWeight: 600, marginBottom: 6 }}>Offer from / to</label>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <input type="date" value={form.offerFrom || ''} onChange={(e) => setForm({ ...form, offerFrom: e.target.value })} />
+                  <input type="date" value={form.offerTo || ''} onChange={(e) => setForm({ ...form, offerTo: e.target.value })} />
+                </div>
+              </div>
+
               <div style={{ gridColumn: '1 / -1', display: 'flex', flexDirection: 'column' }}>
                 <label style={{ fontWeight: 600, marginBottom: 6 }}>Description</label>
                 <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3} />
@@ -153,9 +196,20 @@ function ProductsPage() {
                 <label style={{ fontWeight: 600, marginBottom: 6 }}>Category</label>
                 <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}>
                   <option value="">— none —</option>
-                  {categories.map(cat => (
-                    <option key={cat.id} value={cat.name}>{cat.name}</option>
-                  ))}
+                  {/** Render options recursively with indentation */}
+                  {categories.map((cat) => {
+                    const renderOptions = (node, prefix = '') => {
+                      const opts = [];
+                      opts.push(<option key={node.id} value={node.name}>{prefix + node.name}</option>);
+                      if (Array.isArray(node.subcategories)) {
+                        node.subcategories.forEach((child) => {
+                          opts.push(...renderOptions(child, prefix + '-- '));
+                        });
+                      }
+                      return opts;
+                    };
+                    return renderOptions(cat);
+                  })}
                 </select>
               </div>
 
@@ -180,12 +234,16 @@ function ProductsPage() {
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <label style={{ fontWeight: 600, marginBottom: 6 }}>Image</label>
-                <input type="file" accept="image/*" onChange={(e) => setForm({ ...form, image: e.target.files?.[0] || null })} />
-                {/* preview */}
-                {form.image ? (
-                  <div style={{ marginTop: 8 }}>
-                    <img src={URL.createObjectURL(form.image)} alt="preview" style={{ maxHeight: 120 }} />
+                <label style={{ fontWeight: 600, marginBottom: 6 }}>Images</label>
+                <input type="file" accept="image/*" multiple onChange={(e) => setForm({ ...form, images: e.target.files ? Array.from(e.target.files) : [] })} />
+                {/* preview thumbnails */}
+                {form.images && form.images.length ? (
+                  <div style={{ marginTop: 8, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                    {form.images.map((f, idx) => (
+                      <div key={idx} style={{ width: 80, height: 60, overflow: 'hidden', borderRadius: 6 }}>
+                        <img src={URL.createObjectURL(f)} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      </div>
+                    ))}
                   </div>
                 ) : null}
               </div>
@@ -219,26 +277,42 @@ function ProductsPage() {
             {products.map((p) => (
               <tr key={p.id} style={{ borderBottom: '1px solid #f3f3f3' }}>
                 <td style={{ padding: 12, width: 140, maxWidth: 140, verticalAlign: 'top' }}>
-                  {p.image ? (
-                    <img src={p.image.startsWith('http') ? p.image : `http://localhost:4000${p.image}`} alt={p.name} style={{ height: 80, objectFit: 'cover', borderRadius: 4 }} />
-                  ) : (
-                    <div style={{ color: '#999' }}>No image</div>
-                  )}
+                  { (p.images && p.images.length) || p.image ? (
+                        <Link to={`/products/${p.id}`} style={{ display: 'inline-block' }}>
+                          <img src={(p.images && p.images.length ? (p.images[0].startsWith('http') ? p.images[0] : `http://localhost:4000${p.images[0]}`) : (p.image.startsWith('http') ? p.image : `http://localhost:4000${p.image}`))} alt={p.name} style={{ height: 80, objectFit: 'cover', borderRadius: 4 }} />
+                        </Link>
+                      ) : (
+                        <div style={{ color: '#999' }}>No image</div>
+                      )}
                 </td>
                 <td style={{ padding: 12, verticalAlign: 'top', whiteSpace: 'normal', wordBreak: 'break-word' }}>
-                  <div style={{ fontWeight: 700 }}>{p.name}</div>
+                  <div style={{ fontWeight: 700 }}>
+                    <Link to={`/products/${p.id}`} style={{ color: 'inherit', textDecoration: 'none' }}>{p.name}</Link>
+                  </div>
                   <div style={{ color: '#666', fontSize: 13 }}>{p.description}</div>
                 </td>
                 <td style={{ padding: 12, verticalAlign: 'top', whiteSpace: 'normal', wordBreak: 'break-word' }}>{p.category || '—'}</td>
                 <td style={{ padding: 12, verticalAlign: 'top', whiteSpace: 'normal', wordBreak: 'break-word' }}>{p.brand || '—'}</td>
                 <td style={{ padding: 12, verticalAlign: 'top', whiteSpace: 'normal', wordBreak: 'break-word' }}>{p.sku || '—'}</td>
-                <td style={{ padding: 12, verticalAlign: 'top' }}>${p.price}</td>
+                <td style={{ padding: 12, verticalAlign: 'top' }}>
+                  {(() => {
+                    const info = priceInfo(p);
+                    return (
+                      <div>
+                        <div style={{ fontWeight: info.discounted ? 800 : 700, color: info.isOffer ? '#d32' : (info.isSale ? '#d32' : '#111') }}>${Number(info.display).toFixed(2)}</div>
+                        {info.discounted ? <div style={{ textDecoration: 'line-through', color: '#888', fontSize: 13 }}>${Number(info.original).toFixed(2)}</div> : null}
+                        {info.remaining ? <div style={{ marginTop: 6, color: '#c00', fontSize: 12 }}>{info.remaining}</div> : null}
+                        {info.isInvalidSale ? <div style={{ marginTop: 6, display: 'inline-block', background: '#f0ad4e', color: '#fff', padding: '4px 8px', borderRadius: 6, fontSize: 12, fontWeight: 700 }}>Check sale</div> : null}
+                      </div>
+                    );
+                  })()}
+                </td>
                 <td style={{ padding: 12, verticalAlign: 'top' }}>{p.stock ?? '—'}</td>
                 <td style={{ padding: 12, verticalAlign: 'top', whiteSpace: 'normal', wordBreak: 'break-word' }}>{renderSpecs(p.specs)}</td>
                 <td style={{ padding: 12, verticalAlign: 'top' }}>
                   <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                      <button onClick={() => { addItem({ id: p.id, name: p.name, price: p.price, image: p.image, sku: p.sku }, 1); window.alert('Added to cart'); }}>🛒 Add to Cart</button>
-                      <button onClick={() => { addItem({ id: p.id, name: p.name, price: p.price, image: p.image, sku: p.sku }, 1); window.location.href = '/cart'; }} style={{ background: '#0b79d0', color: '#fff' }}>💳 Buy Now</button>
+                      <button onClick={async () => { try { const info = priceInfo(p); const priceToUse = info.display; await addItem({ id: p.id, name: p.name, price: priceToUse, image: p.image, sku: p.sku }, 1); window.alert('Added to cart'); } catch (err) { console.error(err); alert('Failed to add to cart'); } }}>🛒 Add to Cart</button>
+                      <button onClick={async () => { try { const info = priceInfo(p); const priceToUse = info.display; await addItem({ id: p.id, name: p.name, price: priceToUse, image: p.image, sku: p.sku }, 1); window.location.href = '/cart'; } catch (err) { console.error(err); alert('Failed to add to cart'); } }} style={{ background: '#0b79d0', color: '#fff' }}>💳 Buy Now</button>
                       <button onClick={() => handleEdit(p)}>✏️ Edit</button>
                       <button onClick={() => handleDelete(p.id)} style={{ color: 'red' }}>🗑️ Delete</button>
                     </div>
@@ -249,33 +323,45 @@ function ProductsPage() {
         </table>
       </div>
 
-      {/* Categories management panel (inline on product admin page) */}
-      <div style={{ marginTop: 20 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h3>Categories</h3>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <button onClick={() => { setShowCategoriesPanel(s => !s); setCatForm({ id: null, name: '', description: '', imageFile: null, image: '' }); }}>{showCategoriesPanel ? 'Close' : 'Manage Categories'}</button>
-          </div>
-        </div>
+      {/* Categories management modal (opens when Manage Categories is clicked) */}
+      {showCategoriesPanel ? (
+        <div style={{ position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.4)', zIndex: 80 }}>
+          <div style={{ width: '92%', maxWidth: 1000, maxHeight: '90vh', overflow: 'auto', background: '#fff', padding: 18, borderRadius: 8 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+              <h3 style={{ margin: 0 }}>Manage Categories</h3>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button onClick={() => { setShowCategoriesPanel(false); setCatForm({ id: null, name: '', description: '', imageFile: null, image: '', parentId: '' }); }}>Close</button>
+              </div>
+            </div>
 
-        {showCategoriesPanel ? (
-          <div style={{ marginTop: 12 }}>
             <div style={{ display: 'grid', gap: 12 }}>
-              {categories.map(c => (
-                <div key={c.id} style={{ display: 'flex', alignItems: 'center', gap: 12, border: '1px solid #eee', padding: 12, borderRadius: 8 }}>
-                  <div style={{ width: 84, height: 64, background: '#fafafa', borderRadius: 6, overflow: 'hidden' }}>
-                    {c.image ? <img src={c.image.startsWith('http') ? c.image : `http://localhost:4000${c.image}`} alt={c.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <div style={{ padding: 8, color: '#888' }}>No image</div>}
+              {/** recursive renderer for categories so all depths show */}
+              {(() => {
+                const renderNode = (node, depth = 0) => (
+                  <div key={node.id} style={{ border: '1px solid #eee', padding: 12, borderRadius: 8, marginLeft: depth ? (24 * depth) : 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                      <div style={{ width: 84, height: 64, background: '#fafafa', borderRadius: 6, overflow: 'hidden' }}>
+                        {node.image ? <img src={node.image.startsWith('http') ? node.image : `http://localhost:4000${node.image}`} alt={node.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <div style={{ padding: 8, color: '#888' }}>No image</div>}
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontWeight: 700 }}>{node.name}</div>
+                        <div style={{ color: '#666' }}>{node.description}</div>
+                      </div>
+                      <div style={{ display: 'flex', gap: 8 }}>
+                        <button onClick={() => setCatForm({ id: node.id, name: node.name || '', description: node.description || '', imageFile: null, image: node.image || '', parentId: node.parentId || '' })}>Edit</button>
+                        <button onClick={async () => { if (!window.confirm('Delete this category?')) return; await deleteCategory(node.id); setCategories(await getCategories()); }} style={{ color: 'red' }}>Delete</button>
+                      </div>
+                    </div>
+                    {Array.isArray(node.subcategories) && node.subcategories.length > 0 ? (
+                      <div style={{ marginTop: 8, display: 'grid', gap: 8 }}>
+                        {node.subcategories.map(child => renderNode(child, depth + 1))}
+                      </div>
+                    ) : null}
                   </div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: 700 }}>{c.name}</div>
-                    <div style={{ color: '#666' }}>{c.description}</div>
-                  </div>
-                  <div style={{ display: 'flex', gap: 8 }}>
-                    <button onClick={() => setCatForm({ id: c.id, name: c.name || '', description: c.description || '', imageFile: null, image: c.image || '' })}>Edit</button>
-                    <button onClick={async () => { if (!confirm('Delete this category?')) return; await deleteCategory(c.id); setCategories(await getCategories()); }} style={{ color: 'red' }}>Delete</button>
-                  </div>
-                </div>
-              ))}
+                );
+
+                return categories.map(c => renderNode(c, 0));
+              })()}
 
               <div style={{ border: '1px dashed #ddd', padding: 12, borderRadius: 8 }}>
                 <h4>{catForm.id ? 'Edit Category' : 'Add Category'}</h4>
@@ -285,27 +371,45 @@ function ProductsPage() {
                   fd.append('name', catForm.name);
                   fd.append('description', catForm.description);
                   if (catForm.imageFile) fd.append('image', catForm.imageFile);
+                  if (catForm.parentId) fd.append('parentId', catForm.parentId);
                   if (catForm.id) {
                     await updateCategory(catForm.id, fd);
                   } else {
                     await addCategory(fd);
                   }
                   setCategories(await getCategories());
-                  setCatForm({ id: null, name: '', description: '', imageFile: null, image: '' });
+                  setCatForm({ id: null, name: '', description: '', imageFile: null, image: '', parentId: '' });
                 }} style={{ display: 'grid', gap: 8 }}>
                   <input placeholder="Name" value={catForm.name} required onChange={(e) => setCatForm({ ...catForm, name: e.target.value })} />
                   <textarea placeholder="Description" value={catForm.description} onChange={(e) => setCatForm({ ...catForm, description: e.target.value })} rows={3} />
+                  <label style={{ fontSize: 13, color: '#444' }}>Parent category (optional)</label>
+                  <select value={catForm.parentId || ''} onChange={(e) => setCatForm({ ...catForm, parentId: e.target.value || '' })}>
+                    <option value="">— none —</option>
+                    {categories.map(cat => {
+                      const renderOpts = (node, prefix = '') => {
+                        const opts = [];
+                        opts.push(<option key={node.id} value={node.id}>{prefix + node.name}</option>);
+                        if (Array.isArray(node.subcategories) && node.subcategories.length) {
+                          node.subcategories.forEach(child => {
+                            opts.push(...renderOpts(child, prefix + '-- '));
+                          });
+                        }
+                        return opts;
+                      };
+                      return renderOpts(cat);
+                    })}
+                  </select>
                   <input type="file" accept="image/*" onChange={(e) => setCatForm({ ...catForm, imageFile: e.target.files?.[0] || null })} />
                   <div style={{ display: 'flex', gap: 8 }}>
                     <button type="submit">Save</button>
-                    <button type="button" onClick={() => setCatForm({ id: null, name: '', description: '', imageFile: null, image: '' })}>Reset</button>
+                    <button type="button" onClick={() => setCatForm({ id: null, name: '', description: '', imageFile: null, image: '', parentId: '' })}>Reset</button>
                   </div>
                 </form>
               </div>
             </div>
           </div>
-        ) : null}
-      </div>
+        </div>
+      ) : null}
     </div>
   );
 }

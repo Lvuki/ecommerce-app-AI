@@ -29,9 +29,13 @@ export async function addProduct(productData) {
   const token = getToken();
   const form = new FormData();
   Object.entries(productData).forEach(([key, value]) => {
-    if (value !== undefined && value !== null) {
-      form.append(key, value);
+    if (value === undefined || value === null) return;
+    // If it's a FileList or array of files, append each file as 'images'
+    if ((value instanceof FileList) || (Array.isArray(value) && value.length && value[0] instanceof File)) {
+      for (const f of value) form.append('images', f);
+      return;
     }
+    form.append(key, value);
   });
   const res = await fetch(`${API_BASE_URL}/products`, {
     method: "POST",
@@ -47,9 +51,12 @@ export async function updateProduct(id, productData) {
   const token = getToken();
   const form = new FormData();
   Object.entries(productData).forEach(([key, value]) => {
-    if (value !== undefined && value !== null) {
-      form.append(key, value);
+    if (value === undefined || value === null) return;
+    if ((value instanceof FileList) || (Array.isArray(value) && value.length && value[0] instanceof File)) {
+      for (const f of value) form.append('images', f);
+      return;
     }
+    form.append(key, value);
   });
   const res = await fetch(`${API_BASE_URL}/products/${id}`, {
     method: "PUT",

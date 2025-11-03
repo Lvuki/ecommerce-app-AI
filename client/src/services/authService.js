@@ -4,6 +4,7 @@ export async function login(email, password) {
   const res = await fetch(`${API_BASE_URL}/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
+    credentials: 'include',
     body: JSON.stringify({ email, password }),
   });
   const data = await res.json();
@@ -15,7 +16,16 @@ export function getToken() {
   return localStorage.getItem("token");
 }
 
+export function setToken(t) {
+  if (t) localStorage.setItem('token', t);
+  else localStorage.removeItem('token');
+}
+
 export function logout() {
+  // Clear local token and tell server to clear cookie
+  try {
+    fetch(`${API_BASE_URL}/auth/logout`, { method: 'POST', credentials: 'include' }).catch(() => {});
+  } catch (_) {}
   localStorage.removeItem("token");
 }
 
