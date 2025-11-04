@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { getPosts, deletePost, addPost, updatePost } from '../services/blogService';
 import { getBlogCategories } from '../services/blogCategoryService';
 import { isAdmin } from '../services/authService';
@@ -11,7 +11,6 @@ export default function BlogsPage() {
     getPosts().then(p => setPosts(p || []));
   }, []);
 
-  const navigate = useNavigate();
   const admin = isAdmin();
 
   const handleDelete = async (id) => {
@@ -54,7 +53,7 @@ export default function BlogsPage() {
     <div className="page-container">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h1>Blog</h1>
-        {null}
+  {admin ? <button onClick={openAdd}>New Post</button> : null}
       </div>
       <div className="responsive-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' }}>
         {posts.map(post => (
