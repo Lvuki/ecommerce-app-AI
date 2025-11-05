@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="220" height="46" viewBox="0 0 220 46" fill="none">
+  <!-- Stylized globe mark + colored "globe" wordmark to match provided image -->
+  <defs>
+    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="1" stdDeviation="1" flood-color="#000" flood-opacity="0.08" />
+    </filter>
+  </defs>
+  <!-- round mark on the left -->
+  <g filter="url(#shadow)">
+    <circle cx="22" cy="22" r="18" fill="#00A3E0" />
+    <!-- small orange dot to emulate the two-color mark -->
+    <circle cx="34" cy="14" r="5" fill="#FF8A00" />
+    <!-- subtle white highlight curve -->
+    <path d="M12 26c3-6 9-9 16-9 5 0 10 2 14 6" stroke="rgba(255,255,255,0.9)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+  </g>
+
+  <!-- wordmark: colored letters; font-family fallback used, for pixel-perfect provide an SVG from designer -->
+  <g transform="translate(58,32)">
+    <text x="0" y="0" font-family="'Poppins', 'Arial', sans-serif" font-weight="700" font-size="22" letter-spacing="-0.5">
+      <tspan fill="#00A3E0">g</tspan>
+      <tspan fill="#0B74DE">l</tspan>
+      <tspan fill="#FF8A00">o</tspan>
+      <tspan fill="#00A3E0">b</tspan>
+      <tspan fill="#FF8A00">e</tspan>
+    </text>
+  </g>
+</svg>

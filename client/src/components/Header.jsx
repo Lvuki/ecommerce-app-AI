@@ -3,9 +3,14 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { getToken, logout, isAdmin } from "../services/authService";
 import { getCount, getCart } from "../services/cartService";
 import API_BASE_URL from "../config";
+import logo from '../assets/globe-logo.png';
 
 export default function Header() {
   const navigate = useNavigate();
+  const [showHamburger, setShowHamburger] = useState(false);
+  const [showLangMenu, setShowLangMenu] = useState(false);
+  const [lang, setLang] = useState(() => localStorage.getItem('site_lang') || 'English');
+  const [currency, setCurrency] = useState(() => localStorage.getItem('site_currency') || 'All');
   const [hasToken, setHasToken] = useState(!!getToken());
   const [isAdministrator, setIsAdministrator] = useState(isAdmin());
   const [cartCount, setCartCount] = useState(getCount());
@@ -14,7 +19,10 @@ export default function Header() {
   const [headerCategories, setHeaderCategories] = useState([]);
   const [headerPages, setHeaderPages] = useState([]);
   const [showCategoryMenu, setShowCategoryMenu] = useState(false);
+  const [b2bEnabled, setB2bEnabled] = useState(() => localStorage.getItem('b2b_enabled') === '1');
   const menuRef = useRef(null);
+  const hamburgerRef = useRef(null);
+  const langRef = useRef(null);
   const location = useLocation();
 
   useEffect(() => {
@@ -111,10 +119,20 @@ export default function Header() {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
         setShowCategoryMenu(false);
       }
+      if (hamburgerRef.current && !hamburgerRef.current.contains(e.target)) {
+        setShowHamburger(false);
+      }
+      if (langRef.current && !langRef.current.contains(e.target)) {
+        setShowLangMenu(false);
+      }
     }
     document.addEventListener('mousedown', onDoc);
     return () => document.removeEventListener('mousedown', onDoc);
   }, []);
+
+  useEffect(() => {
+    localStorage.setItem('b2b_enabled', b2bEnabled ? '1' : '0');
+  }, [b2bEnabled]);
 
   // flatten hierarchical categories into a flat list of {id,name}
   const flattenCategories = (nodes) => {
@@ -204,68 +222,136 @@ export default function Header() {
   }
 
   return (
-    <header style={{ display: "flex", alignItems: "center", padding: "12px 16px", borderBottom: "1px solid #eee" }}>
-      {/* left: navigation */}
-      <div style={{ display: 'flex', alignItems: 'center', minWidth: 220 }}>
-        <nav style={{ display: "flex", gap: 12, position: 'relative' }}>
-          <Link to="/">Home</Link>
-          <Link to="/dashboard">Dashboard</Link>
-          <Link to="/products">Products</Link>
+    <header style={{ display: "flex", flexDirection: 'column', gap: 8, padding: "12px 16px", borderBottom: "1px solid #eee" }}>
+      {/* inline styles for placeholder and search input border to match image */}
+      <style>{`
+        .header-search-input::placeholder { color: #0B74DE; opacity: 0.95; }
+        .header-search-input { border: 1px solid #e6eef6; }
+      `}</style>
+      {/* top row: centered container with navigation and language selector */}
+      <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+        <div style={{ width: '100%', maxWidth: 1170, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ width: 60 }} />
+          <nav style={{ display: 'flex', gap: 48, position: 'relative', justifyContent: 'center', flex: 1 }}>
+            <Link to="/">Home</Link>
+            <Link to="/dashboard">Dashboard</Link>
+            <Link to="/products">Products</Link>
 
-          <Link to="/offers">Offers</Link>
+            <Link to="/offers">Offers</Link>
 
-          {headerPages.map(pg => (
-            <Link key={pg.id} to={`/pages/${pg.slug}`}>{pg.title}</Link>
-          ))}
+            {headerPages.map(pg => (
+              <Link key={pg.id} to={`/pages/${pg.slug}`}>{pg.title}</Link>
+            ))}
 
-          {/* Category mega menu trigger */}
-          <div ref={menuRef} style={{ position: 'relative' }}>
-            <button type="button" onClick={() => setShowCategoryMenu(s => !s)} onMouseEnter={() => setShowCategoryMenu(true)} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>Category ▾</button>
-            {showCategoryMenu ? (
-              <div style={{ position: 'absolute', left: 0, top: '100%', marginTop: 8, background: '#fff', border: '1px solid #eee', boxShadow: '0 8px 24px rgba(0,0,0,0.08)', padding: 16, zIndex: 80, minWidth: 640 }}>
-                <CategoryMega nodes={headerCategories} onSelect={(name) => { setShowCategoryMenu(false); navigate(`/category?category=${encodeURIComponent(name)}`); }} />
+            {/* Category mega menu trigger */}
+            <div ref={menuRef} style={{ position: 'relative' }}>
+              <button type="button" onClick={() => setShowCategoryMenu(s => !s)} onMouseEnter={() => setShowCategoryMenu(true)} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>Category ▾</button>
+              {showCategoryMenu ? (
+                <div style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)', top: '100%', marginTop: 8, background: '#fff', border: '1px solid #eee', boxShadow: '0 8px 24px rgba(0,0,0,0.08)', padding: 16, zIndex: 80, minWidth: 640 }}>
+                  <CategoryMega nodes={headerCategories} onSelect={(name) => { setShowCategoryMenu(false); navigate(`/category?category=${encodeURIComponent(name)}`); }} />
+                </div>
+              ) : null}
+            </div>
+
+            <Link to={isAdmin() ? "/admin/blogs" : "/blogs"}>Blogs</Link>
+            <Link to="/admin/users">Users</Link>
+          </nav>
+
+          {/* top-right: language & currency selector */}
+          <div style={{ width: 220, display: 'flex', alignItems: 'center', gap: 12, justifyContent: 'flex-end' }} ref={langRef}>
+            <div style={{ position: 'relative' }}>
+              <button type="button" onClick={() => setShowLangMenu(s => !s)} style={{ background: 'none', border: '1px solid #eee', padding: '6px 10px', borderRadius: 6, cursor: 'pointer' }}>Lang / Curr ▾</button>
+              {showLangMenu ? (
+                <div style={{ position: 'absolute', right: 0, top: '100%', marginTop: 8, background: '#fff', border: '1px solid #eee', boxShadow: '0 8px 24px rgba(0,0,0,0.08)', padding: 12, zIndex: 95, minWidth: 220 }}>
+                  <div style={{ display: 'grid', gap: 8 }}>
+                    <label style={{ fontSize: 13 }}>Language</label>
+                    <select value={lang} onChange={(e) => { setLang(e.target.value); localStorage.setItem('site_lang', e.target.value); }}>
+                      <option value="English">English</option>
+                      <option value="Albanian">Albanian</option>
+                    </select>
+                    <label style={{ fontSize: 13 }}>Currency</label>
+                    <select value={currency} onChange={(e) => { setCurrency(e.target.value); localStorage.setItem('site_currency', e.target.value); }}>
+                      <option value="All">All</option>
+                      <option value="EUR">Euro</option>
+                      <option value="USD">USD</option>
+                    </select>
+                  </div>
+                </div>
+              ) : null}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* bottom row: centered container with hamburger (left), search (center), controls (right) */}
+      <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+        <div style={{ width: '100%', maxWidth: 1170, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <Link to="/" style={{ display: 'inline-flex', alignItems: 'center', textDecoration: 'none' }} aria-label="Home">
+                <img src={logo} alt="GLOBE" style={{ height: 36, display: 'block' }} />
+              </Link>
+              <div ref={hamburgerRef} style={{ position: 'relative' }}>
+                <button type="button" onClick={() => setShowHamburger(s => !s)} style={{ background: 'none', border: '1px solid #e6eef6', padding: '0 12px', cursor: 'pointer', fontSize: 15, borderRadius: 6, display: 'inline-flex', alignItems: 'center', gap: 8, height: 40 }}>☰ <span style={{ fontSize: 14 }}>Menu</span></button>
+                {showHamburger ? (
+                  <div style={{ position: 'absolute', left: 0, top: '100%', marginTop: 8, background: '#fff', border: '1px solid #eee', boxShadow: '0 8px 24px rgba(0,0,0,0.08)', padding: 12, zIndex: 90, minWidth: 260 }}>
+                    <CategoryTree nodes={headerCategories} onSelect={(name) => { setShowHamburger(false); navigate(`/category?category=${encodeURIComponent(name)}`); }} />
+                  </div>
+                ) : null}
               </div>
-            ) : null}
+            </div>
           </div>
 
-          <Link to={isAdmin() ? "/admin/blogs" : "/blogs"}>Blogs</Link>
-          <Link to="/admin/users">Users</Link>
-        </nav>
-      </div>
+          <form onSubmit={handleSearch} style={{ display: 'flex', gap: 12, alignItems: 'center', width: '100%', maxWidth: 720 }}>
+            <div style={{ position: 'relative', display: 'flex', alignItems: 'center', width: '100%' }}>
+              <input
+                className="header-search-input"
+                placeholder="Search products..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                style={{ padding: '0 12px', fontSize: 16, borderRadius: 6, flex: 1, height: 40, display: 'inline-block' }}
+              />
+              {/* B2B toggle/button placed next to search input */}
+              <div style={{ marginLeft: 8, display: 'flex', alignItems: 'center' }}>
+                <button type="button" onClick={() => setB2bEnabled(s => !s)} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '6px 10px', borderRadius: 20, border: '1px solid #cfeefc', background: '#fff', cursor: 'pointer' }} aria-pressed={b2bEnabled} title="B2B">
+                  <div style={{ width: 36, height: 20, borderRadius: 20, background: b2bEnabled ? '#ffb84d' : '#eef6ff', position: 'relative' }}>
+                    <div style={{ width: 14, height: 14, borderRadius: 12, background: b2bEnabled ? '#fff' : '#0b74de', position: 'absolute', top: 3, left: (b2bEnabled ? 19 : 3), transition: 'left 140ms linear' }} />
+                  </div>
+                  <div style={{ fontSize: 13, fontWeight: 600 }}>B2B</div>
+                </button>
+              </div>
+              {/* action icons moved next to B2B */}
+              <div style={{ marginLeft: 8, display: 'flex', gap: 8, alignItems: 'center' }}>
+                <Link to="/cart" style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 40, height: 40, borderRadius: 20, border: '1px solid #e6eef6', textDecoration: 'none' }} aria-label="Cart">
+                  <span style={{ fontSize: 18 }}>🛒</span>
+                  {cartCount ? (
+                    <span style={{ position: 'absolute', top: -6, right: -6, background: '#d32', color: '#fff', borderRadius: 10, padding: '2px 6px', fontSize: 12 }}>{cartCount}</span>
+                  ) : null}
+                </Link>
+                {hasToken ? (
+                  <>
+                    <Link to="/profile" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 40, height: 40, borderRadius: 20, border: '1px solid #e6eef6', textDecoration: 'none' }} aria-label="Profile">👤</Link>
+                    <button onClick={handleLogout} title="Logout" aria-label="Logout" style={{ width: 40, height: 40, borderRadius: 20, border: '1px solid #e6eef6', background: 'transparent', cursor: 'pointer' }}>🔓</button>
+                  </>
+                ) : (
+                  <button onClick={() => navigate("/login")} title="Login" aria-label="Login" style={{ width: 40, height: 40, borderRadius: 20, border: '1px solid #e6eef6', background: 'transparent', cursor: 'pointer' }}>👤</button>
+                )}
+              </div>
+            </div>
+          </form>
 
-      {/* center: large search form */}
-      <div style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
-        <form onSubmit={handleSearch} style={{ display: 'flex', gap: 12, alignItems: 'center', width: '70%', maxWidth: 900 }}>
-          <select value={searchCategory} onChange={(e) => setSearchCategory(e.target.value)} style={{ padding: 10, minWidth: 220, borderRadius: 6 }}>
-            <option value="">All categories</option>
-            {flatHeaderCategories.map(c => <option key={c.id ?? c.name} value={c.name}>{c.name}</option>)}
-          </select>
-          <input placeholder="Search products..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} style={{ padding: 12, fontSize: 16, borderRadius: 6, flex: 1 }} />
-          <button type="submit" style={{ padding: '10px 16px', fontSize: 15, borderRadius: 6 }}>Search</button>
-        </form>
-      </div>
-
-      {/* right: cart/users/auth */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 220, justifyContent: 'flex-end' }}>
-        {isAdministrator ? (
-          <Link to="/admin" style={{ padding: '8px 12px', borderRadius: 6, background: '#0b74de', color: '#fff', textDecoration: 'none', fontSize: 14 }}>Admin Console</Link>
-        ) : null}
-        <Link to="/cart" style={{ position: 'relative', display: 'inline-block', textDecoration: 'none' }} aria-label="Cart">
-          <span style={{ fontSize: 20 }}>🛒</span>
-          {cartCount ? (
-            <span style={{ position: 'absolute', top: -6, right: -8, background: '#d32', color: '#fff', borderRadius: 10, padding: '2px 6px', fontSize: 12 }}>{cartCount}</span>
-          ) : null}
-        </Link>
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-          {hasToken ? (
-            <>
-              <Link to="/profile" style={{ textDecoration: 'none' }}>Profile</Link>
-              <button onClick={handleLogout} title="Logout" aria-label="Logout" style={{ fontSize: 18, padding: 8 }}>🔓</button>
-            </>
-          ) : (
-            <button onClick={() => navigate("/login")} title="Login" aria-label="Login" style={{ fontSize: 18, padding: 8 }}>👤</button>
-          )}
+          <div style={{ width: 220, display: 'flex', justifyContent: 'flex-end', gap: 12, alignItems: 'center' }}>
+            {isAdministrator ? (
+              <Link to="/admin" style={{ padding: '8px 12px', borderRadius: 6, background: '#0b74de', color: '#fff', textDecoration: 'none', fontSize: 14 }}>Admin Console</Link>
+            ) : null}
+          </div>
         </div>
+      </div>
+
+      {/* announcement bar like the uploaded design */}
+      <div style={{ marginTop: 12, background: '#f4f6f8', padding: '14px 18px', borderRadius: 4, display: 'flex', alignItems: 'center', gap: 12 }}>
+        <div style={{ width: 44, height: 44, borderRadius: 22, border: '1px solid #ddd', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fff', fontSize: 20 }}>!</div>
+        <div style={{ color: '#333', letterSpacing: 0.4, fontSize: 13, textTransform: 'uppercase', fontWeight: 600 }}>LOREM IPSUM DOLOR SIT AMET, CONSECTETUER ADIPISCING ELIT, SED DIAM NONUMMY NIBH EUISMOD EUISMOD IBH EUISMOD EUISMOD</div>
       </div>
     </header>
   );

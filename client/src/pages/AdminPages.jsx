@@ -77,6 +77,7 @@ export default function AdminPages() {
     if (t === 'text') return { id: createId(), type: 'text', config: { text: '' } };
     if (t === 'image') return { id: createId(), type: 'image', config: { url: '', alt: '' } };
     if (t === 'products') return { id: createId(), type: 'products', config: { mode: 'category', categories: [], category: '', items: [], limit: 8 } };
+    if (t === 'blogs') return { id: createId(), type: 'blogs', config: { mode: 'category', categories: [], category: '', items: [], limit: 8 } };
     return { id: createId(), type: t, config: {} };
   };
   const { isOver: isModulesOver, setNodeRef: setModulesRef } = useDroppable({ id: 'modules-container' });
@@ -441,6 +442,9 @@ export default function AdminPages() {
                   <div onClick={() => setModules(m => [...m, createModule('products')])}>
                     <PaletteItem type="products" label="Products" />
                   </div>
+                  <div onClick={() => setModules(m => [...m, createModule('blogs')])}>
+                    <PaletteItem type="blogs" label="Blogs" />
+                  </div>
                 </div>
               </div>
 
@@ -508,6 +512,53 @@ export default function AdminPages() {
                                     <div style={{ display: 'grid', gap: 6 }}>
                                       <LocalInput
                                         placeholder="Product IDs (comma separated)"
+                                        value={(mod.config.items || []).join(',')}
+                                        onCommit={(v) => {
+                                          const items = (v || '').split(',').map(s => Number(s.trim())).filter(Boolean);
+                                          setModules(ms => ms.map((m,i) => i===idx ? { ...m, config: { ...m.config, items } } : m));
+                                        }}
+                                      />
+                                      <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                                        <label style={{ fontSize: 13 }}>Limit</label>
+                                        <LocalNumberInput value={mod.config.limit ?? 8} onCommit={(v) => setModules(ms => ms.map((m,i) => i===idx ? { ...m, config: { ...m.config, limit: v } } : m))} style={{ width: 100 }} />
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    <div style={{ display: 'grid', gap: 6 }}>
+                                      <div style={{ color: '#666' }}>Shows active offers</div>
+                                      <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                                        <label style={{ fontSize: 13 }}>Limit</label>
+                                        <LocalNumberInput value={mod.config.limit ?? 8} onCommit={(v) => setModules(ms => ms.map((m,i) => i===idx ? { ...m, config: { ...m.config, limit: v } } : m))} style={{ width: 100 }} />
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              ) : null}
+                              {mod.type === 'blogs' ? (
+                                <div>
+                                  <div style={{ display: 'flex', gap: 8 }}>
+                                    <label><input type="radio" checked={mod.config.mode === 'category'} onChange={() => setModules(ms => ms.map((m,i) => i===idx ? { ...m, config: { ...m.config, mode: 'category' } } : m))} /> By category</label>
+                                    <label><input type="radio" checked={mod.config.mode === 'offer'} onChange={() => setModules(ms => ms.map((m,i) => i===idx ? { ...m, config: { ...m.config, mode: 'offer' } } : m))} /> Offers</label>
+                                    <label><input type="radio" checked={mod.config.mode === 'manual'} onChange={() => setModules(ms => ms.map((m,i) => i===idx ? { ...m, config: { ...m.config, mode: 'manual' } } : m))} /> Manual</label>
+                                  </div>
+                                  {mod.config.mode === 'category' ? (
+                                    <div style={{ display: 'grid', gap: 6 }}>
+                                      <label style={{ fontSize: 13 }}>Select categories (multiple)</label>
+                                      <LocalSelectMultiple
+                                        value={mod.config.categories || []}
+                                        options={categories.map(c => ({ value: c.name, label: c.name }))}
+                                        onCommit={(opts) => setModules(ms => ms.map((m,i) => i===idx ? { ...m, config: { ...m.config, categories: opts } } : m))}
+                                        style={{ minHeight: 100 }}
+                                      />
+                                      <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                                        <label style={{ fontSize: 13 }}>Limit</label>
+                                        <LocalNumberInput value={mod.config.limit ?? 8} onCommit={(v) => setModules(ms => ms.map((m,i) => i===idx ? { ...m, config: { ...m.config, limit: v } } : m))} style={{ width: 100 }} />
+                                      </div>
+                                    </div>
+                                  ) : mod.config.mode === 'manual' ? (
+                                    <div style={{ display: 'grid', gap: 6 }}>
+                                      <LocalInput
+                                        placeholder="Blog IDs (comma separated)"
                                         value={(mod.config.items || []).join(',')}
                                         onCommit={(v) => {
                                           const items = (v || '').split(',').map(s => Number(s.trim())).filter(Boolean);
