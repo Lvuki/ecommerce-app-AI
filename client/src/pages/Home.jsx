@@ -8,6 +8,7 @@ import { addItem } from "../services/cartService";
 import wishlistService from "../services/wishlistService";
 import { getToken } from "../services/authService";
 
+
 export default function Home() {
   const [products, setProducts] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -271,7 +272,7 @@ export default function Home() {
   {/* Promo banner (full-width) - centered text with right image, badge removed */}
   <div style={{ width: '100%', marginTop: 32 }}>
     <div style={{ width: '100%', boxSizing: 'border-box' }}>
-      <div style={{ position: 'relative', overflow: 'hidden', background: '#efefef', display: 'flex', alignItems: 'center', height: 115 }}>
+  <div style={{ position: 'relative', overflow: 'hidden', background: '#efefef', display: 'flex', alignItems: 'center', height: 115 }}>
         {/* left orange sticker */}
   <div style={{ position: 'absolute', left: 48, top: '50%', transform: 'translateY(-50%)', background: '#ffb84d', color: '#fff', padding: '10px 12px', borderRadius: 8, fontWeight: 800, textAlign: 'center', boxShadow: '0 8px 18px rgba(0,0,0,0.08)', zIndex: 4 }}>
           <div style={{ fontSize: 16, lineHeight: 1 }}>nxitoni</div>
@@ -345,6 +346,21 @@ export default function Home() {
       </div>
     </>
   ) : null}
+
+  {/* Promo strip under Current offers (full-bleed, larger) */}
+  <div className="hp-promo-strip" style={{ width: '100%', marginTop: 20, background: '#fff3e0', boxShadow: '0 6px 20px rgba(0,0,0,0.06)' }}>
+    <div style={{ width: '100%', maxWidth: 1400, margin: '0 auto', boxSizing: 'border-box', padding: '12px 20px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderRadius: 6, padding: '12px 16px', height: 80, overflow: 'hidden' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
+          <div style={{ fontWeight: 800, fontSize: 18 }}>Gjeni produktin më të përshtatshëm me Asistentët Tanë Dixhitalë.</div>
+          <a href="/promotions" style={{ color: '#0b79d0', textDecoration: 'none', fontSize: 14 }}>Për më shumë</a>
+        </div>
+
+        {/* Right area removed image; keep space for visual balance */}
+        <div style={{ width: 260, display: 'flex', justifyContent: 'flex-end' }} />
+      </div>
+    </div>
+  </div>
 
   <h2 style={{ marginTop: 48, marginBottom: 24, textAlign: 'center' }}>Popular products</h2>
         <div style={{ width: '100%', maxWidth: '100%', margin: '0 auto', textAlign: 'center' }}>
