@@ -17,12 +17,14 @@ import UserProfile from './pages/UserProfile';
 import ProductView from "./pages/ProductView";
 import Category from "./pages/Category";
 import CartPage from "./pages/Cart";
+import Wishlist from './pages/Wishlist';
 import BlogsPage from "./pages/Blogs";
 import BlogPost from "./pages/BlogPost";
 import BlogsAdmin from "./pages/BlogsAdmin";
 import CategoriesAdmin from "./pages/CategoriesAdmin";
 import OffersPage from "./pages/Offers";
 import Header from "./components/Header";
+import Breadcrumbs from './components/Breadcrumbs';
 import Footer from "./components/Footer";
 import StaticPage from './pages/StaticPage';
 
@@ -30,6 +32,7 @@ function App() {
   return (
     <Router>
       <Header />
+      <Breadcrumbs />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/dashboard" element={<Dashboard />} />
@@ -54,6 +57,7 @@ function App() {
         <Route path="/offers" element={<OffersPage />} />
     <Route path="/pages/:slug" element={<StaticPage />} />
   <Route path="/cart" element={<CartPage />} />
+    <Route path="/wishlist" element={<Wishlist />} />
         <Route path="/blogs" element={<BlogsPage />} />
         <Route path="/blogs/:id" element={<BlogPost />} />
       </Routes>

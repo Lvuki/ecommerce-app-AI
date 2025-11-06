@@ -20,6 +20,7 @@ const blogRoutes = require('./routes/blogs');
 const categoryRoutes = require('./routes/categories');
 const blogCategoryRoutes = require('./routes/blogCategories');
 const cartRoutes = require('./routes/cart');
+const wishlistRoutes = require('./routes/wishlist');
 const adminRoutes = require('./routes/admin');
 const rolesRoutes = require('./routes/roles');
 const pagesRoutes = require('./routes/pages');
@@ -43,6 +44,7 @@ app.use('/api/blogs', blogRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/blogcategories', blogCategoryRoutes);
 app.use('/api/cart', cartRoutes);
+app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/users', userRoutes); // includes admin-only routes
 app.use('/api/admin', adminRoutes);

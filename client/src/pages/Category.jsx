@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { getCategoriesAndBrands, searchProducts } from "../services/productService";
 import { addItem } from "../services/cartService";
+import wishlistService from "../services/wishlistService";
 
 export default function CategoryPage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -126,12 +127,16 @@ export default function CategoryPage() {
               {products.map((p) => (
                 <div key={p.id} style={{ border: "1px solid #eee", borderRadius: 10, overflow: "hidden", background: "#fff" }}>
                   {p.image ? (
-                    <img src={p.image?.startsWith('http') ? p.image : `http://localhost:4000${p.image}`} alt={p.name} style={{ width: '100%', height: 150, objectFit: 'cover', background: '#fafafa' }} />
+                    <Link to={`/products/${p.id}`}>
+                      <img src={p.image?.startsWith('http') ? p.image : `http://localhost:4000${p.image}`} alt={p.name} style={{ width: '100%', height: 150, objectFit: 'cover', background: '#fafafa' }} />
+                    </Link>
                   ) : (
                     <div style={{ width: '100%', height: 150, background: '#fafafa' }} />
                   )}
                   <div style={{ padding: 12 }}>
-                    <div style={{ fontWeight: 600 }}>{p.name}</div>
+                    <div style={{ fontWeight: 600 }}>
+                      <Link to={`/products/${p.id}`} style={{ color: 'inherit', textDecoration: 'none' }}>{p.name}</Link>
+                    </div>
                     <div style={{ color: '#666', fontSize: 14 }}>{p.brand || p.category}</div>
                     <div style={{ marginTop: 8 }}>
                       {p.salePrice && Number(p.salePrice) > 0 && Number(p.salePrice) !== Number(p.price) ? (
@@ -145,9 +150,9 @@ export default function CategoryPage() {
                     </div>
                     <div style={{ marginTop: 10 }}>
                          <div style={{ display: 'flex', gap: 8 }}>
-                         <Link to={`/products/${p.id}`} style={{ border: '1px solid #111', padding: '6px 10px', borderRadius: 6, color: '#111', textDecoration: 'none' }}>View</Link>
                          <button onClick={async () => { try { const priceToUse = (p.offerPrice && Number(p.offerPrice) > 0) ? p.offerPrice : ((p.salePrice && Number(p.salePrice) > 0) ? p.salePrice : p.price); await addItem({ id: p.id, name: p.name, price: priceToUse, image: p.image, sku: p.sku }, 1); alert('Added to cart'); } catch (err) { console.error(err); alert('Failed to add to cart'); } }} style={{ background: '#fff', border: '1px solid #e6e6e6', padding: '6px 8px', borderRadius: 6, fontSize: 13, cursor: 'pointer' }}>🛒 Add</button>
                          <button onClick={async () => { try { const priceToUse = (p.offerPrice && Number(p.offerPrice) > 0) ? p.offerPrice : ((p.salePrice && Number(p.salePrice) > 0) ? p.salePrice : p.price); await addItem({ id: p.id, name: p.name, price: priceToUse, image: p.image, sku: p.sku }, 1); navigate('/cart'); } catch (err) { console.error(err); alert('Failed to add to cart'); } }} style={{ background: '#0b79d0', color: '#fff', borderRadius: 6, padding: '6px 10px', fontSize: 13, border: 'none', cursor: 'pointer', boxShadow: '0 2px 6px rgba(11,121,208,0.18)' }}>💳 Buy</button>
+                         <button onClick={async () => { try { const out = await wishlistService.toggleItem({ id: p.id, name: p.name, image: p.image, price: (p.salePrice && Number(p.salePrice) > 0) ? p.salePrice : p.price }); const present = (out || []).find(i => String(i.id) === String(p.id)); alert(present ? 'Added to wishlist' : 'Removed from wishlist'); } catch (err) { console.error(err); alert('Failed to update wishlist'); } }} style={{ background: '#fff', border: '1px solid #e6e6e6', padding: '6px 8px', borderRadius: 6, fontSize: 13, cursor: 'pointer' }}>♡ Wishlist</button>
                        </div>
                     </div>
                   </div>

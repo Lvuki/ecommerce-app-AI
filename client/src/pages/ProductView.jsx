@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { addItem } from "../services/cartService";
+import wishlistService from '../services/wishlistService';
 import { getProductById } from "../services/productService";
 
 export default function ProductView() {
@@ -9,6 +10,7 @@ export default function ProductView() {
   const [mainIndex, setMainIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [inWishlist, setInWishlist] = useState(false);
 
   useEffect(() => {
     getProductById(id)
@@ -21,6 +23,26 @@ export default function ProductView() {
       })
       .catch(() => setError("Failed to load product"))
       .finally(() => setLoading(false));
+  }, [id]);
+
+  // track whether this product is in the wishlist
+  useEffect(() => {
+    let mounted = true;
+    async function check() {
+      try {
+        const list = await wishlistService.getWishlist();
+        if (!mounted) return;
+        const has = Array.isArray(list) && list.some(i => String(i.id) === String(id));
+        setInWishlist(has);
+      } catch (_) { if (mounted) setInWishlist(false); }
+    }
+    check();
+    const onUpdate = (e) => {
+      const items = e && e.detail && e.detail.items ? e.detail.items : [];
+      setInWishlist(Array.isArray(items) && items.some(i => String(i.id) === String(id)));
+    };
+    window.addEventListener('wishlistUpdated', onUpdate);
+    return () => { mounted = false; window.removeEventListener('wishlistUpdated', onUpdate); };
   }, [id]);
 
   if (loading) return <div style={{ padding: 20 }}>Loading...</div>;
@@ -91,6 +113,9 @@ export default function ProductView() {
             </button>
             <button onClick={async () => { try { const priceToUse = (product.offerPrice && Number(product.offerPrice) > 0) ? product.offerPrice : ((product.salePrice && Number(product.salePrice) > 0) ? product.salePrice : product.price); await addItem({ id: product.id, name: product.name, price: priceToUse, image: product.image, sku: product.sku }, 1); window.location.href = '/cart'; } catch (err) { console.error(err); alert('Failed to add to cart'); } }} style={{ background: '#0b79d0', color: '#fff' }}>
               💳 Buy Now
+            </button>
+            <button onClick={async () => { try { await wishlistService.toggleItem({ id: product.id, name: product.name, image: product.image, price: product.price }); /* toggle will fire wishlistUpdated event */ } catch (err) { console.error(err); alert('Failed to update wishlist'); } }} style={{ border: '1px solid #e6eef6', padding: '8px 12px', background: inWishlist ? '#ffecec' : 'transparent' }} aria-pressed={inWishlist}>
+              {inWishlist ? '❤️ In Wishlist' : '♡ Wishlist'}
             </button>
           </div>
 
