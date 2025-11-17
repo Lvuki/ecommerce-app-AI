@@ -26,6 +26,7 @@ function ProductsPage() {
   const [categories, setCategories] = useState([]);
   const [showCategoriesPanel, setShowCategoriesPanel] = useState(false);
   const [catForm, setCatForm] = useState({ id: null, name: '', description: '', imageFile: null, image: '', parentId: '' });
+  const [addForm, setAddForm] = useState({ name: '', description: '', imageFile: null, image: '', parentId: '' });
   const [editId, setEditId] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const navigate = useNavigate();
@@ -144,7 +145,7 @@ function ProductsPage() {
         <h2>Product Management</h2>
         <div style={{ display: 'flex', gap: 8 }}>
           <button onClick={handleStartAdd}>Add Product</button>
-          <button onClick={() => { setShowCategoriesPanel(s => !s); setCatForm({ id: null, name: '', description: '', imageFile: null, image: '', parentId: '' }); }}>{showCategoriesPanel ? 'Close Categories' : 'Manage Categories'}</button>
+          <button onClick={() => { setShowCategoriesPanel(s => !s); setAddForm({ name: '', description: '', imageFile: null, image: '', parentId: '' }); }}>{showCategoriesPanel ? 'Close Categories' : 'Manage Categories'}</button>
         </div>
       </div>
 
@@ -330,11 +331,52 @@ function ProductsPage() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
               <h3 style={{ margin: 0 }}>Manage Categories</h3>
               <div style={{ display: 'flex', gap: 8 }}>
-                <button onClick={() => { setShowCategoriesPanel(false); setCatForm({ id: null, name: '', description: '', imageFile: null, image: '', parentId: '' }); }}>Close</button>
+                <button onClick={() => { setShowCategoriesPanel(false); setCatForm({ id: null, name: '', description: '', imageFile: null, image: '', parentId: '' }); setAddForm({ name: '', description: '', imageFile: null, image: '', parentId: '' }); }}>Close</button>
               </div>
             </div>
 
             <div style={{ display: 'grid', gap: 12 }}>
+              {/** Add category form on top (quick add) */}
+              <div style={{ border: '1px dashed #ddd', padding: 12, borderRadius: 8 }}>
+                <h4>Add Category</h4>
+                <form onSubmit={async (e) => {
+                  e.preventDefault();
+                  const fd = new FormData();
+                  fd.append('name', addForm.name);
+                  fd.append('description', addForm.description);
+                  if (addForm.imageFile) fd.append('image', addForm.imageFile);
+                  if (addForm.parentId) fd.append('parentId', addForm.parentId);
+                  await addCategory(fd);
+                  setCategories(await getCategories());
+                  setAddForm({ name: '', description: '', imageFile: null, image: '', parentId: '' });
+                }} style={{ display: 'grid', gap: 8 }}>
+                  <input placeholder="Name" value={addForm.name} required onChange={(e) => setAddForm({ ...addForm, name: e.target.value })} />
+                  <textarea placeholder="Description" value={addForm.description} onChange={(e) => setAddForm({ ...addForm, description: e.target.value })} rows={3} />
+                  <label style={{ fontSize: 13, color: '#444' }}>Parent category (optional)</label>
+                  <select value={addForm.parentId || ''} onChange={(e) => setAddForm({ ...addForm, parentId: e.target.value || '' })}>
+                    <option value="">— none —</option>
+                    {categories.map(cat => {
+                      const renderOpts = (node, prefix = '') => {
+                        const opts = [];
+                        opts.push(<option key={node.id} value={node.id}>{prefix + node.name}</option>);
+                        if (Array.isArray(node.subcategories) && node.subcategories.length) {
+                          node.subcategories.forEach(child => {
+                            opts.push(...renderOpts(child, prefix + '-- '));
+                          });
+                        }
+                        return opts;
+                      };
+                      return renderOpts(cat);
+                    })}
+                  </select>
+                  <input type="file" accept="image/*" onChange={(e) => setAddForm({ ...addForm, imageFile: e.target.files?.[0] || null })} />
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <button type="submit">Save</button>
+                    <button type="button" onClick={() => setAddForm({ name: '', description: '', imageFile: null, image: '', parentId: '' })}>Reset</button>
+                  </div>
+                </form>
+              </div>
+
               {/** recursive renderer for categories so all depths show */}
               {(() => {
                 const renderNode = (node, depth = 0) => {
@@ -415,49 +457,7 @@ function ProductsPage() {
                 return categories.map(c => renderNode(c, 0));
               })()}
 
-              <div style={{ border: '1px dashed #ddd', padding: 12, borderRadius: 8 }}>
-                <h4>{catForm.id ? 'Edit Category' : 'Add Category'}</h4>
-                <form onSubmit={async (e) => {
-                  e.preventDefault();
-                  const fd = new FormData();
-                  fd.append('name', catForm.name);
-                  fd.append('description', catForm.description);
-                  if (catForm.imageFile) fd.append('image', catForm.imageFile);
-                  if (catForm.parentId) fd.append('parentId', catForm.parentId);
-                  if (catForm.id) {
-                    await updateCategory(catForm.id, fd);
-                  } else {
-                    await addCategory(fd);
-                  }
-                  setCategories(await getCategories());
-                  setCatForm({ id: null, name: '', description: '', imageFile: null, image: '', parentId: '' });
-                }} style={{ display: 'grid', gap: 8 }}>
-                  <input placeholder="Name" value={catForm.name} required onChange={(e) => setCatForm({ ...catForm, name: e.target.value })} />
-                  <textarea placeholder="Description" value={catForm.description} onChange={(e) => setCatForm({ ...catForm, description: e.target.value })} rows={3} />
-                  <label style={{ fontSize: 13, color: '#444' }}>Parent category (optional)</label>
-                  <select value={catForm.parentId || ''} onChange={(e) => setCatForm({ ...catForm, parentId: e.target.value || '' })}>
-                    <option value="">— none —</option>
-                    {categories.map(cat => {
-                      const renderOpts = (node, prefix = '') => {
-                        const opts = [];
-                        opts.push(<option key={node.id} value={node.id}>{prefix + node.name}</option>);
-                        if (Array.isArray(node.subcategories) && node.subcategories.length) {
-                          node.subcategories.forEach(child => {
-                            opts.push(...renderOpts(child, prefix + '-- '));
-                          });
-                        }
-                        return opts;
-                      };
-                      return renderOpts(cat);
-                    })}
-                  </select>
-                  <input type="file" accept="image/*" onChange={(e) => setCatForm({ ...catForm, imageFile: e.target.files?.[0] || null })} />
-                  <div style={{ display: 'flex', gap: 8 }}>
-                    <button type="submit">Save</button>
-                    <button type="button" onClick={() => setCatForm({ id: null, name: '', description: '', imageFile: null, image: '', parentId: '' })}>Reset</button>
-                  </div>
-                </form>
-              </div>
+              {/* moved add form to top; inline edit remains available per-node */}
             </div>
           </div>
         </div>
