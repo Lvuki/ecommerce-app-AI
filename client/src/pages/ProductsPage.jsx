@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { getProducts, searchProducts, addProduct, updateProduct, deleteProduct } from "../services/productService";
 import { getCategories, addCategory, updateCategory, deleteCategory } from "../services/categoryService";
 import { addItem } from "../services/cartService";
@@ -26,6 +26,7 @@ function ProductsPage() {
   const [categories, setCategories] = useState([]);
   const [filterCategory, setFilterCategory] = useState('');
   const [searchQ, setSearchQ] = useState('');
+  const searchDebounce = useRef(null);
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(20);
   const [showCategoriesPanel, setShowCategoriesPanel] = useState(false);
@@ -290,12 +291,19 @@ function ProductsPage() {
       {/* Filters: category + search */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 12, alignItems: 'center' }}>
         <label style={{ fontSize: 14, fontWeight: 600 }}>Filter:</label>
-        <select value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)} style={{ minWidth: 220 }}>
+        <select value={filterCategory} onChange={async (e) => { const val = e.target.value; setFilterCategory(val); await loadProducts({ category: val, q: searchQ }); }} style={{ minWidth: 220 }}>
           <option value="">— all categories —</option>
           {categories.map(cat => <option key={cat.id || cat.name} value={cat.name || cat.id}>{cat.name || cat}</option>)}
         </select>
-        <input placeholder="Search products by name" value={searchQ} onChange={(e) => setSearchQ(e.target.value)} style={{ flex: 1, padding: 8 }} onKeyDown={(e) => { if (e.key === 'Enter') loadProducts(); }} />
-        <button onClick={() => loadProducts()}>Search</button>
+        <input placeholder="Search products by name" value={searchQ} onChange={(e) => {
+          const val = e.target.value;
+          setSearchQ(val);
+          // debounced live search
+          if (searchDebounce.current) clearTimeout(searchDebounce.current);
+          searchDebounce.current = setTimeout(() => {
+            loadProducts({ category: filterCategory, q: val });
+          }, 350);
+        }} style={{ flex: 1, padding: 8 }} />
         <button onClick={async () => { setFilterCategory(''); setSearchQ(''); await loadProducts({}); }}>Clear</button>
       </div>
       <div style={{ background: '#fff', border: '1px solid #eee', borderRadius: 8 }} className="table-responsive">
