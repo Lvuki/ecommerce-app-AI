@@ -337,28 +337,80 @@ function ProductsPage() {
             <div style={{ display: 'grid', gap: 12 }}>
               {/** recursive renderer for categories so all depths show */}
               {(() => {
-                const renderNode = (node, depth = 0) => (
-                  <div key={node.id} style={{ border: '1px solid #eee', padding: 12, borderRadius: 8, marginLeft: depth ? (24 * depth) : 0 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                      <div style={{ width: 84, height: 64, background: '#fafafa', borderRadius: 6, overflow: 'hidden' }}>
-                        {node.image ? <img src={node.image.startsWith('http') ? node.image : `http://localhost:4000${node.image}`} alt={node.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <div style={{ padding: 8, color: '#888' }}>No image</div>}
+                const renderNode = (node, depth = 0) => {
+                  // If catForm.id matches this node, render the edit form inline here
+                  if (catForm.id === node.id) {
+                    return (
+                      <div key={node.id} style={{ border: '1px solid #eee', padding: 12, borderRadius: 8, marginLeft: depth ? (24 * depth) : 0, background: '#fffef8' }}>
+                        <h4 style={{ marginTop: 0 }}>{catForm.id ? 'Edit Category' : 'Add Category'}</h4>
+                        <form onSubmit={async (e) => {
+                          e.preventDefault();
+                          const fd = new FormData();
+                          fd.append('name', catForm.name);
+                          fd.append('description', catForm.description);
+                          if (catForm.imageFile) fd.append('image', catForm.imageFile);
+                          if (catForm.parentId) fd.append('parentId', catForm.parentId);
+                          if (catForm.id) {
+                            await updateCategory(catForm.id, fd);
+                          } else {
+                            await addCategory(fd);
+                          }
+                          setCategories(await getCategories());
+                          setCatForm({ id: null, name: '', description: '', imageFile: null, image: '', parentId: '' });
+                        }} style={{ display: 'grid', gap: 8 }}>
+                          <input placeholder="Name" value={catForm.name} required onChange={(e) => setCatForm({ ...catForm, name: e.target.value })} />
+                          <textarea placeholder="Description" value={catForm.description} onChange={(e) => setCatForm({ ...catForm, description: e.target.value })} rows={3} />
+                          <label style={{ fontSize: 13, color: '#444' }}>Parent category (optional)</label>
+                          <select value={catForm.parentId || ''} onChange={(e) => setCatForm({ ...catForm, parentId: e.target.value || '' })}>
+                            <option value="">— none —</option>
+                            {categories.map(cat => {
+                              const renderOpts = (nodeOpt, prefix = '') => {
+                                const opts = [];
+                                opts.push(<option key={nodeOpt.id} value={nodeOpt.id}>{prefix + nodeOpt.name}</option>);
+                                if (Array.isArray(nodeOpt.subcategories) && nodeOpt.subcategories.length) {
+                                  nodeOpt.subcategories.forEach(child => {
+                                    opts.push(...renderOpts(child, prefix + '-- '));
+                                  });
+                                }
+                                return opts;
+                              };
+                              return renderOpts(cat);
+                            })}
+                          </select>
+                          <input type="file" accept="image/*" onChange={(e) => setCatForm({ ...catForm, imageFile: e.target.files?.[0] || null })} />
+                          <div style={{ display: 'flex', gap: 8 }}>
+                            <button type="submit">Save</button>
+                            <button type="button" onClick={() => setCatForm({ id: null, name: '', description: '', imageFile: null, image: '', parentId: '' })}>Cancel</button>
+                          </div>
+                        </form>
                       </div>
-                      <div style={{ flex: 1 }}>
-                        <div style={{ fontWeight: 700 }}>{node.name}</div>
-                        <div style={{ color: '#666' }}>{node.description}</div>
+                    );
+                  }
+
+                  // Default rendering for a node (not being edited)
+                  return (
+                    <div key={node.id} style={{ border: '1px solid #eee', padding: 12, borderRadius: 8, marginLeft: depth ? (24 * depth) : 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                        <div style={{ width: 84, height: 64, background: '#fafafa', borderRadius: 6, overflow: 'hidden' }}>
+                          {node.image ? <img src={node.image.startsWith('http') ? node.image : `http://localhost:4000${node.image}`} alt={node.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <div style={{ padding: 8, color: '#888' }}>No image</div>}
+                        </div>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontWeight: 700 }}>{node.name}</div>
+                          <div style={{ color: '#666' }}>{node.description}</div>
+                        </div>
+                        <div style={{ display: 'flex', gap: 8 }}>
+                          <button onClick={() => setCatForm({ id: node.id, name: node.name || '', description: node.description || '', imageFile: null, image: node.image || '', parentId: node.parentId || '' })}>Edit</button>
+                          <button onClick={async () => { if (!window.confirm('Delete this category?')) return; await deleteCategory(node.id); setCategories(await getCategories()); }} style={{ color: 'red' }}>Delete</button>
+                        </div>
                       </div>
-                      <div style={{ display: 'flex', gap: 8 }}>
-                        <button onClick={() => setCatForm({ id: node.id, name: node.name || '', description: node.description || '', imageFile: null, image: node.image || '', parentId: node.parentId || '' })}>Edit</button>
-                        <button onClick={async () => { if (!window.confirm('Delete this category?')) return; await deleteCategory(node.id); setCategories(await getCategories()); }} style={{ color: 'red' }}>Delete</button>
-                      </div>
+                      {Array.isArray(node.subcategories) && node.subcategories.length > 0 ? (
+                        <div style={{ marginTop: 8, display: 'grid', gap: 8 }}>
+                          {node.subcategories.map(child => renderNode(child, depth + 1))}
+                        </div>
+                      ) : null}
                     </div>
-                    {Array.isArray(node.subcategories) && node.subcategories.length > 0 ? (
-                      <div style={{ marginTop: 8, display: 'grid', gap: 8 }}>
-                        {node.subcategories.map(child => renderNode(child, depth + 1))}
-                      </div>
-                    ) : null}
-                  </div>
-                );
+                  );
+                };
 
                 return categories.map(c => renderNode(c, 0));
               })()}
