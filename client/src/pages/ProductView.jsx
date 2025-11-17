@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { addItem } from "../services/cartService";
 import wishlistService from '../services/wishlistService';
-import { getProductById } from "../services/productService";
+import { getProductById, rateProduct } from "../services/productService";
+import { getToken } from '../services/authService';
 
 export default function ProductView() {
   const { id } = useParams();
@@ -11,6 +12,27 @@ export default function ProductView() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [inWishlist, setInWishlist] = useState(false);
+  const [ratingLoading, setRatingLoading] = useState(false);
+
+  // submit rating helper used by star buttons
+  async function submitRating(idx) {
+    if (ratingLoading) return;
+  // allow anonymous rating; the server applies rate-limiting per IP
+    try {
+      setRatingLoading(true);
+      const resp = await rateProduct(product.id, idx);
+      if (resp && resp.average !== undefined) {
+        setProduct(prev => ({ ...prev, ratingAvg: resp.average, ratingCount: resp.count }));
+      } else if (resp && resp.error) {
+        alert(resp.error);
+      }
+    } catch (e) {
+      console.error(e);
+      alert('Failed to submit rating');
+    } finally {
+      setRatingLoading(false);
+    }
+  }
 
   useEffect(() => {
     getProductById(id)
@@ -85,6 +107,45 @@ export default function ProductView() {
         <div>
           <h1 style={{ marginTop: 0 }}>{product.name}</h1>
           <div style={{ color: '#666' }}>{product.brand || product.category}</div>
+          {/* Rating: accessible star component with keyboard support and nicer visuals */}
+          <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div role="radiogroup" aria-label={`Rate ${product.name}`} style={{ display: 'flex', gap: 6 }}>
+              {Array.from({ length: 5 }).map((_, i) => {
+                const idx = i + 1;
+                const avg = Number(product.ratingAvg || 0);
+                // per-star fill percentage (0..100)
+                const fillPct = Math.max(0, Math.min(100, Math.round((Math.max(0, avg - i) * 100))));
+                const gradId = `starGrad-${product.id || 'p'}-${i}`;
+                return (
+                  <button
+                    key={idx}
+                    role="radio"
+                    aria-checked={avg >= idx}
+                    aria-label={`Rate ${idx} out of 5`}
+                    onKeyDown={async (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); await submitRating(idx); } }}
+                    onClick={async () => await submitRating(idx)}
+                    disabled={ratingLoading}
+                    style={{ background: 'transparent', border: 'none', padding: 4, cursor: 'pointer' }}
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden focusable="false">
+                      <defs>
+                        <linearGradient id={gradId} x1="0%" x2="100%">
+                          <stop offset={`${fillPct}%`} stopColor="#ffb400" />
+                          <stop offset={`${fillPct}%`} stopColor="#ddd" />
+                        </linearGradient>
+                      </defs>
+                      <path fill={`url(#${gradId})`} d="M12 .587l3.668 7.431 8.2 1.192-5.934 5.788 1.402 8.168L12 18.896l-7.336 3.87 1.402-8.168L.132 9.21l8.2-1.192z" />
+                    </svg>
+                  </button>
+                );
+              })}
+            </div>
+            <div style={{ color: '#666', fontSize: 14 }} aria-live="polite">
+              {product.ratingAvg ? `${product.ratingAvg} / 5` : 'No rating yet'}{product.ratingCount ? ` (${product.ratingCount} votes)` : ''}
+            </div>
+          </div>
+
+          {/* helper: submitRating moved to function scope so buttons can call it */}
                   <div style={{ marginTop: 8 }}>
             {product.offerPrice && Number(product.offerPrice) > 0 ? (
               <div>

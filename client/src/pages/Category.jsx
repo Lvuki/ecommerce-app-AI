@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { getCategoriesAndBrands, searchProducts } from "../services/productService";
+import { getCategories } from "../services/categoryService";
 import { addItem } from "../services/cartService";
 import wishlistService from "../services/wishlistService";
 
@@ -12,12 +13,24 @@ export default function CategoryPage() {
   const [products, setProducts] = useState([]);
   const [filters, setFilters] = useState({ category: "", brand: "", priceMin: "", priceMax: "", stockMin: "", color: "", size: "" });
   const [meta, setMeta] = useState({ categories: [], brands: [] });
+  const [categoriesTree, setCategoriesTree] = useState([]);
 
-  // Load categories/brands
+  // Load categories tree and brands
   useEffect(() => {
-    getCategoriesAndBrands()
-      .then((m) => setMeta(m || { categories: [], brands: [] }))
-      .catch(() => setMeta({ categories: [], brands: [] }));
+    let mounted = true;
+    (async () => {
+      try {
+        const [tree, brandsRes] = await Promise.all([getCategories(), getCategoriesAndBrands()]);
+        if (!mounted) return;
+        setCategoriesTree(Array.isArray(tree) ? tree : []);
+        setMeta(brandsRes || { categories: [], brands: [] });
+      } catch (e) {
+        if (!mounted) return;
+        setCategoriesTree([]);
+        setMeta({ categories: [], brands: [] });
+      }
+    })();
+    return () => { mounted = false; };
   }, []);
 
   // Load products based on URL params
@@ -84,9 +97,19 @@ export default function CategoryPage() {
               <div style={{ fontWeight: 600, marginBottom: 6 }}>Category</div>
               <select value={filters.category} onChange={(e) => setFilters({ ...filters, category: e.target.value })}>
                 <option value="">All</option>
-                {meta.categories.map((c) => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
+                {/* render hierarchical categories flattened with indentation */}
+                {(() => {
+                  const out = [];
+                  function walk(nodes, depth = 0) {
+                    for (const n of nodes || []) {
+                      const label = `${'\u00A0'.repeat(depth * 2)}${n.name}`;
+                      out.push(<option key={`cat-${n.id}`} value={n.name}>{label}</option>);
+                      if (Array.isArray(n.subcategories) && n.subcategories.length) walk(n.subcategories, depth + 1);
+                    }
+                  }
+                  walk(categoriesTree, 0);
+                  return out;
+                })()}
               </select>
             </div>
             <div>

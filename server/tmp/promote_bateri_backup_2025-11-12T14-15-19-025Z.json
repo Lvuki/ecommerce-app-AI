@@ -1,0 +1,114 @@
+{
+  "id": 678,
+  "name": "BATERI & LLAMPA",
+  "description": null,
+  "image": null,
+  "parentId": 454,
+  "createdAt": "2025-11-12T14:03:48.165Z",
+  "updatedAt": "2025-11-12T14:11:49.639Z",
+  "subcategories": [
+    {
+      "id": 679,
+      "name": "AKSESORE BATERI",
+      "description": null,
+      "image": null,
+      "parentId": 678,
+      "createdAt": "2025-11-12T14:03:48.181Z",
+      "updatedAt": "2025-11-12T14:03:48.181Z",
+      "subcategories": [
+        {
+          "id": 682,
+          "name": "KARIKUES BATERISH",
+          "description": null,
+          "image": null,
+          "parentId": 679,
+          "createdAt": "2025-11-12T14:03:48.204Z",
+          "updatedAt": "2025-11-12T14:03:48.204Z",
+          "subcategories": []
+        }
+      ]
+    },
+    {
+      "id": 680,
+      "name": "BATERI",
+      "description": null,
+      "image": null,
+      "parentId": 678,
+      "createdAt": "2025-11-12T14:03:48.189Z",
+      "updatedAt": "2025-11-12T14:03:48.189Z",
+      "subcategories": [
+        {
+          "id": 683,
+          "name": "BATERI ALKALINE",
+          "description": null,
+          "image": null,
+          "parentId": 680,
+          "createdAt": "2025-11-12T14:03:48.210Z",
+          "updatedAt": "2025-11-12T14:03:48.210Z",
+          "subcategories": []
+        },
+        {
+          "id": 684,
+          "name": "BATERI TE RIKARIKUESHME",
+          "description": null,
+          "image": null,
+          "parentId": 680,
+          "createdAt": "2025-11-12T14:03:48.216Z",
+          "updatedAt": "2025-11-12T14:03:48.216Z",
+          "subcategories": []
+        }
+      ]
+    },
+    {
+      "id": 681,
+      "name": "LLAMPA EKOLOGJIKE",
+      "description": null,
+      "image": null,
+      "parentId": 678,
+      "createdAt": "2025-11-12T14:03:48.196Z",
+      "updatedAt": "2025-11-12T14:03:48.196Z",
+      "subcategories": [
+        {
+          "id": 685,
+          "name": "LLAMPA EKOLOGJIKE EKONOMIKE",
+          "description": null,
+          "image": null,
+          "parentId": 681,
+          "createdAt": "2025-11-12T14:03:48.222Z",
+          "updatedAt": "2025-11-12T14:03:48.222Z",
+          "subcategories": []
+        },
+        {
+          "id": 686,
+          "name": "LLAMPA EKOLOGJIKE HALOGEN",
+          "description": null,
+          "image": null,
+          "parentId": 681,
+          "createdAt": "2025-11-12T14:03:48.228Z",
+          "updatedAt": "2025-11-12T14:03:48.228Z",
+          "subcategories": []
+        },
+        {
+          "id": 687,
+          "name": "LLAMPA EKOLOGJIKE LED",
+          "description": null,
+          "image": null,
+          "parentId": 681,
+          "createdAt": "2025-11-12T14:03:48.234Z",
+          "updatedAt": "2025-11-12T14:03:48.234Z",
+          "subcategories": []
+        },
+        {
+          "id": 688,
+          "name": "LLAMPA EKOLOGJIKE SET",
+          "description": null,
+          "image": null,
+          "parentId": 681,
+          "createdAt": "2025-11-12T14:03:48.241Z",
+          "updatedAt": "2025-11-12T14:03:48.241Z",
+          "subcategories": []
+        }
+      ]
+    }
+  ]
+}

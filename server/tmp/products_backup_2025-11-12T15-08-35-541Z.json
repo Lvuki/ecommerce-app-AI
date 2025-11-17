@@ -1,0 +1,75 @@
+{
+  "createdAt": "2025-11-12T15:08:35.542Z",
+  "count": 3,
+  "items": [
+    {
+      "id": 4,
+      "name": "Sample Product 1",
+      "description": "This is a great product number 1.",
+      "price": 9.99,
+      "salePrice": null,
+      "offerPrice": 15,
+      "offerFrom": "2025-11-05T00:00:00.000Z",
+      "offerTo": "2025-11-29T00:00:00.000Z",
+      "image": "https://picsum.photos/seed/product1/600/400",
+      "images": "",
+      "category": "Men",
+      "sku": "SKU-1001",
+      "brand": "Acme",
+      "stock": 10,
+      "specs": {
+        "color": "red",
+        "size": "S",
+        "weight": "0.5kg"
+      },
+      "createdAt": "2025-10-31T10:40:30.214Z",
+      "updatedAt": "2025-11-05T13:33:07.234Z"
+    },
+    {
+      "id": 23,
+      "name": "Sample Product 20",
+      "description": "This is a great product number 20.",
+      "price": 28.990000000000002,
+      "salePrice": null,
+      "offerPrice": null,
+      "offerFrom": null,
+      "offerTo": null,
+      "image": "https://picsum.photos/seed/product20/600/400",
+      "images": null,
+      "category": "Men",
+      "sku": "SKU-1020",
+      "brand": "Initech",
+      "stock": 29,
+      "specs": {
+        "color": "blue",
+        "size": "M",
+        "weight": "2.4000000000000004kg"
+      },
+      "createdAt": "2025-10-31T10:40:30.215Z",
+      "updatedAt": "2025-11-01T19:06:58.540Z"
+    },
+    {
+      "id": 17,
+      "name": "Sample Product 15",
+      "description": "This is a great product number 15.",
+      "price": 23.990000000000002,
+      "salePrice": null,
+      "offerPrice": null,
+      "offerFrom": null,
+      "offerTo": null,
+      "image": "https://picsum.photos/seed/product15/600/400",
+      "images": null,
+      "category": "Men",
+      "sku": "SKU-1015",
+      "brand": "Initech",
+      "stock": 24,
+      "specs": {
+        "color": "green",
+        "size": "L",
+        "weight": "1.9000000000000001kg"
+      },
+      "createdAt": "2025-10-31T10:40:30.215Z",
+      "updatedAt": "2025-11-01T19:02:52.802Z"
+    }
+  ]
+}

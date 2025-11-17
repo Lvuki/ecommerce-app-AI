@@ -1,0 +1,800 @@
+[
+  {
+    "id": 443,
+    "name": "ELEKTROSHTEPIAKE TE MEDHA",
+    "parentId": null,
+    "createdAt": "2025-11-12T09:52:10.423Z",
+    "updatedAt": "2025-11-12T09:52:10.423Z"
+  },
+  {
+    "id": 444,
+    "name": "ELEKTROSHTEPIAKE TE VOGLA",
+    "parentId": null,
+    "createdAt": "2025-11-12T09:52:10.440Z",
+    "updatedAt": "2025-11-12T09:52:10.440Z"
+  },
+  {
+    "id": 445,
+    "name": "TELEFONIA",
+    "parentId": null,
+    "createdAt": "2025-11-12T09:52:10.446Z",
+    "updatedAt": "2025-11-12T09:52:10.446Z"
+  },
+  {
+    "id": 446,
+    "name": "TV & AUDIO",
+    "parentId": null,
+    "createdAt": "2025-11-12T09:52:10.454Z",
+    "updatedAt": "2025-11-12T09:52:10.454Z"
+  },
+  {
+    "id": 447,
+    "name": "FTOHJE & NGROHJE",
+    "parentId": null,
+    "createdAt": "2025-11-12T09:52:10.461Z",
+    "updatedAt": "2025-11-12T09:52:10.461Z"
+  },
+  {
+    "id": 448,
+    "name": "KOMPJUTERA",
+    "parentId": null,
+    "createdAt": "2025-11-12T09:52:10.468Z",
+    "updatedAt": "2025-11-12T09:52:10.468Z"
+  },
+  {
+    "id": 449,
+    "name": "KUJDESI PERSONAL",
+    "parentId": null,
+    "createdAt": "2025-11-12T09:52:10.475Z",
+    "updatedAt": "2025-11-12T09:52:10.475Z"
+  },
+  {
+    "id": 450,
+    "name": "PASTRIMI & HEKUROSJA",
+    "parentId": null,
+    "createdAt": "2025-11-12T09:52:10.481Z",
+    "updatedAt": "2025-11-12T09:52:10.481Z"
+  },
+  {
+    "id": 451,
+    "name": "FOTO & VIDEO",
+    "parentId": null,
+    "createdAt": "2025-11-12T09:52:10.488Z",
+    "updatedAt": "2025-11-12T09:52:10.488Z"
+  },
+  {
+    "id": 452,
+    "name": "LOJRA & HOBI & GADGETS",
+    "parentId": null,
+    "createdAt": "2025-11-12T09:52:10.494Z",
+    "updatedAt": "2025-11-12T09:52:10.494Z"
+  },
+  {
+    "id": 453,
+    "name": "SIGURIA & MBIKQYRJA",
+    "parentId": null,
+    "createdAt": "2025-11-12T09:52:10.501Z",
+    "updatedAt": "2025-11-12T09:52:10.501Z"
+  },
+  {
+    "id": 454,
+    "name": "BATERI & LLAMPA",
+    "parentId": null,
+    "createdAt": "2025-11-12T09:52:10.506Z",
+    "updatedAt": "2025-11-12T09:52:10.506Z"
+  },
+  {
+    "id": 455,
+    "name": "FRIGORIFERE",
+    "parentId": 443,
+    "createdAt": "2025-11-12T10:07:35.374Z",
+    "updatedAt": "2025-11-12T10:07:35.374Z"
+  },
+  {
+    "id": 456,
+    "name": "LAVATRICE",
+    "parentId": 443,
+    "createdAt": "2025-11-12T10:07:35.389Z",
+    "updatedAt": "2025-11-12T10:07:35.389Z"
+  },
+  {
+    "id": 457,
+    "name": "LAVASTOVILJE",
+    "parentId": 443,
+    "createdAt": "2025-11-12T10:07:35.398Z",
+    "updatedAt": "2025-11-12T10:07:35.398Z"
+  },
+  {
+    "id": 458,
+    "name": "ASPIRATORE",
+    "parentId": 443,
+    "createdAt": "2025-11-12T10:07:35.405Z",
+    "updatedAt": "2025-11-12T10:07:35.405Z"
+  },
+  {
+    "id": 459,
+    "name": "PERGATITJA E KAFESE",
+    "parentId": 443,
+    "createdAt": "2025-11-12T10:07:35.412Z",
+    "updatedAt": "2025-11-12T10:07:35.412Z"
+  },
+  {
+    "id": 460,
+    "name": "SOBA & MIKROVALE",
+    "parentId": 443,
+    "createdAt": "2025-11-12T10:07:35.419Z",
+    "updatedAt": "2025-11-12T10:07:35.419Z"
+  },
+  {
+    "id": 461,
+    "name": "THARESE RROBASH",
+    "parentId": 443,
+    "createdAt": "2025-11-12T10:07:35.425Z",
+    "updatedAt": "2025-11-12T10:07:35.425Z"
+  },
+  {
+    "id": 462,
+    "name": "AKSESORE GATIMI",
+    "parentId": 443,
+    "createdAt": "2025-11-12T10:07:35.431Z",
+    "updatedAt": "2025-11-12T10:07:35.431Z"
+  },
+  {
+    "id": 463,
+    "name": "ELEKTROSHTEPIAKE INKASO",
+    "parentId": 443,
+    "createdAt": "2025-11-12T10:07:35.436Z",
+    "updatedAt": "2025-11-12T10:07:35.436Z"
+  },
+  {
+    "id": 464,
+    "name": "BANAK",
+    "parentId": 455,
+    "createdAt": "2025-11-12T10:11:08.783Z",
+    "updatedAt": "2025-11-12T10:13:59.482Z"
+  },
+  {
+    "id": 465,
+    "name": "FTOHES",
+    "parentId": 455,
+    "createdAt": "2025-11-12T10:11:08.800Z",
+    "updatedAt": "2025-11-12T10:13:59.500Z"
+  },
+  {
+    "id": 466,
+    "name": "I KOMBINUAR",
+    "parentId": 455,
+    "createdAt": "2025-11-12T10:11:08.807Z",
+    "updatedAt": "2025-11-12T10:13:59.506Z"
+  },
+  {
+    "id": 467,
+    "name": "MINI BAR",
+    "parentId": 455,
+    "createdAt": "2025-11-12T10:11:08.813Z",
+    "updatedAt": "2025-11-12T10:13:59.512Z"
+  },
+  {
+    "id": 468,
+    "name": "MULTI DOOR",
+    "parentId": 455,
+    "createdAt": "2025-11-12T10:11:08.820Z",
+    "updatedAt": "2025-11-12T10:13:59.517Z"
+  },
+  {
+    "id": 469,
+    "name": "NGRIRES",
+    "parentId": 455,
+    "createdAt": "2025-11-12T10:11:08.826Z",
+    "updatedAt": "2025-11-12T10:13:59.521Z"
+  },
+  {
+    "id": 470,
+    "name": "SBS",
+    "parentId": 455,
+    "createdAt": "2025-11-12T10:11:08.832Z",
+    "updatedAt": "2025-11-12T10:13:59.529Z"
+  },
+  {
+    "id": 471,
+    "name": "VERE",
+    "parentId": 455,
+    "createdAt": "2025-11-12T10:11:08.839Z",
+    "updatedAt": "2025-11-12T10:13:59.534Z"
+  },
+  {
+    "id": 472,
+    "name": "AKSESORE",
+    "parentId": 455,
+    "createdAt": "2025-11-12T10:11:08.844Z",
+    "updatedAt": "2025-11-12T10:13:59.540Z"
+  },
+  {
+    "id": 473,
+    "name": "AKSESORE LAVATRICE",
+    "parentId": 456,
+    "createdAt": "2025-11-12T10:24:04.709Z",
+    "updatedAt": "2025-11-12T10:24:04.709Z"
+  },
+  {
+    "id": 474,
+    "name": "LARESE - THARESE",
+    "parentId": 456,
+    "createdAt": "2025-11-12T10:24:04.729Z",
+    "updatedAt": "2025-11-12T10:24:04.729Z"
+  },
+  {
+    "id": 475,
+    "name": "LAVATRICE",
+    "parentId": 456,
+    "createdAt": "2025-11-12T10:24:04.736Z",
+    "updatedAt": "2025-11-12T10:24:04.736Z"
+  },
+  {
+    "id": 476,
+    "name": "AKSESORE LAVASTOVILJE",
+    "parentId": 457,
+    "createdAt": "2025-11-12T10:24:04.746Z",
+    "updatedAt": "2025-11-12T10:24:04.746Z"
+  },
+  {
+    "id": 477,
+    "name": "LAVASTOVILJE",
+    "parentId": 457,
+    "createdAt": "2025-11-12T10:24:04.753Z",
+    "updatedAt": "2025-11-12T10:24:04.753Z"
+  },
+  {
+    "id": 478,
+    "name": "ASPIRATORE",
+    "parentId": 458,
+    "createdAt": "2025-11-12T10:24:04.761Z",
+    "updatedAt": "2025-11-12T10:24:04.761Z"
+  },
+  {
+    "id": 479,
+    "name": "EKSPRESE INKASO AUTOMATIK",
+    "parentId": 459,
+    "createdAt": "2025-11-12T10:24:04.770Z",
+    "updatedAt": "2025-11-12T10:24:04.770Z"
+  },
+  {
+    "id": 480,
+    "name": "EKSPRESE INKASO MANUAL",
+    "parentId": 459,
+    "createdAt": "2025-11-12T10:24:04.775Z",
+    "updatedAt": "2025-11-12T10:24:04.775Z"
+  },
+  {
+    "id": 481,
+    "name": "GRILLA",
+    "parentId": 460,
+    "createdAt": "2025-11-12T10:24:04.783Z",
+    "updatedAt": "2025-11-12T10:24:04.783Z"
+  },
+  {
+    "id": 482,
+    "name": "MIKROVALE",
+    "parentId": 460,
+    "createdAt": "2025-11-12T10:24:04.789Z",
+    "updatedAt": "2025-11-12T10:24:04.789Z"
+  },
+  {
+    "id": 483,
+    "name": "SOBE ELEKTRIKE",
+    "parentId": 460,
+    "createdAt": "2025-11-12T10:24:04.795Z",
+    "updatedAt": "2025-11-12T10:24:04.795Z"
+  },
+  {
+    "id": 484,
+    "name": "AKSESORE THARESE RROBASH",
+    "parentId": 461,
+    "createdAt": "2025-11-12T10:24:04.803Z",
+    "updatedAt": "2025-11-12T10:24:04.803Z"
+  },
+  {
+    "id": 485,
+    "name": "HIGJENIZUES RROBASH",
+    "parentId": 461,
+    "createdAt": "2025-11-12T10:24:04.809Z",
+    "updatedAt": "2025-11-12T10:24:04.809Z"
+  },
+  {
+    "id": 486,
+    "name": "THARESE RROBASH",
+    "parentId": 461,
+    "createdAt": "2025-11-12T10:24:04.815Z",
+    "updatedAt": "2025-11-12T10:24:04.815Z"
+  },
+  {
+    "id": 487,
+    "name": "AKSESORE",
+    "parentId": 463,
+    "createdAt": "2025-11-12T10:24:04.824Z",
+    "updatedAt": "2025-11-12T10:24:04.824Z"
+  },
+  {
+    "id": 488,
+    "name": "ASPIRATORE INKASO",
+    "parentId": 463,
+    "createdAt": "2025-11-12T10:24:04.829Z",
+    "updatedAt": "2025-11-12T10:24:04.829Z"
+  },
+  {
+    "id": 489,
+    "name": "FRIGORIFERE INKASO",
+    "parentId": 463,
+    "createdAt": "2025-11-12T10:24:04.835Z",
+    "updatedAt": "2025-11-12T10:24:04.835Z"
+  },
+  {
+    "id": 490,
+    "name": "FURRA INKASO",
+    "parentId": 463,
+    "createdAt": "2025-11-12T10:24:04.842Z",
+    "updatedAt": "2025-11-12T10:24:04.842Z"
+  },
+  {
+    "id": 491,
+    "name": "LAVAPJATA & RUBINETA",
+    "parentId": 463,
+    "createdAt": "2025-11-12T10:24:04.854Z",
+    "updatedAt": "2025-11-12T10:24:04.854Z"
+  },
+  {
+    "id": 492,
+    "name": "LAVASTOVILJE INKASO",
+    "parentId": 463,
+    "createdAt": "2025-11-12T10:24:04.860Z",
+    "updatedAt": "2025-11-12T10:24:04.860Z"
+  },
+  {
+    "id": 493,
+    "name": "LAVATRICE INKASO",
+    "parentId": 463,
+    "createdAt": "2025-11-12T10:24:04.865Z",
+    "updatedAt": "2025-11-12T10:24:04.865Z"
+  },
+  {
+    "id": 494,
+    "name": "PIANURA INKASO",
+    "parentId": 463,
+    "createdAt": "2025-11-12T10:24:04.871Z",
+    "updatedAt": "2025-11-12T10:24:04.871Z"
+  },
+  {
+    "id": 495,
+    "name": "PRODUKTE SPECIALE INKASO",
+    "parentId": 463,
+    "createdAt": "2025-11-12T10:24:04.877Z",
+    "updatedAt": "2025-11-12T10:24:04.877Z"
+  },
+  {
+    "id": 496,
+    "name": "GATIMI",
+    "parentId": 444,
+    "createdAt": "2025-11-12T10:27:44.617Z",
+    "updatedAt": "2025-11-12T10:27:44.617Z"
+  },
+  {
+    "id": 497,
+    "name": "PERGATITJA E KAFESE",
+    "parentId": 444,
+    "createdAt": "2025-11-12T10:27:44.637Z",
+    "updatedAt": "2025-11-12T10:27:44.637Z"
+  },
+  {
+    "id": 498,
+    "name": "PERGATITJA E USHQIMIT",
+    "parentId": 444,
+    "createdAt": "2025-11-12T10:27:44.646Z",
+    "updatedAt": "2025-11-12T10:27:44.646Z"
+  },
+  {
+    "id": 499,
+    "name": "ENE KUZHINE",
+    "parentId": 444,
+    "createdAt": "2025-11-12T10:27:44.654Z",
+    "updatedAt": "2025-11-12T10:27:44.654Z"
+  },
+  {
+    "id": 500,
+    "name": "FRITEZA",
+    "parentId": 496,
+    "createdAt": "2025-11-12T10:31:59.741Z",
+    "updatedAt": "2025-11-12T10:31:59.741Z"
+  },
+  {
+    "id": 501,
+    "name": "FURRA",
+    "parentId": 496,
+    "createdAt": "2025-11-12T10:31:59.756Z",
+    "updatedAt": "2025-11-12T10:31:59.756Z"
+  },
+  {
+    "id": 502,
+    "name": "GATUES",
+    "parentId": 496,
+    "createdAt": "2025-11-12T10:31:59.764Z",
+    "updatedAt": "2025-11-12T10:31:59.764Z"
+  },
+  {
+    "id": 503,
+    "name": "GRILLA",
+    "parentId": 496,
+    "createdAt": "2025-11-12T10:31:59.770Z",
+    "updatedAt": "2025-11-12T10:31:59.770Z"
+  },
+  {
+    "id": 504,
+    "name": "MAKINE PRODHUES AKULLI",
+    "parentId": 496,
+    "createdAt": "2025-11-12T10:31:59.777Z",
+    "updatedAt": "2025-11-12T10:31:59.777Z"
+  },
+  {
+    "id": 505,
+    "name": "MIKROVALE",
+    "parentId": 496,
+    "createdAt": "2025-11-12T10:31:59.784Z",
+    "updatedAt": "2025-11-12T10:31:59.784Z"
+  },
+  {
+    "id": 506,
+    "name": "PIANURA",
+    "parentId": 496,
+    "createdAt": "2025-11-12T10:31:59.790Z",
+    "updatedAt": "2025-11-12T10:31:59.790Z"
+  },
+  {
+    "id": 507,
+    "name": "AKSESORE",
+    "parentId": 497,
+    "createdAt": "2025-11-12T10:31:59.800Z",
+    "updatedAt": "2025-11-12T10:31:59.800Z"
+  },
+  {
+    "id": 508,
+    "name": "EKSPRESE",
+    "parentId": 497,
+    "createdAt": "2025-11-12T10:31:59.805Z",
+    "updatedAt": "2025-11-12T10:31:59.805Z"
+  },
+  {
+    "id": 509,
+    "name": "MAKINE KAFEJE",
+    "parentId": 497,
+    "createdAt": "2025-11-12T10:31:59.811Z",
+    "updatedAt": "2025-11-12T10:31:59.811Z"
+  },
+  {
+    "id": 510,
+    "name": "MULLINJ KAFEJE",
+    "parentId": 497,
+    "createdAt": "2025-11-12T10:31:59.818Z",
+    "updatedAt": "2025-11-12T10:31:59.818Z"
+  },
+  {
+    "id": 511,
+    "name": "XHEZVE",
+    "parentId": 497,
+    "createdAt": "2025-11-12T10:31:59.824Z",
+    "updatedAt": "2025-11-12T10:31:59.824Z"
+  },
+  {
+    "id": 512,
+    "name": "AKSESORE",
+    "parentId": 498,
+    "createdAt": "2025-11-12T10:31:59.833Z",
+    "updatedAt": "2025-11-12T10:31:59.833Z"
+  },
+  {
+    "id": 513,
+    "name": "APARATE VAKUMI",
+    "parentId": 498,
+    "createdAt": "2025-11-12T10:31:59.839Z",
+    "updatedAt": "2025-11-12T10:31:59.839Z"
+  },
+  {
+    "id": 514,
+    "name": "BLENDERA",
+    "parentId": 498,
+    "createdAt": "2025-11-12T10:31:59.845Z",
+    "updatedAt": "2025-11-12T10:31:59.845Z"
+  },
+  {
+    "id": 515,
+    "name": "GRIRESE",
+    "parentId": 498,
+    "createdAt": "2025-11-12T10:31:59.853Z",
+    "updatedAt": "2025-11-12T10:31:59.853Z"
+  },
+  {
+    "id": 516,
+    "name": "MIKSERA",
+    "parentId": 498,
+    "createdAt": "2025-11-12T10:31:59.859Z",
+    "updatedAt": "2025-11-12T10:31:59.859Z"
+  },
+  {
+    "id": 517,
+    "name": "NGROHES UJI",
+    "parentId": 498,
+    "createdAt": "2025-11-12T10:31:59.866Z",
+    "updatedAt": "2025-11-12T10:31:59.866Z"
+  },
+  {
+    "id": 518,
+    "name": "PESHORE USHQIMI",
+    "parentId": 498,
+    "createdAt": "2025-11-12T10:31:59.872Z",
+    "updatedAt": "2025-11-12T10:31:59.872Z"
+  },
+  {
+    "id": 519,
+    "name": "SHTRYDHESE",
+    "parentId": 498,
+    "createdAt": "2025-11-12T10:31:59.878Z",
+    "updatedAt": "2025-11-12T10:31:59.878Z"
+  },
+  {
+    "id": 520,
+    "name": "THEKESE",
+    "parentId": 498,
+    "createdAt": "2025-11-12T10:31:59.885Z",
+    "updatedAt": "2025-11-12T10:31:59.885Z"
+  },
+  {
+    "id": 521,
+    "name": "TOSTIERE",
+    "parentId": 498,
+    "createdAt": "2025-11-12T10:31:59.893Z",
+    "updatedAt": "2025-11-12T10:31:59.893Z"
+  },
+  {
+    "id": 522,
+    "name": "AKSESORE KUZHINE",
+    "parentId": 499,
+    "createdAt": "2025-11-12T10:31:59.901Z",
+    "updatedAt": "2025-11-12T10:31:59.901Z"
+  },
+  {
+    "id": 523,
+    "name": "CAJNIK",
+    "parentId": 499,
+    "createdAt": "2025-11-12T10:31:59.907Z",
+    "updatedAt": "2025-11-12T10:31:59.907Z"
+  },
+  {
+    "id": 524,
+    "name": "TAVA PJEKJE",
+    "parentId": 499,
+    "createdAt": "2025-11-12T10:31:59.912Z",
+    "updatedAt": "2025-11-12T10:31:59.912Z"
+  },
+  {
+    "id": 525,
+    "name": "TENXHERE",
+    "parentId": 499,
+    "createdAt": "2025-11-12T10:31:59.918Z",
+    "updatedAt": "2025-11-12T10:31:59.918Z"
+  },
+  {
+    "id": 526,
+    "name": "TIGANE",
+    "parentId": 499,
+    "createdAt": "2025-11-12T10:31:59.924Z",
+    "updatedAt": "2025-11-12T10:31:59.924Z"
+  },
+  {
+    "id": 527,
+    "name": "CELULARE",
+    "parentId": 445,
+    "createdAt": "2025-11-12T10:45:19.335Z",
+    "updatedAt": "2025-11-12T10:45:19.335Z"
+  },
+  {
+    "id": 528,
+    "name": "SMARTPHONE",
+    "parentId": 445,
+    "createdAt": "2025-11-12T10:45:19.353Z",
+    "updatedAt": "2025-11-12T10:45:19.353Z"
+  },
+  {
+    "id": 529,
+    "name": "SMARTWATCH",
+    "parentId": 445,
+    "createdAt": "2025-11-12T10:45:19.361Z",
+    "updatedAt": "2025-11-12T10:45:19.361Z"
+  },
+  {
+    "id": 530,
+    "name": "TELEFONA FIKS",
+    "parentId": 445,
+    "createdAt": "2025-11-12T10:45:19.369Z",
+    "updatedAt": "2025-11-12T10:45:19.369Z"
+  },
+  {
+    "id": 531,
+    "name": "AKSESORE SMARTPHONE",
+    "parentId": 528,
+    "createdAt": "2025-11-12T10:45:19.377Z",
+    "updatedAt": "2025-11-12T10:45:19.377Z"
+  },
+  {
+    "id": 532,
+    "name": "AKSESORE SMARTWATCH",
+    "parentId": 529,
+    "createdAt": "2025-11-12T10:45:19.385Z",
+    "updatedAt": "2025-11-12T10:45:19.385Z"
+  },
+  {
+    "id": 533,
+    "name": "TELEFON CORDLESS",
+    "parentId": 530,
+    "createdAt": "2025-11-12T10:45:19.392Z",
+    "updatedAt": "2025-11-12T10:45:19.392Z"
+  },
+  {
+    "id": 534,
+    "name": "TELEFON FIKS",
+    "parentId": 530,
+    "createdAt": "2025-11-12T10:45:19.398Z",
+    "updatedAt": "2025-11-12T10:45:19.398Z"
+  },
+  {
+    "id": 535,
+    "name": "AKSESORE AUDIO",
+    "parentId": 446,
+    "createdAt": "2025-11-12T10:52:32.107Z",
+    "updatedAt": "2025-11-12T10:52:32.107Z"
+  },
+  {
+    "id": 536,
+    "name": "AKSESORE TV",
+    "parentId": 446,
+    "createdAt": "2025-11-12T10:52:32.121Z",
+    "updatedAt": "2025-11-12T10:52:32.121Z"
+  },
+  {
+    "id": 537,
+    "name": "HI-FI",
+    "parentId": 446,
+    "createdAt": "2025-11-12T10:52:32.129Z",
+    "updatedAt": "2025-11-12T10:52:32.129Z"
+  },
+  {
+    "id": 538,
+    "name": "HOME CINEMA",
+    "parentId": 446,
+    "createdAt": "2025-11-12T10:52:32.136Z",
+    "updatedAt": "2025-11-12T10:52:32.136Z"
+  },
+  {
+    "id": 539,
+    "name": "MONITORE",
+    "parentId": 446,
+    "createdAt": "2025-11-12T10:52:32.144Z",
+    "updatedAt": "2025-11-12T10:52:32.144Z"
+  },
+  {
+    "id": 540,
+    "name": "TELEVIZORE",
+    "parentId": 446,
+    "createdAt": "2025-11-12T10:52:32.152Z",
+    "updatedAt": "2025-11-12T10:52:32.152Z"
+  },
+  {
+    "id": 541,
+    "name": "ANTENA",
+    "parentId": 536,
+    "createdAt": "2025-11-12T10:52:32.159Z",
+    "updatedAt": "2025-11-12T10:52:32.159Z"
+  },
+  {
+    "id": 542,
+    "name": "BOKSE BLUETOOTH",
+    "parentId": 537,
+    "createdAt": "2025-11-12T10:52:32.166Z",
+    "updatedAt": "2025-11-12T10:52:32.166Z"
+  },
+  {
+    "id": 543,
+    "name": "MINI HI-FI",
+    "parentId": 537,
+    "createdAt": "2025-11-12T10:52:32.173Z",
+    "updatedAt": "2025-11-12T10:52:32.173Z"
+  },
+  {
+    "id": 544,
+    "name": "AMPLIFIKATORE",
+    "parentId": 538,
+    "createdAt": "2025-11-12T10:52:32.181Z",
+    "updatedAt": "2025-11-12T10:52:32.181Z"
+  },
+  {
+    "id": 545,
+    "name": "AV RECEIVER",
+    "parentId": 538,
+    "createdAt": "2025-11-12T10:52:32.187Z",
+    "updatedAt": "2025-11-12T10:52:32.187Z"
+  },
+  {
+    "id": 546,
+    "name": "BOKSE",
+    "parentId": 538,
+    "createdAt": "2025-11-12T10:52:32.194Z",
+    "updatedAt": "2025-11-12T10:52:32.194Z"
+  },
+  {
+    "id": 547,
+    "name": "HOME CINEMA",
+    "parentId": 538,
+    "createdAt": "2025-11-12T10:52:32.201Z",
+    "updatedAt": "2025-11-12T10:52:32.201Z"
+  },
+  {
+    "id": 548,
+    "name": "SOUNDBAR",
+    "parentId": 538,
+    "createdAt": "2025-11-12T10:52:32.207Z",
+    "updatedAt": "2025-11-12T10:52:32.207Z"
+  },
+  {
+    "id": 549,
+    "name": "MONITOR PROFESIONAL",
+    "parentId": 539,
+    "createdAt": "2025-11-12T10:52:32.214Z",
+    "updatedAt": "2025-11-12T10:52:32.214Z"
+  },
+  {
+    "id": 550,
+    "name": "AKSESORE TV",
+    "parentId": 540,
+    "createdAt": "2025-11-12T10:52:32.221Z",
+    "updatedAt": "2025-11-12T10:52:32.221Z"
+  },
+  {
+    "id": 551,
+    "name": "TELEVIZOR LED",
+    "parentId": 540,
+    "createdAt": "2025-11-12T10:52:32.228Z",
+    "updatedAt": "2025-11-12T10:52:32.228Z"
+  },
+  {
+    "id": 552,
+    "name": "TELEVIZOR MINI LED",
+    "parentId": 540,
+    "createdAt": "2025-11-12T10:52:32.235Z",
+    "updatedAt": "2025-11-12T10:52:32.235Z"
+  },
+  {
+    "id": 553,
+    "name": "TELEVIZOR OLED",
+    "parentId": 540,
+    "createdAt": "2025-11-12T10:52:32.242Z",
+    "updatedAt": "2025-11-12T10:52:32.242Z"
+  },
+  {
+    "id": 554,
+    "name": "TELEVIZOR QLED",
+    "parentId": 540,
+    "createdAt": "2025-11-12T10:52:32.250Z",
+    "updatedAt": "2025-11-12T10:52:32.250Z"
+  },
+  {
+    "id": 555,
+    "name": "TELEVIZOR QNED",
+    "parentId": 540,
+    "createdAt": "2025-11-12T10:52:32.256Z",
+    "updatedAt": "2025-11-12T10:52:32.256Z"
+  },
+  {
+    "id": 556,
+    "name": "TELEVIZOR ULTRA HD 4K",
+    "parentId": 540,
+    "createdAt": "2025-11-12T10:52:32.263Z",
+    "updatedAt": "2025-11-12T10:52:32.263Z"
+  }
+]

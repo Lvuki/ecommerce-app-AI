@@ -401,11 +401,14 @@ export default function Header() {
                           <div>
                             <h3 style={{ marginTop: 0, marginBottom: 8 }}>{selectedHamburgerCategory.name}</h3>
                             {Array.isArray(selectedHamburgerCategory.subcategories) && selectedHamburgerCategory.subcategories.length ? (
-                              <div style={{ display: 'flex', gap: 32 }}>
-                                {/* split into columns */}
-                                {selectedHamburgerCategory.subcategories.map((sc, idx) => (
+                              // Use grid so child categories wrap into multiple rows as needed (visual only)
+                              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 24 }}>
+                                {selectedHamburgerCategory.subcategories.map((sc) => (
                                   <div key={sc.id || sc.name} style={{ minWidth: 160 }}>
-                                    <div style={{ fontWeight: 800, marginBottom: 6 }}>{sc.name}</div>
+                                    {/* make level-1 child clickable as well */}
+                                    <div style={{ fontWeight: 800, marginBottom: 6 }}>
+                                      <button type="button" onClick={() => { setShowHamburger(false); navigate(`/category?category=${encodeURIComponent(sc.name)}`); }} style={{ color: '#111', textDecoration: 'none', background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontSize: 'inherit', fontWeight: 800 }}>{sc.name}</button>
+                                    </div>
                                     {Array.isArray(sc.subcategories) && sc.subcategories.length ? (
                                       <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                                         {sc.subcategories.map(ss => (

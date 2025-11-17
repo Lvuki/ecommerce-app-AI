@@ -14,7 +14,13 @@ module.exports = (sequelize, DataTypes) => {
     brand: { type: DataTypes.STRING },
     stock: { type: DataTypes.INTEGER, defaultValue: 0 },
     specs: { type: DataTypes.JSON },
+    categories: { type: DataTypes.JSON },
   });
+  Product.associate = (models) => {
+    if (models && models.Rating) {
+      Product.hasMany(models.Rating, { foreignKey: 'productId', as: 'ratings' });
+    }
+  };
 
   return Product;
 };

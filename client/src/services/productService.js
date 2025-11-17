@@ -22,6 +22,11 @@ export async function searchProducts(params = {}) {
     if (v !== undefined && v !== null && v !== "") qs.append(k, v);
   });
   const res = await fetch(`${API_BASE_URL}/products?${qs.toString()}`);
+  if (!res.ok) {
+    let err = 'Failed to load products';
+    try { const body = await res.json(); if (body && (body.error || body.message)) err = body.error || body.message; } catch (_) {}
+    throw new Error(err);
+  }
   return res.json();
 }
 
@@ -75,6 +80,18 @@ export async function deleteProduct(id) {
     headers: {
       Authorization: `Bearer ${token}`,
     },
+  });
+  return res.json();
+}
+
+export async function rateProduct(id, value) {
+  const token = getToken();
+  const headers = { 'Content-Type': 'application/json' };
+  if (token) headers.Authorization = `Bearer ${token}`;
+  const res = await fetch(`${API_BASE_URL}/products/${id}/rate`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ value }),
   });
   return res.json();
 }

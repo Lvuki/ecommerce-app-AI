@@ -1,0 +1,164 @@
+[
+  {
+    "id": 1,
+    "name": "test 1",
+    "description": "test 1",
+    "image": "/uploads/1762003404832-503852021.jpeg",
+    "parentId": null,
+    "createdAt": "2025-11-01T13:23:24.836Z",
+    "updatedAt": "2025-11-01T13:23:24.836Z"
+  },
+  {
+    "id": 8,
+    "name": "Books",
+    "description": "Printed and digital books",
+    "image": "/uploads/books.jpg",
+    "parentId": null,
+    "createdAt": "2025-11-01T18:29:49.140Z",
+    "updatedAt": "2025-11-01T19:02:47.303Z"
+  },
+  {
+    "id": 10,
+    "name": "Home & Kitchen",
+    "description": "Household items and kitchenware",
+    "image": "/uploads/home-kitchen.jpg",
+    "parentId": null,
+    "createdAt": "2025-11-01T18:29:49.163Z",
+    "updatedAt": "2025-11-01T19:02:49.068Z"
+  },
+  {
+    "id": 13,
+    "name": "Sports",
+    "description": "Sporting goods and outdoor gear",
+    "image": "/uploads/sports.jpg",
+    "parentId": null,
+    "createdAt": "2025-11-01T18:29:49.195Z",
+    "updatedAt": "2025-11-01T19:02:50.686Z"
+  },
+  {
+    "id": 14,
+    "name": "Health",
+    "description": "Health and personal care",
+    "image": "/uploads/health.jpg",
+    "parentId": null,
+    "createdAt": "2025-11-01T18:29:49.204Z",
+    "updatedAt": "2025-11-01T19:02:50.820Z"
+  },
+  {
+    "id": 15,
+    "name": "Garden",
+    "description": "Gardening tools and outdoor supplies",
+    "image": "/uploads/garden.jpg",
+    "parentId": null,
+    "createdAt": "2025-11-01T18:29:49.215Z",
+    "updatedAt": "2025-11-01T19:02:50.939Z"
+  },
+  {
+    "id": 16,
+    "name": "Automotive",
+    "description": "Car parts and accessories",
+    "image": "/uploads/automotive.jpg",
+    "parentId": null,
+    "createdAt": "2025-11-01T18:29:49.224Z",
+    "updatedAt": "2025-11-01T19:02:51.073Z"
+  },
+  {
+    "id": 17,
+    "name": "Phones",
+    "description": "Smartphones and mobile devices",
+    "image": "/uploads/electronics-phones.jpg",
+    "parentId": 7,
+    "createdAt": "2025-11-01T18:29:49.234Z",
+    "updatedAt": "2025-11-01T19:02:51.195Z"
+  },
+  {
+    "id": 18,
+    "name": "Computers",
+    "description": "Laptops, desktops and accessories",
+    "image": "/uploads/electronics-computers.jpg",
+    "parentId": 7,
+    "createdAt": "2025-11-01T18:29:49.243Z",
+    "updatedAt": "2025-11-01T19:02:51.318Z"
+  },
+  {
+    "id": 21,
+    "name": "Decor",
+    "description": "Home decor items",
+    "image": "/uploads/home-kitchen-decor.jpg",
+    "parentId": 10,
+    "createdAt": "2025-11-01T18:29:49.270Z",
+    "updatedAt": "2025-11-01T19:02:52.095Z"
+  },
+  {
+    "id": 7,
+    "name": "Electronics",
+    "description": "Gadgets, devices and accessories",
+    "image": "/uploads/electronics-picsum-1762024013070.jpg",
+    "parentId": null,
+    "createdAt": "2025-11-01T18:29:49.093Z",
+    "updatedAt": "2025-11-01T19:06:54.034Z"
+  },
+  {
+    "id": 9,
+    "name": "Clothing",
+    "description": "Apparel for men, women and children",
+    "image": "/uploads/clothing-picsum-1762024014326.jpg",
+    "parentId": null,
+    "createdAt": "2025-11-01T18:29:49.150Z",
+    "updatedAt": "2025-11-01T19:06:54.541Z"
+  },
+  {
+    "id": 11,
+    "name": "Toys",
+    "description": "Toys and games for kids",
+    "image": "/uploads/toys-picsum-1762024015170.jpg",
+    "parentId": null,
+    "createdAt": "2025-11-01T18:29:49.173Z",
+    "updatedAt": "2025-11-01T19:06:55.451Z"
+  },
+  {
+    "id": 12,
+    "name": "Beauty",
+    "description": "Cosmetics and beauty products",
+    "image": "/uploads/beauty-picsum-1762024015730.jpg",
+    "parentId": null,
+    "createdAt": "2025-11-01T18:29:49.184Z",
+    "updatedAt": "2025-11-01T19:06:56.653Z"
+  },
+  {
+    "id": 19,
+    "name": "Men",
+    "description": "Men clothing",
+    "image": "/uploads/clothing-men-picsum-1762024016956.jpg",
+    "parentId": 9,
+    "createdAt": "2025-11-01T18:29:49.252Z",
+    "updatedAt": "2025-11-01T19:06:57.359Z"
+  },
+  {
+    "id": 20,
+    "name": "Women",
+    "description": "Women clothing",
+    "image": "/uploads/clothing-women-picsum-1762024017636.jpg",
+    "parentId": 9,
+    "createdAt": "2025-11-01T18:29:49.262Z",
+    "updatedAt": "2025-11-01T19:06:57.913Z"
+  },
+  {
+    "id": 22,
+    "name": "Educational",
+    "description": "Educational toys",
+    "image": "/uploads/toys-educational-picsum-1762024018185.jpg",
+    "parentId": 11,
+    "createdAt": "2025-11-01T18:29:49.279Z",
+    "updatedAt": "2025-11-01T19:06:58.505Z"
+  },
+  {
+    "id": 23,
+    "name": "zv2",
+    "description": "zv2",
+    "image": "/uploads/1762032003385-307861403.png",
+    "parentId": 20,
+    "createdAt": "2025-11-01T21:20:03.392Z",
+    "updatedAt": "2025-11-01T21:20:03.392Z"
+  }
+]
