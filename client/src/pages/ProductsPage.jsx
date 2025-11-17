@@ -293,7 +293,21 @@ function ProductsPage() {
         <label style={{ fontSize: 14, fontWeight: 600 }}>Filter:</label>
         <select value={filterCategory} onChange={async (e) => { const val = e.target.value; setFilterCategory(val); await loadProducts({ category: val, q: searchQ }); }} style={{ minWidth: 220 }}>
           <option value="">— all categories —</option>
-          {categories.map(cat => <option key={cat.id || cat.name} value={cat.name || cat.id}>{cat.name || cat}</option>)}
+          {/** render nested options with indentation */}
+          {categories.map(cat => {
+            const renderOpts = (node, prefix = '') => {
+              const opts = [];
+              const label = node.name || node;
+              opts.push(<option key={node.id || label} value={label}>{prefix + label}</option>);
+              if (Array.isArray(node.subcategories) && node.subcategories.length) {
+                node.subcategories.forEach(child => {
+                  opts.push(...renderOpts(child, prefix + '-- '));
+                });
+              }
+              return opts;
+            };
+            return renderOpts(cat);
+          })}
         </select>
         <input placeholder="Search products by name" value={searchQ} onChange={(e) => {
           const val = e.target.value;
