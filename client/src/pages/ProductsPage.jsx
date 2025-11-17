@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getProducts, addProduct, updateProduct, deleteProduct } from "../services/productService";
+import { getProducts, searchProducts, addProduct, updateProduct, deleteProduct } from "../services/productService";
 import { getCategories, addCategory, updateCategory, deleteCategory } from "../services/categoryService";
 import { addItem } from "../services/cartService";
 import { priceInfo } from '../utils/priceUtils';
@@ -24,6 +24,10 @@ function ProductsPage() {
     images: [],
   });
   const [categories, setCategories] = useState([]);
+  const [filterCategory, setFilterCategory] = useState('');
+  const [searchQ, setSearchQ] = useState('');
+  const [page, setPage] = useState(1);
+  const [perPage, setPerPage] = useState(20);
   const [showCategoriesPanel, setShowCategoriesPanel] = useState(false);
   const [catForm, setCatForm] = useState({ id: null, name: '', description: '', imageFile: null, image: '', parentId: '' });
   const [addForm, setAddForm] = useState({ name: '', description: '', imageFile: null, image: '', parentId: '' });
@@ -36,10 +40,34 @@ function ProductsPage() {
     if (!getToken()) {
       navigate("/login");
     } else {
-      getProducts().then(setProducts);
+      // load products via search endpoint to support filters
+      (async () => {
+        try {
+          const prods = await searchProducts({});
+          setProducts(prods || []);
+        } catch (e) {
+          console.error('Failed to load products', e);
+          setProducts([]);
+        }
+      })();
       getCategories().then((c) => setCategories(c || []));
     }
   }, [navigate]);
+
+  const loadProducts = async (opts = {}) => {
+    try {
+      const params = { ...opts };
+      // include category and q if present
+      if (filterCategory) params.category = filterCategory;
+      if (searchQ) params.q = searchQ;
+      const prods = await searchProducts(params);
+      setProducts(prods || []);
+      setPage(1);
+    } catch (e) {
+      console.error('Load products failed', e);
+      setProducts([]);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -259,6 +287,17 @@ function ProductsPage() {
       )}
 
       <h3 style={{ marginTop: "10px", marginBottom: 12 }}>Product List</h3>
+      {/* Filters: category + search */}
+      <div style={{ display: 'flex', gap: 8, marginBottom: 12, alignItems: 'center' }}>
+        <label style={{ fontSize: 14, fontWeight: 600 }}>Filter:</label>
+        <select value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)} style={{ minWidth: 220 }}>
+          <option value="">— all categories —</option>
+          {categories.map(cat => <option key={cat.id || cat.name} value={cat.name || cat.id}>{cat.name || cat}</option>)}
+        </select>
+        <input placeholder="Search products by name" value={searchQ} onChange={(e) => setSearchQ(e.target.value)} style={{ flex: 1, padding: 8 }} onKeyDown={(e) => { if (e.key === 'Enter') loadProducts(); }} />
+        <button onClick={() => loadProducts()}>Search</button>
+        <button onClick={async () => { setFilterCategory(''); setSearchQ(''); await loadProducts({}); }}>Clear</button>
+      </div>
       <div style={{ background: '#fff', border: '1px solid #eee', borderRadius: 8 }} className="table-responsive">
         <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'auto', minWidth: 700 }}>
           <thead>
@@ -275,7 +314,15 @@ function ProductsPage() {
             </tr>
           </thead>
           <tbody>
-            {products.map((p) => (
+            {(() => {
+              // client-side pagination
+              const total = products.length;
+              const totalPages = Math.max(1, Math.ceil(total / perPage));
+              const current = Math.min(page, totalPages);
+              const start = (current - 1) * perPage;
+              const end = start + perPage;
+              const pageItems = products.slice(start, end);
+              return pageItems.map((p) => (
               <tr key={p.id} style={{ borderBottom: '1px solid #f3f3f3' }}>
                 <td style={{ padding: 12, width: 140, maxWidth: 140, verticalAlign: 'top' }}>
                   { (p.images && p.images.length) || p.image ? (
@@ -319,9 +366,28 @@ function ProductsPage() {
                     </div>
                 </td>
               </tr>
-            ))}
+            ));
+            })()}
           </tbody>
         </table>
+      </div>
+
+      {/* Pagination controls */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 12 }}>
+        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+          <div>Show</div>
+          <select value={perPage} onChange={(e) => { setPerPage(Number(e.target.value)); setPage(1); }}>
+            <option value={20}>20</option>
+            <option value={50}>50</option>
+            <option value={100}>100</option>
+          </select>
+          <div>products</div>
+        </div>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <button onClick={() => setPage((p) => Math.max(1, p - 1))}>Prev</button>
+          <div>Page {page} of {Math.max(1, Math.ceil(products.length / perPage))}</div>
+          <button onClick={() => setPage((p) => Math.min(Math.max(1, Math.ceil(products.length / perPage)), p + 1))}>Next</button>
+        </div>
       </div>
 
       {/* Categories management modal (opens when Manage Categories is clicked) */}
