@@ -1,0 +1,21 @@
+{
+  "before": {
+    "id": 656,
+    "name": "MATES LAGESHTIE",
+    "description": null,
+    "image": null,
+    "parentId": 653,
+    "specs": null,
+    "createdAt": "2025-11-12T13:53:43.067Z",
+    "updatedAt": "2025-11-12T13:53:43.067Z"
+  },
+  "specsFromCsv": [
+    "Bateri",
+    "Grade",
+    "Opsione 1",
+    "Opsione 2",
+    "Opsione 3",
+    "Opsione 4",
+    "Rezolucion Ekrani"
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "before": {
+    "id": 516,
+    "name": "MIKSERA",
+    "description": null,
+    "image": null,
+    "parentId": 498,
+    "specs": null,
+    "createdAt": "2025-11-12T10:31:59.859Z",
+    "updatedAt": "2025-11-12T10:31:59.859Z"
+  },
+  "specsFromCsv": [
+    "Aksesore te perfshire",
+    "Funksion Pulse",
+    "Funksion Turbo",
+    "Funksioni",
+    "Fuqia",
+    "Kapaciteti",
+    "Kapaciteti depozites",
+    "Kapak kunder sperkatje",
+    "Kontrolli",
+    "Llojet e aksesoreve",
+    "Materiali depozites",
+    "Materiali trupit",
+    "Nivele Shpejtesie",
+    "Numri I thikave",
+    "Sirtar per aksesoret",
+    "Sistem vakumi",
+    "Te sigurta ne lavastovilje",
+    "Teknologjia"
+  ]
+}

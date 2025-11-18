@@ -1,0 +1,34 @@
+{
+  "before": {
+    "id": 467,
+    "name": "FRIGORIFER MINI BAR",
+    "description": "",
+    "image": null,
+    "parentId": 455,
+    "specs": null,
+    "createdAt": "2025-11-12T10:11:08.813Z",
+    "updatedAt": "2025-11-17T09:40:20.872Z"
+  },
+  "specsFromCsv": [
+    "Aksesore",
+    "Alarm",
+    "Frekuenca",
+    "Instalimi",
+    "Kahu I deres",
+    "Kapaciteti i ftohesit",
+    "Kapaciteti total",
+    "Klasa e Energjise",
+    "Kompresor inverter",
+    "Konsumi i Energjise",
+    "Kontrolli",
+    "Me xham",
+    "Ngjyra",
+    "Niveli i zhurmes",
+    "Permasat (LxGJxTH)",
+    "Pesha neto",
+    "Rafte xhami",
+    "Rezolucion Ekrani",
+    "Sistemi i Ftohjes",
+    "Temperatura"
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "before": {
+    "id": 638,
+    "name": "AKSESORE FSHESE",
+    "description": null,
+    "image": null,
+    "parentId": 636,
+    "specs": null,
+    "createdAt": "2025-11-12T13:40:50.738Z",
+    "updatedAt": "2025-11-12T13:40:50.738Z"
+  },
+  "specsFromCsv": [
+    "Funksioni",
+    "Lloji",
+    "Materiali",
+    "Perberja",
+    "Pershtatshmeria"
+  ]
+}

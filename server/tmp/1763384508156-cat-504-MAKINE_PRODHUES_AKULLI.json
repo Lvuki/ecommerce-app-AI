@@ -1,0 +1,23 @@
+{
+  "before": {
+    "id": 504,
+    "name": "MAKINE PRODHUES AKULLI",
+    "description": null,
+    "image": null,
+    "parentId": 496,
+    "specs": null,
+    "createdAt": "2025-11-12T10:31:59.777Z",
+    "updatedAt": "2025-11-12T10:31:59.777Z"
+  },
+  "specsFromCsv": [
+    "Ekran",
+    "Funksioni",
+    "Fuqia",
+    "Kapaciteti I kontenierit",
+    "Koha e pergatitjes",
+    "Madhesia e akullit",
+    "Sasia ditore e akullit",
+    "Sistem vetpastrimi",
+    "Tregues I nivelit ujit"
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "before": {
+    "id": 624,
+    "name": "MAKINE SHKURTIMI QIME",
+    "description": null,
+    "image": null,
+    "parentId": 617,
+    "specs": null,
+    "createdAt": "2025-11-12T13:36:28.562Z",
+    "updatedAt": "2025-11-12T13:36:28.562Z"
+  },
+  "specsFromCsv": [
+    "Aksesore 1",
+    "Aksesore 2",
+    "Aksesore te perfshire",
+    "Cilesimet e gjatesise",
+    "Funksioni",
+    "Koha e karikimit",
+    "Kohe Pune",
+    "Koke e lashme",
+    "Nivele shkurtimi",
+    "Perdorim ne te lagesht",
+    "Perdorimi",
+    "Teknologjia"
+  ]
+}

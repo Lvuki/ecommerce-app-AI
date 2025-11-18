@@ -1,0 +1,19 @@
+{
+  "before": {
+    "id": 683,
+    "name": "BATERI ALKALINE",
+    "description": null,
+    "image": null,
+    "parentId": 680,
+    "specs": null,
+    "createdAt": "2025-11-12T14:03:48.210Z",
+    "updatedAt": "2025-11-12T14:03:48.210Z"
+  },
+  "specsFromCsv": [
+    "Kapaciteti (mAh)",
+    "Lloji",
+    "Paketimi (cope)",
+    "Rikarikueshme",
+    "Tensioni (v)"
+  ]
+}

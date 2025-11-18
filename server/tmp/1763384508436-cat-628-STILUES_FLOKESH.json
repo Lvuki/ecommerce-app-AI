@@ -1,0 +1,26 @@
+{
+  "before": {
+    "id": 628,
+    "name": "STILUES FLOKESH",
+    "description": null,
+    "image": null,
+    "parentId": 617,
+    "specs": null,
+    "createdAt": "2025-11-12T13:36:28.585Z",
+    "updatedAt": "2025-11-12T13:36:28.585Z"
+  },
+  "specsFromCsv": [
+    "Aksesore te perfshire",
+    "Fikje automatike",
+    "Funksioni",
+    "Gjatesia e kabullit",
+    "Hapja & mbyllja",
+    "Materiali pllakes",
+    "Nivele Nxehtesie",
+    "Nxehje e shpejte",
+    "Perdorimi",
+    "Sistem Jonizimi",
+    "Teknologjia",
+    "Temperatura max"
+  ]
+}

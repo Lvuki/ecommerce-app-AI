@@ -6,7 +6,7 @@ import { priceInfo } from '../utils/priceUtils';
 import { getToken } from "../services/authService";
 import { useNavigate, Link } from "react-router-dom";
 
-function ProductsPage() {
+function ProductsPage({ hidePurchaseActions }) {
   const [products, setProducts] = useState([]);
   const [form, setForm] = useState({
     name: "",
@@ -21,6 +21,7 @@ function ProductsPage() {
     brand: "",
     stock: "",
     specs: "",
+    specValues: {},
     images: [],
   });
   const [categories, setCategories] = useState([]);
@@ -31,7 +32,7 @@ function ProductsPage() {
   const [perPage, setPerPage] = useState(20);
   const [showCategoriesPanel, setShowCategoriesPanel] = useState(false);
   const [catForm, setCatForm] = useState({ id: null, name: '', description: '', imageFile: null, image: '', parentId: '' });
-  const [addForm, setAddForm] = useState({ name: '', description: '', imageFile: null, image: '', parentId: '' });
+  const [addForm, setAddForm] = useState({ name: '', description: '', imageFile: null, image: '', parentId: '', specs: '' });
   const [editId, setEditId] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const navigate = useNavigate();
@@ -51,7 +52,7 @@ function ProductsPage() {
           setProducts([]);
         }
       })();
-      getCategories().then((c) => setCategories(c || []));
+      getCategories().then((c) => { console.debug('DEBUG: loaded categories', c); setCategories(c || []); });
     }
   }, [navigate]);
 
@@ -78,7 +79,10 @@ function ProductsPage() {
   if (payload.offerPrice === "" || payload.offerPrice === undefined) delete payload.offerPrice;
   if (payload.offerFrom === "" || payload.offerFrom === undefined) delete payload.offerFrom;
   if (payload.offerTo === "" || payload.offerTo === undefined) delete payload.offerTo;
-    if (payload.specs && typeof payload.specs !== "string") {
+    // If dynamic specValues were used (object), prefer that and send as object
+    if (payload.specValues && Object.keys(payload.specValues).length) {
+      payload.specs = payload.specValues; // productService will stringify objects when building FormData
+    } else if (payload.specs && typeof payload.specs !== "string") {
       payload.specs = JSON.stringify(payload.specs);
     }
     if (typeof payload.specs === "string" && payload.specs.trim()) {
@@ -87,6 +91,28 @@ function ProductsPage() {
 
     // include any selected images (File[]) as 'images' for multipart upload
     if (form.images && form.images.length) payload.images = form.images;
+
+    // If category was selected as an id, convert to category name for legacy backend fields
+    const findById = (nodes, id) => {
+      for (const n of nodes) {
+        if (!n) continue;
+        if (String(n.id) === String(id)) return n;
+        if (Array.isArray(n.subcategories)) {
+          const r = findById(n.subcategories, id);
+          if (r) return r;
+        }
+      }
+      return null;
+    };
+    if (payload.category) {
+      const catObj = findById(categories, payload.category);
+      if (catObj) {
+        // use readable name for the product.category field so UI/listing remains stable
+        payload.category = catObj.name;
+        // also keep id as categoryId in case server wants it
+        payload.categoryId = catObj.id;
+      }
+    }
 
     if (editId) {
       const updated = await updateProduct(editId, payload);
@@ -99,11 +125,40 @@ function ProductsPage() {
       setShowForm(false);
     }
 
-    setForm({ name: "", description: "", price: "", category: "", sku: "", brand: "", stock: "", specs: "", images: [] });
+    setForm({ name: "", description: "", price: "", category: "", sku: "", brand: "", stock: "", specs: "", specValues: {}, images: [] });
   };
 
   const handleEdit = (product) => {
     setEditId(product.id);
+    // try to map the stored product.category (name) to a category id if possible
+    const findCategoryByName = (nodes, name) => {
+      for (const n of nodes) {
+        if (!n) continue;
+        if (n.name === name) return n;
+        if (Array.isArray(n.subcategories)) {
+          const r = findCategoryByName(n.subcategories, name);
+          if (r) return r;
+        }
+      }
+      return null;
+    };
+
+    // prefill specValues from product.specs if present
+    let initialSpecValues = {};
+    if (product.specs) {
+      try {
+        const parsed = typeof product.specs === 'string' ? JSON.parse(product.specs) : product.specs;
+        if (parsed && typeof parsed === 'object') initialSpecValues = parsed;
+      } catch (err) {
+        // leave as empty
+      }
+    }
+
+    // determine category id if possible
+    let categoryValue = product.category || "";
+    const matched = findCategoryByName(categories, product.category);
+    if (matched && matched.id) categoryValue = matched.id;
+
     setForm({
       name: product.name || "",
       description: product.description || "",
@@ -112,11 +167,12 @@ function ProductsPage() {
       offerPrice: product.offerPrice ?? '',
       offerFrom: product.offerFrom ?? '',
       offerTo: product.offerTo ?? '',
-      category: product.category || "",
+      category: categoryValue,
       sku: product.sku || "",
       brand: product.brand || "",
       stock: product.stock ?? "",
-      specs: product.specs ? JSON.stringify(product.specs, null, 2) : "",
+      specs: product.specs ? (typeof product.specs === 'string' ? product.specs : JSON.stringify(product.specs, null, 2)) : "",
+      specValues: initialSpecValues,
       images: [],
     });
     setShowForm(true);
@@ -142,7 +198,8 @@ function ProductsPage() {
       brand: "",
       stock: "",
       specs: "",
-      image: null,
+      specValues: {},
+      images: [],
     });
     setShowForm(true);
   };
@@ -174,7 +231,7 @@ function ProductsPage() {
         <h2>Product Management</h2>
         <div style={{ display: 'flex', gap: 8 }}>
           <button onClick={handleStartAdd}>Add Product</button>
-          <button onClick={() => { setShowCategoriesPanel(s => !s); setAddForm({ name: '', description: '', imageFile: null, image: '', parentId: '' }); }}>{showCategoriesPanel ? 'Close Categories' : 'Manage Categories'}</button>
+          <button onClick={() => { setShowCategoriesPanel(s => !s); setAddForm({ name: '', description: '', imageFile: null, image: '', parentId: '', specs: '' }); }}>{showCategoriesPanel ? 'Close Categories' : 'Manage Categories'}</button>
         </div>
       </div>
 
@@ -184,7 +241,7 @@ function ProductsPage() {
           <div style={{ width: '90%', maxWidth: 800, background: '#fff', borderRadius: 8, padding: 18, boxShadow: '0 8px 24px rgba(0,0,0,0.2)', maxHeight: '90vh', overflow: 'auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
               <h3 style={{ margin: 0 }}>{editId ? 'Edit Product' : 'Add Product'}</h3>
-              <button onClick={() => { setShowForm(false); setEditId(null); setForm({ name: "", description: "", price: "", category: "", sku: "", brand: "", stock: "", specs: "", image: null }); }}>Close</button>
+              <button onClick={() => { setShowForm(false); setEditId(null); setForm({ name: "", description: "", price: "", salePrice: "", offerPrice: '', offerFrom: '', offerTo: '', category: "", sku: "", brand: "", stock: "", specs: "", specValues: {}, images: [] }); }}>Close</button>
             </div>
             <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 0, alignItems: 'start' }}>
               <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -224,13 +281,36 @@ function ProductsPage() {
 
               <div style={{ display: 'flex', flexDirection: 'column' }}>
                 <label style={{ fontWeight: 600, marginBottom: 6 }}>Category</label>
-                <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}>
+                <select value={form.category} onChange={(e) => {
+                  const val = e.target.value;
+                  // when category changes, if it has specs template, prepare specValues
+                  const findById = (nodes, id) => {
+                    for (const n of nodes) {
+                      if (!n) continue;
+                      if (String(n.id) === String(id)) return n;
+                      if (Array.isArray(n.subcategories)) {
+                        const r = findById(n.subcategories, id);
+                        if (r) return r;
+                      }
+                    }
+                    return null;
+                  };
+                  const catObj = findById(categories, val);
+                  console.debug('DEBUG: selected category object for id', val, catObj);
+                  if (catObj && Array.isArray(catObj.specs) && catObj.specs.length) {
+                    const sv = {};
+                    for (const s of catObj.specs) sv[s] = form.specValues && form.specValues[s] ? form.specValues[s] : '';
+                    setForm({ ...form, category: val, specValues: sv });
+                  } else {
+                    setForm({ ...form, category: val, specValues: {} });
+                  }
+                }}>
                   <option value="">— none —</option>
-                  {/** Render options recursively with indentation */}
+                  {/** Render options recursively with indentation; value is id now */}
                   {categories.map((cat) => {
                     const renderOptions = (node, prefix = '') => {
                       const opts = [];
-                      opts.push(<option key={node.id} value={node.name}>{prefix + node.name}</option>);
+                      opts.push(<option key={node.id} value={node.id}>{prefix + node.name}</option>);
                       if (Array.isArray(node.subcategories)) {
                         node.subcategories.forEach((child) => {
                           opts.push(...renderOptions(child, prefix + '-- '));
@@ -241,6 +321,37 @@ function ProductsPage() {
                     return renderOptions(cat);
                   })}
                 </select>
+                {/* If selected category has specs template, render inputs */}
+                {(() => {
+                  const findById = (nodes, id) => {
+                    for (const n of nodes) {
+                      if (!n) continue;
+                      if (String(n.id) === String(id)) return n;
+                      if (Array.isArray(n.subcategories)) {
+                        const r = findById(n.subcategories, id);
+                        if (r) return r;
+                      }
+                    }
+                    return null;
+                  };
+                  const selectedCat = form.category ? findById(categories, form.category) : null;
+                  if (selectedCat && Array.isArray(selectedCat.specs) && selectedCat.specs.length) {
+                    return (
+                      <div style={{ marginTop: 8 }}>
+                        <div style={{ fontWeight: 700, marginBottom: 6 }}>Specifications for {selectedCat.name}</div>
+                        <div style={{ display: 'grid', gap: 8 }}>
+                          {selectedCat.specs.map((s) => (
+                            <div key={s} style={{ display: 'flex', flexDirection: 'column' }}>
+                              <label style={{ fontSize: 13, fontWeight: 600 }}>{s}</label>
+                              <input value={form.specValues?.[s] ?? ''} onChange={(e) => setForm({ ...form, specValues: { ...(form.specValues || {}), [s]: e.target.value } })} />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  }
+                  return null;
+                })()}
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -280,7 +391,7 @@ function ProductsPage() {
 
               <div style={{ gridColumn: '1 / -1', display: 'flex', gap: 8 }}>
                 <button type="submit">{editId ? "Update Product" : "Add Product"}</button>
-                <button type="button" onClick={() => { setShowForm(false); setEditId(null); setForm({ name: "", description: "", price: "", category: "", sku: "", brand: "", stock: "", specs: "", image: null }); }}>Cancel</button>
+                <button type="button" onClick={() => { setShowForm(false); setEditId(null); setForm({ name: "", description: "", price: "", salePrice: "", offerPrice: '', offerFrom: '', offerTo: '', category: "", sku: "", brand: "", stock: "", specs: "", specValues: {}, images: [] }); }}>Cancel</button>
               </div>
             </form>
           </div>
@@ -317,7 +428,7 @@ function ProductsPage() {
           searchDebounce.current = setTimeout(() => {
             loadProducts({ category: filterCategory, q: val });
           }, 350);
-        }} style={{ flex: 1, padding: 8 }} />
+        }} style={{ width: 320, maxWidth: '40%', padding: 8 }} />
         <button onClick={async () => { setFilterCategory(''); setSearchQ(''); await loadProducts({}); }}>Clear</button>
       </div>
       <div style={{ background: '#fff', border: '1px solid #eee', borderRadius: 8 }} className="table-responsive">
@@ -381,8 +492,12 @@ function ProductsPage() {
                 <td style={{ padding: 12, verticalAlign: 'top', whiteSpace: 'normal', wordBreak: 'break-word' }}>{renderSpecs(p.specs)}</td>
                 <td style={{ padding: 12, verticalAlign: 'top' }}>
                   <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                      <button onClick={async () => { try { const info = priceInfo(p); const priceToUse = info.display; await addItem({ id: p.id, name: p.name, price: priceToUse, image: p.image, sku: p.sku }, 1); window.alert('Added to cart'); } catch (err) { console.error(err); alert('Failed to add to cart'); } }}>🛒 Add to Cart</button>
-                      <button onClick={async () => { try { const info = priceInfo(p); const priceToUse = info.display; await addItem({ id: p.id, name: p.name, price: priceToUse, image: p.image, sku: p.sku }, 1); window.location.href = '/cart'; } catch (err) { console.error(err); alert('Failed to add to cart'); } }} style={{ background: '#0b79d0', color: '#fff' }}>💳 Buy Now</button>
+                      {!hidePurchaseActions && (
+                        <>
+                          <button onClick={async () => { try { const info = priceInfo(p); const priceToUse = info.display; await addItem({ id: p.id, name: p.name, price: priceToUse, image: p.image, sku: p.sku }, 1); window.alert('Added to cart'); } catch (err) { console.error(err); alert('Failed to add to cart'); } }}>🛒 Add to Cart</button>
+                          <button onClick={async () => { try { const info = priceInfo(p); const priceToUse = info.display; await addItem({ id: p.id, name: p.name, price: priceToUse, image: p.image, sku: p.sku }, 1); window.location.href = '/cart'; } catch (err) { console.error(err); alert('Failed to add to cart'); } }} style={{ background: '#0b79d0', color: '#fff' }}>💳 Buy Now</button>
+                        </>
+                      )}
                       <button onClick={() => handleEdit(p)}>✏️ Edit</button>
                       <button onClick={() => handleDelete(p.id)} style={{ color: 'red' }}>🗑️ Delete</button>
                     </div>
@@ -419,7 +534,7 @@ function ProductsPage() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
               <h3 style={{ margin: 0 }}>Manage Categories</h3>
               <div style={{ display: 'flex', gap: 8 }}>
-                <button onClick={() => { setShowCategoriesPanel(false); setCatForm({ id: null, name: '', description: '', imageFile: null, image: '', parentId: '' }); setAddForm({ name: '', description: '', imageFile: null, image: '', parentId: '' }); }}>Close</button>
+                <button onClick={() => { setShowCategoriesPanel(false); setCatForm({ id: null, name: '', description: '', imageFile: null, image: '', parentId: '', specs: '' }); setAddForm({ name: '', description: '', imageFile: null, image: '', parentId: '', specs: '' }); }}>Close</button>
               </div>
             </div>
 
@@ -432,14 +547,17 @@ function ProductsPage() {
                   const fd = new FormData();
                   fd.append('name', addForm.name);
                   fd.append('description', addForm.description);
+                  if (addForm.specs) fd.append('specs', addForm.specs);
                   if (addForm.imageFile) fd.append('image', addForm.imageFile);
                   if (addForm.parentId) fd.append('parentId', addForm.parentId);
                   await addCategory(fd);
                   setCategories(await getCategories());
-                  setAddForm({ name: '', description: '', imageFile: null, image: '', parentId: '' });
+                  setAddForm({ name: '', description: '', imageFile: null, image: '', parentId: '', specs: '' });
                 }} style={{ display: 'grid', gap: 8 }}>
                   <input placeholder="Name" value={addForm.name} required onChange={(e) => setAddForm({ ...addForm, name: e.target.value })} />
                   <textarea placeholder="Description" value={addForm.description} onChange={(e) => setAddForm({ ...addForm, description: e.target.value })} rows={3} />
+                  <label style={{ fontSize: 13, color: '#444' }}>Specs template (one per line, optional)</label>
+                  <textarea placeholder={"Dalja e ajrit\nFrekuenca\n..."} value={addForm.specs} onChange={(e) => setAddForm({ ...addForm, specs: e.target.value })} rows={4} />
                   <label style={{ fontSize: 13, color: '#444' }}>Parent category (optional)</label>
                   <select value={addForm.parentId || ''} onChange={(e) => setAddForm({ ...addForm, parentId: e.target.value || '' })}>
                     <option value="">— none —</option>
@@ -460,7 +578,7 @@ function ProductsPage() {
                   <input type="file" accept="image/*" onChange={(e) => setAddForm({ ...addForm, imageFile: e.target.files?.[0] || null })} />
                   <div style={{ display: 'flex', gap: 8 }}>
                     <button type="submit">Save</button>
-                    <button type="button" onClick={() => setAddForm({ name: '', description: '', imageFile: null, image: '', parentId: '' })}>Reset</button>
+                    <button type="button" onClick={() => setAddForm({ name: '', description: '', imageFile: null, image: '', parentId: '', specs: '' })}>Reset</button>
                   </div>
                 </form>
               </div>
@@ -478,6 +596,7 @@ function ProductsPage() {
                           const fd = new FormData();
                           fd.append('name', catForm.name);
                           fd.append('description', catForm.description);
+                          if (catForm.specs) fd.append('specs', catForm.specs);
                           if (catForm.imageFile) fd.append('image', catForm.imageFile);
                           if (catForm.parentId) fd.append('parentId', catForm.parentId);
                           if (catForm.id) {
@@ -486,10 +605,12 @@ function ProductsPage() {
                             await addCategory(fd);
                           }
                           setCategories(await getCategories());
-                          setCatForm({ id: null, name: '', description: '', imageFile: null, image: '', parentId: '' });
+                          setCatForm({ id: null, name: '', description: '', imageFile: null, image: '', parentId: '', specs: '' });
                         }} style={{ display: 'grid', gap: 8 }}>
                           <input placeholder="Name" value={catForm.name} required onChange={(e) => setCatForm({ ...catForm, name: e.target.value })} />
                           <textarea placeholder="Description" value={catForm.description} onChange={(e) => setCatForm({ ...catForm, description: e.target.value })} rows={3} />
+                          <label style={{ fontSize: 13, color: '#444' }}>Specs template (one per line, optional)</label>
+                          <textarea placeholder={"Dalja e ajrit\nFrekuenca\n..."} value={catForm.specs || ''} onChange={(e) => setCatForm({ ...catForm, specs: e.target.value })} rows={4} />
                           <label style={{ fontSize: 13, color: '#444' }}>Parent category (optional)</label>
                           <select value={catForm.parentId || ''} onChange={(e) => setCatForm({ ...catForm, parentId: e.target.value || '' })}>
                             <option value="">— none —</option>
@@ -528,8 +649,8 @@ function ProductsPage() {
                           <div style={{ fontWeight: 700 }}>{node.name}</div>
                           <div style={{ color: '#666' }}>{node.description}</div>
                         </div>
-                        <div style={{ display: 'flex', gap: 8 }}>
-                          <button onClick={() => setCatForm({ id: node.id, name: node.name || '', description: node.description || '', imageFile: null, image: node.image || '', parentId: node.parentId || '' })}>Edit</button>
+                          <div style={{ display: 'flex', gap: 8 }}>
+                          <button onClick={() => setCatForm({ id: node.id, name: node.name || '', description: node.description || '', imageFile: null, image: node.image || '', parentId: node.parentId || '', specs: Array.isArray(node.specs) ? node.specs.join('\n') : (node.specs || '') })}>Edit</button>
                           <button onClick={async () => { if (!window.confirm('Delete this category?')) return; await deleteCategory(node.id); setCategories(await getCategories()); }} style={{ color: 'red' }}>Delete</button>
                         </div>
                       </div>

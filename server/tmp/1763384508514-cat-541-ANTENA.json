@@ -1,0 +1,16 @@
+{
+  "before": {
+    "id": 541,
+    "name": "ANTENA",
+    "description": null,
+    "image": null,
+    "parentId": 536,
+    "specs": null,
+    "createdAt": "2025-11-12T10:52:32.159Z",
+    "updatedAt": "2025-11-12T10:52:32.159Z"
+  },
+  "specsFromCsv": [
+    "Gama maksimale",
+    "Numri I kanaleve"
+  ]
+}

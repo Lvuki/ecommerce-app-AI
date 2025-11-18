@@ -1,0 +1,25 @@
+{
+  "before": {
+    "id": 627,
+    "name": "PJASTER FLOKESH",
+    "description": null,
+    "image": null,
+    "parentId": 617,
+    "specs": null,
+    "createdAt": "2025-11-12T13:36:28.580Z",
+    "updatedAt": "2025-11-12T13:36:28.580Z"
+  },
+  "specsFromCsv": [
+    "Fikje automatike",
+    "Funksioni",
+    "Gjatesia e kabullit",
+    "Hapja & mbyllja",
+    "Materiali pllakes",
+    "Nivele Nxehtesie",
+    "Nxehje e shpejte",
+    "Perdorimi",
+    "Sistem Jonizimi",
+    "Teknologjia",
+    "Temperatura max"
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "before": {
+    "id": 598,
+    "name": "NETWORK",
+    "description": null,
+    "image": null,
+    "parentId": 590,
+    "specs": null,
+    "createdAt": "2025-11-12T13:30:46.286Z",
+    "updatedAt": "2025-11-12T13:30:46.286Z"
+  },
+  "specsFromCsv": [
+    "Butona",
+    "Dimensionet",
+    "Distanca",
+    "EAN CODE",
+    "Ekstra",
+    "Enkriptimi WiFi",
+    "Interface",
+    "Kapaciteti WiFi",
+    "Modaliteti",
+    "Ngjyra",
+    "Numer porta Ethernet",
+    "Numri I portave Ethernet",
+    "Pesha (kg)",
+    "Porta LAN",
+    "Porta WAN",
+    "Protokolli",
+    "Shpejtesia e leximit",
+    "Shpejtesia WiFi",
+    "Siguria e rrjetit",
+    "Sinjali",
+    "Standardi"
+  ]
+}

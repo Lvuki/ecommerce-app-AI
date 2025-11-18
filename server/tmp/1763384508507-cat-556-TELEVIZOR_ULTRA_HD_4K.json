@@ -1,0 +1,37 @@
+{
+  "before": {
+    "id": 556,
+    "name": "TELEVIZOR ULTRA HD 4K",
+    "description": null,
+    "image": null,
+    "parentId": 540,
+    "specs": null,
+    "createdAt": "2025-11-12T10:52:32.263Z",
+    "updatedAt": "2025-11-12T10:52:32.263Z"
+  },
+  "specsFromCsv": [
+    "Ambilight",
+    "Android TV",
+    "Bluetooth",
+    "Ethernet",
+    "Frekuenca",
+    "HDMI",
+    "Kontrasti",
+    "Madhesia e Ekranit",
+    "Permasat (gjxgjxl)",
+    "Pesha (kg)",
+    "Procesor",
+    "Rezolucioni",
+    "Seria",
+    "Sistem Audio",
+    "Sistemi Operativ",
+    "Smart TV",
+    "Tipi i Panelit",
+    "TV Turner",
+    "USB",
+    "USB 2.0",
+    "USB 3.0",
+    "Viti I modelit",
+    "Wireless"
+  ]
+}

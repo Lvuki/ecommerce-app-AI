@@ -1,0 +1,24 @@
+{
+  "before": {
+    "id": 625,
+    "name": "MASHE FLOKESH",
+    "description": null,
+    "image": null,
+    "parentId": 617,
+    "specs": null,
+    "createdAt": "2025-11-12T13:36:28.568Z",
+    "updatedAt": "2025-11-12T13:36:28.568Z"
+  },
+  "specsFromCsv": [
+    "Aksesore te perfshire",
+    "Diametri",
+    "Fikje automatike",
+    "Funksioni",
+    "Gjatesia e kabullit",
+    "Materiali pllakes",
+    "Nivele Nxehtesie",
+    "Nxehje e shpejte",
+    "Perdorimi",
+    "Temperatura max"
+  ]
+}

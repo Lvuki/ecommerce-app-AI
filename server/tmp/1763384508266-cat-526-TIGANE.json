@@ -1,0 +1,25 @@
+{
+  "before": {
+    "id": 526,
+    "name": "TIGANE",
+    "description": null,
+    "image": null,
+    "parentId": 499,
+    "specs": null,
+    "createdAt": "2025-11-12T10:31:59.924Z",
+    "updatedAt": "2025-11-12T10:31:59.924Z"
+  },
+  "specsFromCsv": [
+    "Dimensionet",
+    "Doreze",
+    "Funksioni",
+    "Kapaciteti",
+    "Kapak",
+    "Materiali",
+    "Pajtueshmeria",
+    "Perdorimi",
+    "Set",
+    "Te sigurta ne lavastovilje",
+    "Veshje jo ngjitese"
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "before": {
+    "id": 662,
+    "name": "APARAT PLAYSTATION",
+    "description": null,
+    "image": null,
+    "parentId": 655,
+    "specs": null,
+    "createdAt": "2025-11-12T13:53:43.109Z",
+    "updatedAt": "2025-11-12T13:53:43.109Z"
+  },
+  "specsFromCsv": [
+    "Audio",
+    "Dimensione",
+    "Display",
+    "Ekrani",
+    "Ekstra",
+    "Kamera",
+    "Karta Grafike",
+    "Kendi I shikimit",
+    "Lidhja",
+    "Lidhje",
+    "Linja",
+    "Mikrofon",
+    "Ngjyra",
+    "Pesha",
+    "Porta",
+    "Procesori",
+    "RAM",
+    "Rezolucioni",
+    "Rifreskimi",
+    "Sensore",
+    "SSD",
+    "Versioni"
+  ]
+}

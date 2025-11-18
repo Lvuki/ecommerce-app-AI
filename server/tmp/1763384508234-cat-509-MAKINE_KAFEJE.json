@@ -1,0 +1,25 @@
+{
+  "before": {
+    "id": 509,
+    "name": "MAKINE KAFEJE",
+    "description": null,
+    "image": null,
+    "parentId": 497,
+    "specs": null,
+    "createdAt": "2025-11-12T10:31:59.811Z",
+    "updatedAt": "2025-11-12T10:31:59.811Z"
+  },
+  "specsFromCsv": [
+    "Ekran",
+    "Fikje automatike",
+    "Filter",
+    "Funksioni",
+    "Fuqia",
+    "Kapaciteti enes",
+    "Kontrolli",
+    "Materiali enes",
+    "Numri I filxhaneve",
+    "Ruajtja e nxehtesise",
+    "Tregues I nivelit ujit"
+  ]
+}

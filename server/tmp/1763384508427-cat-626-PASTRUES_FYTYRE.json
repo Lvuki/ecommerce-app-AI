@@ -1,0 +1,18 @@
+{
+  "before": {
+    "id": 626,
+    "name": "PASTRUES FYTYRE",
+    "description": null,
+    "image": null,
+    "parentId": 617,
+    "specs": null,
+    "createdAt": "2025-11-12T13:36:28.574Z",
+    "updatedAt": "2025-11-12T13:36:28.574Z"
+  },
+  "specsFromCsv": [
+    "Aksesore te perfshire",
+    "Bateri",
+    "Funksioni",
+    "Perdorimi"
+  ]
+}

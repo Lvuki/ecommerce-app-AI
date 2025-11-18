@@ -1,0 +1,17 @@
+{
+  "before": {
+    "id": 523,
+    "name": "CAJNIK",
+    "description": null,
+    "image": null,
+    "parentId": 499,
+    "specs": null,
+    "createdAt": "2025-11-12T10:31:59.907Z",
+    "updatedAt": "2025-11-12T10:31:59.907Z"
+  },
+  "specsFromCsv": [
+    "Kapaciteti",
+    "Materiali",
+    "Perdorimi"
+  ]
+}

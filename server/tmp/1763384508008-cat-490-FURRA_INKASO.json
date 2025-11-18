@@ -1,0 +1,37 @@
+{
+  "before": {
+    "id": 490,
+    "name": "FURRA INKASO",
+    "description": null,
+    "image": null,
+    "parentId": 463,
+    "specs": null,
+    "createdAt": "2025-11-12T10:24:04.842Z",
+    "updatedAt": "2025-11-12T10:24:04.842Z"
+  },
+  "specsFromCsv": [
+    "Aksesore",
+    "Ekran",
+    "Frekuenca",
+    "Gatim me avull",
+    "Instalimi",
+    "Klasa e Energjise",
+    "Materiali",
+    "Ngarkesa Elektrike",
+    "Ngjyra",
+    "Niveli I Temperatures",
+    "Niveli i zhurmes",
+    "Numri I Programeve",
+    "Numri i xhamave",
+    "Paneli i kontrollit",
+    "Permasat (GJxLxTh)",
+    "Programe automatike",
+    "Rezolucion Ekrani",
+    "Sensor lageshtie",
+    "Sensor Peshe",
+    "Shina teleskopike",
+    "Sistem vetpastrimi",
+    "Volumi i furres",
+    "Wifi"
+  ]
+}

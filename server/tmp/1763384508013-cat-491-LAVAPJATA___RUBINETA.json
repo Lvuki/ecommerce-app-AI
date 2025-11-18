@@ -1,0 +1,25 @@
+{
+  "before": {
+    "id": 491,
+    "name": "LAVAPJATA & RUBINETA",
+    "description": null,
+    "image": null,
+    "parentId": 463,
+    "specs": null,
+    "createdAt": "2025-11-12T10:24:04.854Z",
+    "updatedAt": "2025-11-12T10:24:04.854Z"
+  },
+  "specsFromCsv": [
+    "Aksesore",
+    "Kompozimi",
+    "Linja",
+    "Materiali",
+    "Menyra instalimit",
+    "Ngjyra",
+    "Numri I gropave",
+    "Permasat (GjxGj)",
+    "Permasat (GjxL)",
+    "Permasat per montim",
+    "Sheshpushim"
+  ]
+}

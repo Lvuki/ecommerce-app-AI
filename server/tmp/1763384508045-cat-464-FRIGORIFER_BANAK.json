@@ -1,0 +1,34 @@
+{
+  "before": {
+    "id": 464,
+    "name": "FRIGORIFER BANAK",
+    "description": "",
+    "image": null,
+    "parentId": 455,
+    "specs": null,
+    "createdAt": "2025-11-12T10:11:08.783Z",
+    "updatedAt": "2025-11-17T09:39:47.707Z"
+  },
+  "specsFromCsv": [
+    "Aksesore",
+    "Alarm",
+    "Frekuenca",
+    "Instalimi",
+    "Kapaciteti i ngriresit",
+    "Kapaciteti total",
+    "Klasa e Energjise",
+    "Kompresor inverter",
+    "Konsumi i Energjise",
+    "Kontrolli",
+    "Materiali deres",
+    "Ngjyra",
+    "Niveli i zhurmes",
+    "Numri i kompresoreve",
+    "Permasat (LxGJxTH)",
+    "Pesha neto",
+    "Raft per shishe",
+    "Rezolucion Ekrani",
+    "Sistemi i Ngrirjes",
+    "Temperatura"
+  ]
+}

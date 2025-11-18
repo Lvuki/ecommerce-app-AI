@@ -1,0 +1,43 @@
+{
+  "before": {
+    "id": 616,
+    "name": "TABLET",
+    "description": null,
+    "image": null,
+    "parentId": 597,
+    "specs": null,
+    "createdAt": "2025-11-12T13:30:46.391Z",
+    "updatedAt": "2025-11-12T13:30:46.391Z"
+  },
+  "specsFromCsv": [
+    "Aksesore Shtese",
+    "Bateri",
+    "Dual SIM",
+    "EAN CODE",
+    "Ekran me prekje",
+    "Ekstra",
+    "Emri Universal",
+    "Kamera",
+    "Kamera Sekondare",
+    "Karte Memorje",
+    "Karte SIM",
+    "Kompatibel",
+    "Kontrasti",
+    "Lidhjet",
+    "Linja",
+    "Madhesia e Ekranit",
+    "Memorje",
+    "Model SIM",
+    "Ngjyra",
+    "Permasat",
+    "Pesha (kg)",
+    "Portat",
+    "Procesor",
+    "RAM",
+    "Rezolucion Ekrani",
+    "Rrjeti",
+    "Sensor",
+    "Sistemi Operativ",
+    "Teknologjia e Ekranit"
+  ]
+}

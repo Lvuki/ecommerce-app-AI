@@ -1,0 +1,17 @@
+{
+  "before": {
+    "id": 476,
+    "name": "AKSESORE LAVASTOVILJE",
+    "description": null,
+    "image": null,
+    "parentId": 457,
+    "specs": null,
+    "createdAt": "2025-11-12T10:24:04.746Z",
+    "updatedAt": "2025-11-12T10:24:04.746Z"
+  },
+  "specsFromCsv": [
+    "Funksioni",
+    "Materiali",
+    "Permasat"
+  ]
+}

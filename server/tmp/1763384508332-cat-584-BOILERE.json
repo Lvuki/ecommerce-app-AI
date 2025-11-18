@@ -1,0 +1,39 @@
+{
+  "before": {
+    "id": 584,
+    "name": "BOILERE",
+    "description": null,
+    "image": null,
+    "parentId": 560,
+    "specs": null,
+    "createdAt": "2025-11-12T13:24:52.711Z",
+    "updatedAt": "2025-11-12T13:24:52.711Z"
+  },
+  "specsFromCsv": [
+    "Display",
+    "Fikje automatike",
+    "Fuqia e ngrohesit elektrik",
+    "Izolim termik",
+    "Kapaciteti",
+    "Kazan",
+    "Klasa e Energjise",
+    "Koha e ngrohjes se ujit",
+    "Kontrolli",
+    "Lidhje me WIFI",
+    "Lloji I kazanit",
+    "Materiali I brendshem I depozites",
+    "Materiali I rezervuarit",
+    "Materiali Kazanit",
+    "Montimi",
+    "Ngjyra",
+    "Nr I rezervuarit",
+    "Numri I rezistencave",
+    "Permasat",
+    "Pesha e produktit te paketuar",
+    "Presioni I ujit",
+    "Temperatura max",
+    "Tensioni I punes",
+    "Termostat",
+    "Valvul Sigurie"
+  ]
+}

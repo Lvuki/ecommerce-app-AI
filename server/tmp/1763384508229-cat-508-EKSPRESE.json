@@ -1,0 +1,30 @@
+{
+  "before": {
+    "id": 508,
+    "name": "EKSPRESE",
+    "description": null,
+    "image": null,
+    "parentId": 497,
+    "specs": null,
+    "createdAt": "2025-11-12T10:31:59.805Z",
+    "updatedAt": "2025-11-12T10:31:59.805Z"
+  },
+  "specsFromCsv": [
+    "Depozita e ujit",
+    "Ekran",
+    "Fuqia",
+    "Kapaciteti I kontenierit",
+    "Kontrolli",
+    "Ngrohje filxhanesh",
+    "Nivele bluarje",
+    "Nr. kafe njekohesisht",
+    "Perdorimi",
+    "Presioni pompes",
+    "Programe automatike",
+    "Sistem kapuchino",
+    "Sistem vetfikje",
+    "Sistem vetpastrimi",
+    "Site/Luge",
+    "Teknologjia"
+  ]
+}

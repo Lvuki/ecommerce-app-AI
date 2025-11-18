@@ -1,0 +1,24 @@
+{
+  "before": {
+    "id": 589,
+    "name": "SHTUES LAGESHTIE",
+    "description": null,
+    "image": null,
+    "parentId": 561,
+    "specs": null,
+    "createdAt": "2025-11-12T13:24:52.751Z",
+    "updatedAt": "2025-11-12T13:24:52.751Z"
+  },
+  "specsFromCsv": [
+    "Aplikacion",
+    "Aromatizues",
+    "Ekran",
+    "Fuqia",
+    "Kapaciteti depozites",
+    "Niveli i zhurmes",
+    "Rregullator lageshtie",
+    "Siperfaqja qe mbulon",
+    "Sistem vetfikje",
+    "Vellimi I ajrit (m³/H)"
+  ]
+}

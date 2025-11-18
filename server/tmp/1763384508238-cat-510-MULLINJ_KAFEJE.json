@@ -1,0 +1,20 @@
+{
+  "before": {
+    "id": 510,
+    "name": "MULLINJ KAFEJE",
+    "description": null,
+    "image": null,
+    "parentId": 497,
+    "specs": null,
+    "createdAt": "2025-11-12T10:31:59.818Z",
+    "updatedAt": "2025-11-12T10:31:59.818Z"
+  },
+  "specsFromCsv": [
+    "Aksesore te perfshire",
+    "Ekran",
+    "Funksioni",
+    "Fuqia",
+    "Kapaciteti",
+    "Nivele bluarje"
+  ]
+}

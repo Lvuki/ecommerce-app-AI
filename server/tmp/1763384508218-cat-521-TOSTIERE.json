@@ -1,0 +1,22 @@
+{
+  "before": {
+    "id": 521,
+    "name": "TOSTIERE",
+    "description": null,
+    "image": null,
+    "parentId": 498,
+    "specs": null,
+    "createdAt": "2025-11-12T10:31:59.893Z",
+    "updatedAt": "2025-11-12T10:31:59.893Z"
+  },
+  "specsFromCsv": [
+    "Celes Mbylles",
+    "Drite treguese",
+    "Funksioni",
+    "Fuqia",
+    "Kapaciteti",
+    "Numri I Pllakave",
+    "Pllaka te levizshme",
+    "Te sigurta ne lavastovilje"
+  ]
+}

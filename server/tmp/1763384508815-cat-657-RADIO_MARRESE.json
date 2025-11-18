@@ -1,0 +1,28 @@
+{
+  "before": {
+    "id": 657,
+    "name": "RADIO MARRESE",
+    "description": null,
+    "image": null,
+    "parentId": 653,
+    "specs": null,
+    "createdAt": "2025-11-12T13:53:43.075Z",
+    "updatedAt": "2025-11-12T13:53:43.075Z"
+  },
+  "specsFromCsv": [
+    "Buton Emergjence",
+    "Dimensionet",
+    "Distanca e transmetimit",
+    "EAN CODE",
+    "Ekstra",
+    "Elektrik",
+    "Frekuenca",
+    "Kodet e privatesise",
+    "Numri I kanaleve",
+    "Pesha (kg)",
+    "Porta",
+    "Rezistenca ndaj ujit",
+    "Tonet e zileve",
+    "Voltazhi"
+  ]
+}

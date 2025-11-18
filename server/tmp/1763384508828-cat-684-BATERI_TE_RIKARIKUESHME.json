@@ -1,0 +1,19 @@
+{
+  "before": {
+    "id": 684,
+    "name": "BATERI TE RIKARIKUESHME",
+    "description": null,
+    "image": null,
+    "parentId": 680,
+    "specs": null,
+    "createdAt": "2025-11-12T14:03:48.216Z",
+    "updatedAt": "2025-11-12T14:03:48.216Z"
+  },
+  "specsFromCsv": [
+    "Kapaciteti (mAh)",
+    "Lloji",
+    "Paketimi (cope)",
+    "Rikarikueshme",
+    "Tensioni (v)"
+  ]
+}

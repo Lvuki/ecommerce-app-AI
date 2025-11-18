@@ -1,0 +1,25 @@
+{
+  "before": {
+    "id": 659,
+    "name": "AKSESORE",
+    "description": null,
+    "image": null,
+    "parentId": 655,
+    "specs": null,
+    "createdAt": "2025-11-12T13:53:43.089Z",
+    "updatedAt": "2025-11-12T13:53:43.089Z"
+  },
+  "specsFromCsv": [
+    "Bateri",
+    "Dimensionet",
+    "Ekstra",
+    "Haptic",
+    "Lidhja",
+    "Ngjyra",
+    "Pajisjet e perputhshme",
+    "Permasat",
+    "Platforma e harduerit",
+    "Rezolucioni",
+    "Teknologjia e lidhjes"
+  ]
+}

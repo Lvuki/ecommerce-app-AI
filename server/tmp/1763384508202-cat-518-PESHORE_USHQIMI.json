@@ -1,0 +1,21 @@
+{
+  "before": {
+    "id": 518,
+    "name": "PESHORE USHQIMI",
+    "description": null,
+    "image": null,
+    "parentId": 498,
+    "specs": null,
+    "createdAt": "2025-11-12T10:31:59.872Z",
+    "updatedAt": "2025-11-12T10:31:59.872Z"
+  },
+  "specsFromCsv": [
+    "Ekran",
+    "Fikje automatike",
+    "Funksioni",
+    "Kapaciteti",
+    "Lloji I Baterise",
+    "Materiali",
+    "Ngjyra"
+  ]
+}

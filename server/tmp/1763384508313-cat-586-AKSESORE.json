@@ -1,0 +1,17 @@
+{
+  "before": {
+    "id": 586,
+    "name": "AKSESORE",
+    "description": null,
+    "image": null,
+    "parentId": 561,
+    "specs": null,
+    "createdAt": "2025-11-12T13:24:52.727Z",
+    "updatedAt": "2025-11-12T13:24:52.727Z"
+  },
+  "specsFromCsv": [
+    "Funksioni",
+    "Materiali",
+    "Pershtatshmeria"
+  ]
+}

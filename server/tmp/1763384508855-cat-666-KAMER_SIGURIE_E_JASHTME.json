@@ -1,0 +1,20 @@
+{
+  "before": {
+    "id": 666,
+    "name": "KAMER SIGURIE E JASHTME",
+    "description": null,
+    "image": null,
+    "parentId": 664,
+    "specs": null,
+    "createdAt": "2025-11-12T13:56:51.215Z",
+    "updatedAt": "2025-11-12T13:56:51.215Z"
+  },
+  "specsFromCsv": [
+    "Dimensionet",
+    "DISTANCA SHIKIMIT",
+    "HAPESIRA RUAJTESE(SD)",
+    "Kendi shikimit",
+    "KENDI SHTRIRJES (H-V)",
+    "Rezolucioni"
+  ]
+}

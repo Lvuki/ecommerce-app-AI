@@ -1,0 +1,18 @@
+{
+  "before": {
+    "id": 688,
+    "name": "LLAMPA EKOLOGJIKE SET",
+    "description": null,
+    "image": null,
+    "parentId": 681,
+    "specs": null,
+    "createdAt": "2025-11-12T14:03:48.241Z",
+    "updatedAt": "2025-11-12T14:03:48.241Z"
+  },
+  "specsFromCsv": [
+    "Fuqia (w)",
+    "Kendi i ndriçimit",
+    "Permasat (gj x d)",
+    "Tensioni"
+  ]
+}

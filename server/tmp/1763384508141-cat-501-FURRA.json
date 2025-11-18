@@ -1,0 +1,25 @@
+{
+  "before": {
+    "id": 501,
+    "name": "FURRA",
+    "description": null,
+    "image": null,
+    "parentId": 496,
+    "specs": null,
+    "createdAt": "2025-11-12T10:31:59.756Z",
+    "updatedAt": "2025-11-12T10:31:59.756Z"
+  },
+  "specsFromCsv": [
+    "Aksesore te perfshire",
+    "Fikje automatike",
+    "Funksioni",
+    "Fuqia",
+    "Kapaciteti",
+    "Kohemates",
+    "Numri I Programeve",
+    "Panel Kontrolli",
+    "Permasat LxGJxTH(cm)",
+    "Pllaka ngrohje siper",
+    "Temperatura max"
+  ]
+}

@@ -40,7 +40,12 @@ export async function addProduct(productData) {
       for (const f of value) form.append('images', f);
       return;
     }
-    form.append(key, value);
+    // If it's a plain object (e.g., specs), stringify it
+    if (typeof value === 'object' && !(value instanceof File)) {
+      form.append(key, JSON.stringify(value));
+    } else {
+      form.append(key, value);
+    }
   });
   const res = await fetch(`${API_BASE_URL}/products`, {
     method: "POST",
@@ -61,7 +66,11 @@ export async function updateProduct(id, productData) {
       for (const f of value) form.append('images', f);
       return;
     }
-    form.append(key, value);
+    if (typeof value === 'object' && !(value instanceof File)) {
+      form.append(key, JSON.stringify(value));
+    } else {
+      form.append(key, value);
+    }
   });
   const res = await fetch(`${API_BASE_URL}/products/${id}`, {
     method: "PUT",

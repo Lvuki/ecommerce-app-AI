@@ -1,0 +1,19 @@
+{
+  "before": {
+    "id": 543,
+    "name": "MINI HI-FI",
+    "description": null,
+    "image": null,
+    "parentId": 537,
+    "specs": null,
+    "createdAt": "2025-11-12T10:52:32.173Z",
+    "updatedAt": "2025-11-12T10:52:32.173Z"
+  },
+  "specsFromCsv": [
+    "Bluetooth",
+    "CD",
+    "Fuqia",
+    "MP3",
+    "Radio"
+  ]
+}

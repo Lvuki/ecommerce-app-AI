@@ -1,0 +1,20 @@
+{
+  "before": {
+    "id": 473,
+    "name": "AKSESORE LAVATRICE",
+    "description": null,
+    "image": null,
+    "parentId": 456,
+    "specs": null,
+    "createdAt": "2025-11-12T10:24:04.709Z",
+    "updatedAt": "2025-11-12T10:24:04.709Z"
+  },
+  "specsFromCsv": [
+    "Funksioni",
+    "Instalimi",
+    "Materiali",
+    "Ngjyra",
+    "Permasat",
+    "Sasia"
+  ]
+}

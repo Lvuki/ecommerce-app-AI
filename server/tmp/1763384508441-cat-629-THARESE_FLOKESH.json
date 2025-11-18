@@ -1,0 +1,25 @@
+{
+  "before": {
+    "id": 629,
+    "name": "THARESE FLOKESH",
+    "description": null,
+    "image": null,
+    "parentId": 617,
+    "specs": null,
+    "createdAt": "2025-11-12T13:36:28.592Z",
+    "updatedAt": "2025-11-12T13:36:28.592Z"
+  },
+  "specsFromCsv": [
+    "Ajer I ftohte",
+    "Aksesore te perfshire",
+    "Doreze e palosshme",
+    "Funksioni",
+    "Fuqia",
+    "Gjatesia e kabullit",
+    "Nivele Shpejtesie",
+    "Nivele temperature",
+    "Perdorimi",
+    "Sistem Jonizimi",
+    "Teknologjia"
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "before": {
+    "id": 553,
+    "name": "TELEVIZOR OLED",
+    "description": null,
+    "image": null,
+    "parentId": 540,
+    "specs": null,
+    "createdAt": "2025-11-12T10:52:32.242Z",
+    "updatedAt": "2025-11-12T10:52:32.242Z"
+  },
+  "specsFromCsv": [
+    "Ambilight",
+    "Android TV",
+    "Bluetooth",
+    "Ethernet",
+    "Frekuenca",
+    "HDMI",
+    "Kontrasti",
+    "Madhesia e Ekranit",
+    "Permasat (gjxgjxl)",
+    "Pesha (kg)",
+    "Procesor",
+    "Rezolucioni",
+    "Seria",
+    "Sistem Audio",
+    "Sistemi Operativ",
+    "Smart TV",
+    "Tipi i Panelit",
+    "TV Turner",
+    "USB",
+    "USB 2.0",
+    "USB 3.0",
+    "Viti I modelit",
+    "Wireless"
+  ]
+}

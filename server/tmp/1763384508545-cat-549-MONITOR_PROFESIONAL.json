@@ -1,0 +1,36 @@
+{
+  "before": {
+    "id": 549,
+    "name": "MONITOR PROFESIONAL",
+    "description": null,
+    "image": null,
+    "parentId": 539,
+    "specs": null,
+    "createdAt": "2025-11-12T10:52:32.214Z",
+    "updatedAt": "2025-11-12T10:52:32.214Z"
+  },
+  "specsFromCsv": [
+    "Bokse te integruar",
+    "EAN CODE",
+    "Ekran me prekje",
+    "Gama e ngjyrave",
+    "Grafika",
+    "Kendi shikimit",
+    "Kohe reagimi",
+    "Kontrasti Dinamik",
+    "Madhesia ekranit",
+    "Mbeshtetja e ngjyrave",
+    "Ngjyra e kornizes",
+    "Norma e rifreskimit",
+    "Permasat",
+    "Pesha (kg)",
+    "Porta",
+    "Raporti I Kontrastit",
+    "Rezolucion Ekrani",
+    "Rifreskimi",
+    "Sistem Audio",
+    "Sistemi Operativ",
+    "Teknologjia ekranit",
+    "Touch Screen"
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "before": {
+    "id": 513,
+    "name": "APARATE VAKUMI",
+    "description": null,
+    "image": null,
+    "parentId": 498,
+    "specs": null,
+    "createdAt": "2025-11-12T10:31:59.839Z",
+    "updatedAt": "2025-11-12T10:31:59.839Z"
+  },
+  "specsFromCsv": [
+    "Aksesore te perfshire",
+    "Funksioni",
+    "Fuqia",
+    "Komandimi",
+    "Permasat (HxWxD)",
+    "Vakum automatik",
+    "Vetefikje"
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "before": {
+    "id": 524,
+    "name": "TAVA PJEKJE",
+    "description": null,
+    "image": null,
+    "parentId": 499,
+    "specs": null,
+    "createdAt": "2025-11-12T10:31:59.912Z",
+    "updatedAt": "2025-11-12T10:31:59.912Z"
+  },
+  "specsFromCsv": [
+    "Dimensionet",
+    "Funksioni",
+    "Kapaciteti",
+    "Kapak",
+    "Materiali",
+    "Pajtueshmeria",
+    "Perdorimi",
+    "Te sigurta ne lavastovilje"
+  ]
+}

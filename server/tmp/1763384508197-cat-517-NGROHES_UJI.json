@@ -1,0 +1,26 @@
+{
+  "before": {
+    "id": 517,
+    "name": "NGROHES UJI",
+    "description": null,
+    "image": null,
+    "parentId": 498,
+    "specs": null,
+    "createdAt": "2025-11-12T10:31:59.866Z",
+    "updatedAt": "2025-11-12T10:31:59.866Z"
+  },
+  "specsFromCsv": [
+    "Baze e rrotullueshme",
+    "Buton switch on/off",
+    "Ekran",
+    "Filter antikalk",
+    "Funksioni",
+    "Fuqia",
+    "Hapje kapaku me buton",
+    "Kapaciteti",
+    "Materiali",
+    "Ngjyra",
+    "Sistem vetfikje",
+    "Tregues I nivelit ujit"
+  ]
+}

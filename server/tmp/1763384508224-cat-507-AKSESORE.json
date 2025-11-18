@@ -1,0 +1,19 @@
+{
+  "before": {
+    "id": 507,
+    "name": "AKSESORE",
+    "description": null,
+    "image": null,
+    "parentId": 497,
+    "specs": null,
+    "createdAt": "2025-11-12T10:31:59.800Z",
+    "updatedAt": "2025-11-12T10:31:59.800Z"
+  },
+  "specsFromCsv": [
+    "Funksioni",
+    "Intensiteti",
+    "Lloji",
+    "Numri I kapsulave ne paketim",
+    "Pershtatshmeria"
+  ]
+}

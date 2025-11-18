@@ -1,0 +1,33 @@
+{
+  "before": {
+    "id": 519,
+    "name": "SHTRYDHESE",
+    "description": null,
+    "image": null,
+    "parentId": 498,
+    "specs": null,
+    "createdAt": "2025-11-12T10:31:59.878Z",
+    "updatedAt": "2025-11-12T10:31:59.878Z"
+  },
+  "specsFromCsv": [
+    "Aksesore te perfshire",
+    "Fikje automatike",
+    "Funksioni",
+    "Fuqia",
+    "Gote",
+    "Kapaciteti",
+    "Kapaciteti Enes Lengjeve",
+    "Kapaciteti Enes Mbetjeve",
+    "Kompresimi",
+    "Materiali trupit",
+    "Ndezje automatike",
+    "Nivele Shpejtesie",
+    "Numri I koneve",
+    "Shpejtesia",
+    "Shtrydhje Koker e plote",
+    "Silencioze",
+    "Sistem Eko",
+    "Sistem kunderpikimi",
+    "Te sigurta ne lavastovilje"
+  ]
+}

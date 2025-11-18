@@ -179,6 +179,12 @@ const getCategory = async (req, res) => {
 const createCategory = async (req, res) => {
   try {
     const body = { ...req.body };
+    // normalize specs: accept JSON string or newline-separated string
+    if (body.specs && typeof body.specs === 'string') {
+      try { body.specs = JSON.parse(body.specs); } catch (_) {
+        body.specs = body.specs.split('\n').map(s => s.trim()).filter(Boolean);
+      }
+    }
     // normalize parentId (may come as string from FormData)
     if (body.parentId) body.parentId = Number.isNaN(parseInt(body.parentId, 10)) ? null : parseInt(body.parentId, 10);
     if (req.file) {
@@ -203,6 +209,12 @@ const updateCategory = async (req, res) => {
   try {
     const { id } = req.params;
     const body = { ...req.body };
+    // normalize specs: accept JSON string or newline-separated string
+    if (body.specs && typeof body.specs === 'string') {
+      try { body.specs = JSON.parse(body.specs); } catch (_) {
+        body.specs = body.specs.split('\n').map(s => s.trim()).filter(Boolean);
+      }
+    }
     if (body.parentId) body.parentId = Number.isNaN(parseInt(body.parentId, 10)) ? null : parseInt(body.parentId, 10);
     if (req.file) body.image = `/uploads/${req.file.filename}`;
 

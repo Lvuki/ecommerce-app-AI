@@ -1,0 +1,16 @@
+{
+  "before": {
+    "id": 663,
+    "name": "LOJE PLAYSTATION",
+    "description": null,
+    "image": null,
+    "parentId": 655,
+    "specs": null,
+    "createdAt": "2025-11-12T13:53:43.116Z",
+    "updatedAt": "2025-11-12T13:53:43.116Z"
+  },
+  "specsFromCsv": [
+    "Loja",
+    "Platforma"
+  ]
+}

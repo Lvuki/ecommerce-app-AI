@@ -1,0 +1,27 @@
+{
+  "before": {
+    "id": 621,
+    "name": "DEPILATOR ME LAZER",
+    "description": null,
+    "image": null,
+    "parentId": 617,
+    "specs": null,
+    "createdAt": "2025-11-12T13:36:28.543Z",
+    "updatedAt": "2025-11-12T13:36:28.543Z"
+  },
+  "specsFromCsv": [
+    "Aksesore 1",
+    "Aksesore 2",
+    "Aksesore te perfshire",
+    "Aplikacion",
+    "Funksioni",
+    "Koha e karikimit",
+    "Kohe Pune",
+    "Linja",
+    "Me Kabell",
+    "Nivele Shpejtesie",
+    "Perdorimi",
+    "Sensor tonit te lekures",
+    "Teknologjia"
+  ]
+}

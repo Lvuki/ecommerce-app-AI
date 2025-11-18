@@ -1,0 +1,16 @@
+{
+  "before": {
+    "id": 600,
+    "name": "KABLLO RRJETI",
+    "description": null,
+    "image": null,
+    "parentId": 591,
+    "specs": null,
+    "createdAt": "2025-11-12T13:30:46.298Z",
+    "updatedAt": "2025-11-12T13:30:46.298Z"
+  },
+  "specsFromCsv": [
+    "Gjatesia",
+    "Ngjyra"
+  ]
+}

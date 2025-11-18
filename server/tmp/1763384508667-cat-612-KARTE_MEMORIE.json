@@ -1,0 +1,24 @@
+{
+  "before": {
+    "id": 612,
+    "name": "KARTE MEMORIE",
+    "description": null,
+    "image": null,
+    "parentId": 596,
+    "specs": null,
+    "createdAt": "2025-11-12T13:30:46.370Z",
+    "updatedAt": "2025-11-12T13:30:46.370Z"
+  },
+  "specsFromCsv": [
+    "Dimensionet",
+    "Ekstra",
+    "Kapaciteti",
+    "Lidhje",
+    "Lloji",
+    "Memorje",
+    "Ngjyra",
+    "RPM",
+    "Shpejtesia",
+    "Tipi"
+  ]
+}

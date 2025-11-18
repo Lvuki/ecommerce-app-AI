@@ -1,0 +1,40 @@
+{
+  "before": {
+    "id": 493,
+    "name": "LAVATRICE INKASO",
+    "description": null,
+    "image": null,
+    "parentId": 463,
+    "specs": null,
+    "createdAt": "2025-11-12T10:24:04.865Z",
+    "updatedAt": "2025-11-12T10:24:04.865Z"
+  },
+  "specsFromCsv": [
+    "Bllokim Paneli",
+    "Display",
+    "Frekuenca",
+    "Hapja e deres",
+    "Instalimi",
+    "Kapaciteti i larjes",
+    "Kapaciteti i Tharjes",
+    "Klasa e Energjise",
+    "Konsumi i Energjise",
+    "Material i kazanit",
+    "Menyra e kontrollit",
+    "Ngjyra",
+    "Nisje e vonuar",
+    "Niveli i zhurmes",
+    "Numri I Programeve",
+    "Paralarje",
+    "Performanca e Larjes",
+    "Permasat (LxGJxTH)",
+    "Program me Avull",
+    "Programe Speciale",
+    "Programim i kohes",
+    "Rezolucion Ekrani",
+    "Sensor Peshe",
+    "Shpejtesia max. centrifuge",
+    "Teknologjia e Motorit",
+    "Tharje e shpejte"
+  ]
+}

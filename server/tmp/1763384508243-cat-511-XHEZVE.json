@@ -1,0 +1,21 @@
+{
+  "before": {
+    "id": 511,
+    "name": "XHEZVE",
+    "description": null,
+    "image": null,
+    "parentId": 497,
+    "specs": null,
+    "createdAt": "2025-11-12T10:31:59.824Z",
+    "updatedAt": "2025-11-12T10:31:59.824Z"
+  },
+  "specsFromCsv": [
+    "Buton On/Off",
+    "Funksioni",
+    "Fuqia",
+    "Kapaciteti",
+    "Materiali",
+    "Pajtueshmeria",
+    "Te sigurta ne lavastovilje"
+  ]
+}

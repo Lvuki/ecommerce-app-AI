@@ -1,0 +1,33 @@
+{
+  "before": {
+    "id": 495,
+    "name": "PRODUKTE SPECIALE INKASO",
+    "description": null,
+    "image": null,
+    "parentId": 463,
+    "specs": null,
+    "createdAt": "2025-11-12T10:24:04.877Z",
+    "updatedAt": "2025-11-12T10:24:04.877Z"
+  },
+  "specsFromCsv": [
+    "Frekuenca",
+    "Funksione",
+    "Funksionet e sirtarit",
+    "Fuqia",
+    "Instalimi",
+    "Kapaciteti",
+    "Kontrolli",
+    "Materiali",
+    "Menyra instalimit",
+    "Ngjyra",
+    "Ngjyra/Materiali",
+    "Permasat (GjxL)",
+    "Permasat (LxGJxTH)",
+    "Program maturimi",
+    "Program per lengjet",
+    "Spina e kerkuar (A)",
+    "Temperatura",
+    "Voltazhi",
+    "Volumi"
+  ]
+}

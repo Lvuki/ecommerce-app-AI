@@ -1,0 +1,26 @@
+{
+  "before": {
+    "id": 506,
+    "name": "PIANURA",
+    "description": null,
+    "image": null,
+    "parentId": 496,
+    "specs": null,
+    "createdAt": "2025-11-12T10:31:59.790Z",
+    "updatedAt": "2025-11-12T10:31:59.790Z"
+  },
+  "specsFromCsv": [
+    "Bllokim per femijet",
+    "Fikje automatike",
+    "Fuqia",
+    "Kohemates",
+    "Kontrolli",
+    "Lloji i Suprines",
+    "Materiali",
+    "Nivele fuqie",
+    "Nr I zonave",
+    "Permasat LxGJxTH(cm)",
+    "Programe automatike",
+    "Tregues nxehtesise"
+  ]
+}

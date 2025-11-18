@@ -1,0 +1,19 @@
+{
+  "before": {
+    "id": 546,
+    "name": "BOKSE",
+    "description": null,
+    "image": null,
+    "parentId": 538,
+    "specs": null,
+    "createdAt": "2025-11-12T10:52:32.194Z",
+    "updatedAt": "2025-11-12T10:52:32.194Z"
+  },
+  "specsFromCsv": [
+    "Dimensionet (lxgjxth)",
+    "Fuqia",
+    "Gama e frekuences",
+    "Karakteristikat",
+    "Konektimi"
+  ]
+}

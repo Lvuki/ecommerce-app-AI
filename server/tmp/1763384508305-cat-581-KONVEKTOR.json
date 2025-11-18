@@ -1,0 +1,27 @@
+{
+  "before": {
+    "id": 581,
+    "name": "KONVEKTOR",
+    "description": null,
+    "image": null,
+    "parentId": 559,
+    "specs": null,
+    "createdAt": "2025-11-12T13:24:52.684Z",
+    "updatedAt": "2025-11-12T13:24:52.684Z"
+  },
+  "specsFromCsv": [
+    "Doreze",
+    "Funksion antingrirje",
+    "Funksioni",
+    "Fuqia",
+    "Izolim I dyfishte",
+    "Modalitet eko",
+    "Nivele Nxehtesie",
+    "Panel Kontrolli",
+    "Perdorimi",
+    "Sistem ventilimi",
+    "Sistem vetfikje",
+    "Teknologjia",
+    "Termostat"
+  ]
+}

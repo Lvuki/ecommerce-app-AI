@@ -1,0 +1,42 @@
+{
+  "before": {
+    "id": 652,
+    "name": "KAMERA AKSION",
+    "description": null,
+    "image": null,
+    "parentId": 650,
+    "specs": null,
+    "createdAt": "2025-11-12T13:46:25.360Z",
+    "updatedAt": "2025-11-12T13:46:25.360Z"
+  },
+  "specsFromCsv": [
+    "Bateri",
+    "Blic",
+    "Distanca min.-max. e fokusit",
+    "EAN CODE",
+    "Extra",
+    "Fokusimi",
+    "Formati I Regjistrimit",
+    "Lente",
+    "Lidhjet",
+    "Madhesia e Ekranit",
+    "Ndjeshmeria ISO",
+    "Ngjyra",
+    "Numri i zonave te fokusimit",
+    "Permasat",
+    "Pesha (kg)",
+    "Procesor",
+    "Rezolucion Ekrani",
+    "Rezolucion Foto (pixel)",
+    "Rezolucion Video (pixel)",
+    "Rregullimi i kohes se shkrepjes",
+    "Sensor",
+    "Shpejtesi shkrepjeve",
+    "Sistem Geo-Tag (GPS)",
+    "Stabilizimi",
+    "Suporton Karte",
+    "Teknologjia e Ekranit",
+    "Zmadhimi Dixhital",
+    "Zmadhimi Optik"
+  ]
+}

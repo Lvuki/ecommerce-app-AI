@@ -1,0 +1,21 @@
+{
+  "before": {
+    "id": 632,
+    "name": "APARAT FILTRIMI UJI",
+    "description": null,
+    "image": null,
+    "parentId": 618,
+    "specs": null,
+    "createdAt": "2025-11-12T13:36:28.610Z",
+    "updatedAt": "2025-11-12T13:36:28.610Z"
+  },
+  "specsFromCsv": [
+    "Buton switch on/off",
+    "Filter",
+    "Funksioni",
+    "Hapja e kapakut",
+    "Kapaciteti",
+    "Materiali",
+    "Sinjalizues filtri"
+  ]
+}

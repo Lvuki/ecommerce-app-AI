@@ -1,0 +1,42 @@
+{
+  "before": {
+    "id": 494,
+    "name": "PIANURA INKASO",
+    "description": null,
+    "image": null,
+    "parentId": 463,
+    "specs": null,
+    "createdAt": "2025-11-12T10:24:04.871Z",
+    "updatedAt": "2025-11-12T10:24:04.871Z"
+  },
+  "specsFromCsv": [
+    "Aksesore opsionale",
+    "Bllokim per femijet",
+    "Fikje automatike",
+    "Frekuenca",
+    "Fuqia maksimale e gasit",
+    "Fuqia maksimale e gasit (W)",
+    "Fuqia Thithese",
+    "Klasa e Energjise",
+    "Kohemates",
+    "Kontrolli",
+    "Lidhje me aspiratorin",
+    "Lloji i Suprines",
+    "Materiali",
+    "Motori",
+    "Ngarkesa Elektrike",
+    "Niveli i zhurmes",
+    "Numri I zonave",
+    "Opsion Special",
+    "Permasat (GjxGj)",
+    "Permasat per montim",
+    "Rezolucion Ekrani",
+    "Stop & Go",
+    "Tregues i nxehtesise se mbetur",
+    "Tregues nxehtesia mbetur",
+    "Valvul sigurie per gazin",
+    "Voltazhi",
+    "Zone e Dyfishte/trefishte",
+    "Zone e palimituar"
+  ]
+}

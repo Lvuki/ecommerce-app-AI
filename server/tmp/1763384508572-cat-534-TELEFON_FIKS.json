@@ -1,0 +1,36 @@
+{
+  "before": {
+    "id": 534,
+    "name": "TELEFON FIKS",
+    "description": null,
+    "image": null,
+    "parentId": 530,
+    "specs": null,
+    "createdAt": "2025-11-12T10:45:19.398Z",
+    "updatedAt": "2025-11-12T10:45:19.398Z"
+  },
+  "specsFromCsv": [
+    "Altoparlant",
+    "Bateri Suporton",
+    "Doreza",
+    "EAN CODE",
+    "Ekstra",
+    "Frekuenca",
+    "Identifikim Thirrje",
+    "Kapaciteti Zgjerues",
+    "Kohe Folje",
+    "Libri Telefonik",
+    "Lidhja",
+    "Madhesia e Ekranit",
+    "Memorie Direkte",
+    "Ngjyra",
+    "Perseritje Numri",
+    "Pesha (kg)",
+    "Rezolucion Ekrani",
+    "Sekretari Telefonike",
+    "Standby",
+    "Teknologjia e Ekranit",
+    "Transferim Thirrje",
+    "Zilet"
+  ]
+}
