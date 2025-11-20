@@ -1,5 +1,6 @@
 import API_BASE_URL from "../config";
 import { getToken } from "./authService";
+import filterService from './filterService';
 
 export async function getProducts() {
   const res = await fetch(`${API_BASE_URL}/products`);
@@ -28,6 +29,12 @@ export async function searchProducts(params = {}) {
     throw new Error(err);
   }
   return res.json();
+}
+
+// Convenience: search using Filters component's filter object
+export async function searchWithFilters(filters = {}) {
+  const params = filterService.buildParams(filters || {});
+  return searchProducts(params);
 }
 
 export async function addProduct(productData) {

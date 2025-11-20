@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { searchProducts, getCategoriesAndBrands } from '../services/productService';
+import { searchProducts, getCategoriesAndBrands, searchWithFilters } from '../services/productService';
 import { getCategories } from '../services/categoryService';
+import Filters from '../components/Filters/Filters';
 import { addItem } from '../services/cartService';
 import { priceInfo } from '../utils/priceUtils';
 import { Link } from 'react-router-dom';
@@ -8,12 +9,11 @@ import { Link } from 'react-router-dom';
 export default function PublicProducts() {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [filterCategory, setFilterCategory] = useState('');
   const [searchQ, setSearchQ] = useState('');
   const searchDebounce = useRef(null);
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(20);
-  const [filters, setFilters] = useState({ category: '', brand: '', priceMin: '', priceMax: '', stockMin: '', color: '', size: '' });
+  const [filters, setFilters] = useState({});
   const [meta, setMeta] = useState({ categories: [], brands: [] });
   const [categoriesTree, setCategoriesTree] = useState([]);
 
@@ -134,56 +134,26 @@ export default function PublicProducts() {
     <div className="page-container">
       <h2 style={{ marginBottom: 8 }}>Products</h2>
       <div className="sidebar-layout">
-        <aside style={{ border: '1px solid #eee', borderRadius: 10, padding: 12, background: '#fff' }}>
-          <form onSubmit={applyFilters} style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            <div>
-              <div style={{ fontWeight: 600, marginBottom: 6 }}>Category</div>
-              <select value={filters.category} onChange={(e) => setFilters({ ...filters, category: e.target.value })}>
-                <option value="">All</option>
-                {(() => {
-                  const out = [];
-                  function walk(nodes, depth = 0) {
-                    for (const n of nodes || []) {
-                      const label = `${'\u00A0'.repeat(depth * 2)}${n.name}`;
-                      out.push(<option key={`cat-${n.id}`} value={n.name}>{label}</option>);
-                      if (Array.isArray(n.subcategories) && n.subcategories.length) walk(n.subcategories, depth + 1);
-                    }
-                  }
-                  walk(categoriesTree, 0);
-                  return out;
-                })()}
-              </select>
-            </div>
-            <div>
-              <div style={{ fontWeight: 600, marginBottom: 6 }}>Brand</div>
-              <select value={filters.brand} onChange={(e) => setFilters({ ...filters, brand: e.target.value })}>
-                <option value="">All</option>
-                {(Array.isArray(meta.brands) ? meta.brands : []).map((b) => (
-                  <option key={b} value={b}>{b}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <div style={{ fontWeight: 600, marginBottom: 6 }}>Price</div>
-              <div style={{ display: 'flex', gap: 6 }}>
-                <input type="number" placeholder="Min" value={filters.priceMin} onChange={(e) => setFilters({ ...filters, priceMin: e.target.value })} style={{ width: '50%' }} />
-                <input type="number" placeholder="Max" value={filters.priceMax} onChange={(e) => setFilters({ ...filters, priceMax: e.target.value })} style={{ width: '50%' }} />
-              </div>
-            </div>
-            <div>
-              <div style={{ fontWeight: 600, marginBottom: 6 }}>Stock</div>
-              <input type="number" placeholder="Min stock" value={filters.stockMin} onChange={(e) => setFilters({ ...filters, stockMin: e.target.value })} />
-            </div>
-            <div>
-              <div style={{ fontWeight: 600, marginBottom: 6 }}>Specifications</div>
-              <input placeholder="Color" value={filters.color} onChange={(e) => setFilters({ ...filters, color: e.target.value })} />
-              <input placeholder="Size" value={filters.size} onChange={(e) => setFilters({ ...filters, size: e.target.value })} />
-            </div>
-            <div style={{ display: 'flex', gap: 8 }}>
-              <button type="submit">Apply</button>
-              <button type="button" onClick={async () => { setFilters({ category: '', brand: '', priceMin: '', priceMax: '', stockMin: '', color: '', size: '' }); setSearchQ(''); await loadProducts({}); }}>Clear</button>
-            </div>
-          </form>
+        <aside style={{ padding: 8 }}>
+          <Filters
+            initial={{}}
+            categories={categoriesTree}
+            brands={Array.isArray(meta.brands) ? meta.brands : []}
+            onChange={(f) => {
+              setFilters(f);
+              // debounce filter requests lightly
+              if (searchDebounce.current) clearTimeout(searchDebounce.current);
+              searchDebounce.current = setTimeout(async () => {
+                try {
+                  const res = await searchWithFilters(f);
+                  setProducts(res || []);
+                  setPage(1);
+                } catch (err) {
+                  console.error('Filter search failed', err);
+                }
+              }, 250);
+            }}
+          />
         </aside>
         <main>
           <div style={{ background: '#fff', border: '1px solid #eee', borderRadius: 8 }} className="table-responsive">
