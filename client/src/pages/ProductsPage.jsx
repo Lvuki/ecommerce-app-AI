@@ -19,6 +19,8 @@ function ProductsPage({ hidePurchaseActions }) {
     category: "",
     sku: "",
     brand: "",
+  garancia: "",
+    modeli: "",
     stock: "",
     specs: "",
     specValues: {},
@@ -35,6 +37,7 @@ function ProductsPage({ hidePurchaseActions }) {
   const [addForm, setAddForm] = useState({ name: '', description: '', imageFile: null, image: '', parentId: '', specs: '' });
   const [editId, setEditId] = useState(null);
   const [showForm, setShowForm] = useState(false);
+  // Debug panel removed: lastRequest/lastResponse/showDebugPanel removed
   const navigate = useNavigate();
 
   // 🔒 Authentication check and load products
@@ -89,8 +92,52 @@ function ProductsPage({ hidePurchaseActions }) {
       // send as raw string, server will attempt JSON.parse
     }
 
-    // include any selected images (File[]) as 'images' for multipart upload
-    if (form.images && form.images.length) payload.images = form.images;
+    // include any newly selected image Files as 'images' for multipart upload
+    if (form.images && form.images.length) {
+      // Separate File objects (new uploads) and existing image URLs (strings)
+      const files = form.images.filter(i => i instanceof File);
+      const strings = form.images.filter(i => typeof i === 'string');
+
+      // If the selected main image is an existing string URL, send it explicitly
+      // so the server can update `image` without needing to upload files.
+      if (typeof form.mainImageIndex === 'number') {
+        const sel = form.images[form.mainImageIndex];
+        if (typeof sel === 'string') {
+          payload.image = sel;
+        }
+      }
+
+      if (files.length) {
+        // If the selected main image is one of the newly uploaded files,
+        // ensure that file is appended first so the backend will set it as
+        // the product.image (server takes the first uploaded file as main).
+        let filesOrdered = files.slice();
+        if (typeof form.mainImageIndex === 'number') {
+          const sel = form.images[form.mainImageIndex];
+          if (sel instanceof File) {
+            // find the matching File object by reference and move it first
+            const idx = filesOrdered.findIndex(f => f === sel);
+            if (idx > 0) {
+              const [m] = filesOrdered.splice(idx, 1);
+              filesOrdered.unshift(m);
+            }
+              // indicate which uploaded file (index among uploaded files) should be main
+              // server will map this to the saved filename and persist it
+              payload.mainUploadedIndex = filesOrdered.findIndex(f => f === sel);
+          }
+        }
+  // include existing string URLs first, then appended uploaded files
+  payload.images = strings.concat(filesOrdered);
+  // indicate to server that the provided images list should replace stored images
+  payload.imagesAction = 'replace';
+      } else if (strings.length) {
+        // No new files uploaded but existing image list changed; send the
+        // images array as JSON so server updates stored images order if needed.
+        payload.images = strings;
+        // when client sends only strings (no uploads), treat the list as authoritative
+        payload.imagesAction = 'replace';
+      }
+    }
 
     // If category was selected as an id, convert to category name for legacy backend fields
     const findById = (nodes, id) => {
@@ -114,18 +161,29 @@ function ProductsPage({ hidePurchaseActions }) {
       }
     }
 
+  // Debug removed: not sending _debug and not capturing sanitized payload
+
     if (editId) {
-      const updated = await updateProduct(editId, payload);
-      setProducts(products.map((p) => (p.id === editId ? updated : p)));
+      const resp = await updateProduct(editId, payload);
+      // server may return a debug envelope when _debug is set: { updated, debug }
+      const updatedProduct = resp && resp.updated ? resp.updated : resp;
+  // update local list with the real product object
+  setProducts(products.map((p) => (p.id === editId ? updatedProduct : p)));
+      // notify other parts of the app that a product was updated
+      try { window.dispatchEvent(new CustomEvent('product-updated', { detail: { product: updatedProduct } })); } catch (e) { /* ignore */ }
+  // no debug panel: not storing server response locally
       setEditId(null);
       setShowForm(false);
     } else {
       const newProduct = await addProduct(payload);
       setProducts([...products, newProduct]);
+      // notify other parts of the app that a new product was added
+      try { window.dispatchEvent(new CustomEvent('product-updated', { detail: { product: newProduct } })); } catch (e) { /* ignore */ }
       setShowForm(false);
     }
 
-    setForm({ name: "", description: "", price: "", category: "", sku: "", brand: "", stock: "", specs: "", specValues: {}, images: [] });
+  setForm({ name: "", description: "", price: "", category: "", sku: "", brand: "", garancia: "", modeli: "", stock: "", specs: "", specValues: {}, images: [], mainImageIndex: 0 });
+    
   };
 
   const handleEdit = (product) => {
@@ -159,6 +217,12 @@ function ProductsPage({ hidePurchaseActions }) {
     const matched = findCategoryByName(categories, product.category);
     if (matched && matched.id) categoryValue = matched.id;
 
+    let mainIndex = 0;
+    if (product.image && product.images && product.images.length) {
+      const idx = product.images.findIndex(i => i === product.image);
+      if (idx >= 0) mainIndex = idx;
+    }
+
     setForm({
       name: product.name || "",
       description: product.description || "",
@@ -170,10 +234,13 @@ function ProductsPage({ hidePurchaseActions }) {
       category: categoryValue,
       sku: product.sku || "",
       brand: product.brand || "",
+      garancia: product.garancia || "",
+      modeli: product.modeli || "",
       stock: product.stock ?? "",
       specs: product.specs ? (typeof product.specs === 'string' ? product.specs : JSON.stringify(product.specs, null, 2)) : "",
       specValues: initialSpecValues,
-      images: [],
+      images: product.images && product.images.length ? product.images.slice() : [],
+      mainImageIndex: mainIndex,
     });
     setShowForm(true);
   };
@@ -181,6 +248,8 @@ function ProductsPage({ hidePurchaseActions }) {
   const handleDelete = async (id) => {
     await deleteProduct(id);
     setProducts(products.filter((p) => p.id !== id));
+    // notify other parts of the app that a product was deleted
+    try { window.dispatchEvent(new CustomEvent('product-deleted', { detail: { id } })); } catch (e) { /* ignore */ }
   };
 
   const handleStartAdd = () => {
@@ -196,10 +265,13 @@ function ProductsPage({ hidePurchaseActions }) {
       category: "",
       sku: "",
       brand: "",
+      garancia: "",
+      modeli: "",
       stock: "",
       specs: "",
       specValues: {},
       images: [],
+      mainImageIndex: 0,
     });
     setShowForm(true);
   };
@@ -225,6 +297,40 @@ function ProductsPage({ hidePurchaseActions }) {
     );
   };
 
+  // Build a readable category path for a product. Prefer `product.categories` array
+  // (if normalized) otherwise attempt to locate the product.category string in
+  // the categories tree and return the full path (parent › child › ...).
+  const getProductCategoryPath = (product) => {
+    if (!product) return '—';
+    // prefer categories array if present
+    if (Array.isArray(product.categories) && product.categories.length) {
+      const names = product.categories.map(c => (typeof c === 'string' ? c : (c && c.name) || String(c)));
+      return names.join(' › ');
+    }
+
+    // fallback: find the category node by name in the categories tree
+    const norm = (s) => (s === undefined || s === null) ? '' : String(s).toLowerCase().trim();
+    const target = norm(product.category || '');
+    if (!target) return product.category || '—';
+
+    const findPathByName = (nodes, tgt, path = []) => {
+      for (const n of nodes || []) {
+        if (!n) continue;
+        const next = path.concat(n.name);
+        if (norm(n.name) === tgt) return next;
+        if (Array.isArray(n.subcategories) && n.subcategories.length) {
+          const found = findPathByName(n.subcategories, tgt, next);
+          if (found) return found;
+        }
+      }
+      return null;
+    };
+
+    const path = findPathByName(categories || [], target);
+    if (path && path.length) return path.join(' › ');
+    return product.category || '—';
+  };
+
   return (
     <div className="page-container" style={{ padding: "20px" }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
@@ -238,12 +344,16 @@ function ProductsPage({ hidePurchaseActions }) {
       {/* Form shown in modal — trigger with Add Product / Edit buttons */}
       {showForm && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 60 }}>
-          <div style={{ width: '90%', maxWidth: 800, background: '#fff', borderRadius: 8, padding: 18, boxShadow: '0 8px 24px rgba(0,0,0,0.2)', maxHeight: '90vh', overflow: 'auto' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-              <h3 style={{ margin: 0 }}>{editId ? 'Edit Product' : 'Add Product'}</h3>
-              <button onClick={() => { setShowForm(false); setEditId(null); setForm({ name: "", description: "", price: "", salePrice: "", offerPrice: '', offerFrom: '', offerTo: '', category: "", sku: "", brand: "", stock: "", specs: "", specValues: {}, images: [] }); }}>Close</button>
-            </div>
-            <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 0, alignItems: 'start' }}>
+    <div style={{ width: '90%', maxWidth: 800, maxHeight: '90vh', background: '#fff', borderRadius: 8, padding: 18, boxShadow: '0 8px 24px rgba(0,0,0,0.2)', position: 'relative', overflowY: 'auto', overflowX: 'hidden' }}>
+              {/* sticky header so the close button stays visible while body scrolls */}
+              <div style={{ position: 'sticky', top: 0, background: '#fff', zIndex: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: 12 }}>
+                <h3 style={{ margin: 0 }}>{editId ? 'Edit Product' : 'Add Product'}</h3>
+                <button aria-label="Close modal" onClick={() => { setShowForm(false); setEditId(null); setForm({ name: "", description: "", price: "", salePrice: "", offerPrice: '', offerFrom: '', offerTo: '', category: "", sku: "", brand: "", garancia: "", modeli: "", stock: "", specs: "", specValues: {}, images: [], mainImageIndex: 0 }); }}
+                  style={{ width: 32, height: 32, borderRadius: 16, border: '1px solid #ddd', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 4px 10px rgba(0,0,0,0.12)', fontSize: 16 }}>
+                  ×
+                </button>
+              </div>
+                <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 0, alignItems: 'start' }}>
               <div style={{ display: 'flex', flexDirection: 'column' }}>
                 <label style={{ fontWeight: 600, marginBottom: 6 }}>Name</label>
                 <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
@@ -355,12 +465,22 @@ function ProductsPage({ hidePurchaseActions }) {
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <label style={{ fontWeight: 600, marginBottom: 6 }}>Brand</label>
+                <label style={{ fontWeight: 600, marginBottom: 6 }}>Marka</label>
                 <input value={form.brand} onChange={(e) => setForm({ ...form, brand: e.target.value })} />
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <label style={{ fontWeight: 600, marginBottom: 6 }}>SKU</label>
+                <label style={{ fontWeight: 600, marginBottom: 6 }}>Garancia</label>
+                <input value={form.garancia || ''} onChange={(e) => setForm({ ...form, garancia: e.target.value })} placeholder="e.g. 24 hónap / 2 év / 12 months" />
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <label style={{ fontWeight: 600, marginBottom: 6 }}>Modeli</label>
+                <input value={form.modeli || ''} onChange={(e) => setForm({ ...form, modeli: e.target.value })} placeholder="e.g. Model X, MX-200, or vendor model" />
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <label style={{ fontWeight: 600, marginBottom: 6 }}>Kodi i produktit</label>
                 <input value={form.sku} onChange={(e) => setForm({ ...form, sku: e.target.value })} />
               </div>
 
@@ -369,29 +489,102 @@ function ProductsPage({ hidePurchaseActions }) {
                 <input type="number" value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} />
               </div>
 
-              <div style={{ gridColumn: '1 / -1', display: 'flex', flexDirection: 'column' }}>
-                <label style={{ fontWeight: 600, marginBottom: 6 }}>Specifications (JSON)</label>
-                <textarea placeholder='{"color":"red","size":"M"}' value={form.specs} onChange={(e) => setForm({ ...form, specs: e.target.value })} rows={4} />
-              </div>
+              {/* Removed raw JSON specs textarea to avoid manual JSON edits; use category-driven spec inputs above */}
 
               <div style={{ display: 'flex', flexDirection: 'column' }}>
                 <label style={{ fontWeight: 600, marginBottom: 6 }}>Images</label>
-                <input type="file" accept="image/*" multiple onChange={(e) => setForm({ ...form, images: e.target.files ? Array.from(e.target.files) : [] })} />
+                <input type="file" accept="image/*" multiple onChange={(e) => {
+                  const files = e.target.files ? Array.from(e.target.files) : [];
+                  // append new files to existing images array instead of replacing
+                  setForm({ ...form, images: ([...(form.images || [])]).concat(files), mainImageIndex: form.mainImageIndex ?? 0 });
+                }} />
                 {/* preview thumbnails */}
                 {form.images && form.images.length ? (
                   <div style={{ marginTop: 8, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                    {form.images.map((f, idx) => (
-                      <div key={idx} style={{ width: 80, height: 60, overflow: 'hidden', borderRadius: 6 }}>
-                        <img src={URL.createObjectURL(f)} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                      </div>
-                    ))}
+                    {form.images.map((f, idx) => {
+                      // determine src for preview: File -> object URL, string -> use as-is or prefix with server
+                      let src = '';
+                      if (f instanceof File) {
+                        src = URL.createObjectURL(f);
+                      } else if (typeof f === 'string') {
+                        src = f.startsWith('http') ? f : `http://localhost:4000${f}`;
+                      }
+                      const isMain = (form.mainImageIndex ?? 0) === idx;
+                      return (
+                        <div
+                          key={idx}
+                          onClick={() => setForm({ ...form, mainImageIndex: idx })}
+                          style={{
+                            width: 80,
+                            height: 60,
+                            overflow: 'hidden',
+                            borderRadius: 6,
+                            position: 'relative',
+                            boxSizing: 'border-box',
+                            padding: isMain ? 4 : 0,
+                            border: isMain ? '2px solid #0b74de' : '1px solid #eee',
+                            background: '#fff',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          <img
+                            src={src}
+                            alt="preview"
+                            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', borderRadius: 4 }}
+                            onLoad={(e) => {
+                              // revoke object URL after image has loaded to avoid memory leaks
+                              try {
+                                if (f instanceof File && e?.target?.src?.startsWith('blob:')) URL.revokeObjectURL(e.target.src);
+                              } catch (err) {
+                                // ignore
+                              }
+                            }}
+                          />
+
+                          {/* delete button */}
+                          <button
+                            type="button"
+                            onClick={(ev) => {
+                              ev.stopPropagation();
+                              const newImages = (form.images || []).slice();
+                              newImages.splice(idx, 1);
+                              // adjust mainImageIndex
+                              let newMain = form.mainImageIndex ?? 0;
+                              if (idx < newMain) newMain = Math.max(0, newMain - 1);
+                              else if (idx === newMain) newMain = 0;
+                              setForm({ ...form, images: newImages, mainImageIndex: newMain });
+                            }}
+                            aria-label="Remove image"
+                            style={{
+                              position: 'absolute',
+                              right: 6,
+                              top: 6,
+                              width: 20,
+                              height: 20,
+                              borderRadius: 10,
+                              background: 'rgba(255,255,255,0.95)',
+                              border: '1px solid #ddd',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              fontSize: 12,
+                              lineHeight: '12px',
+                              padding: 0,
+                              cursor: 'pointer'
+                            }}
+                          >
+                            ×
+                          </button>
+                        </div>
+                      );
+                    })}
                   </div>
                 ) : null}
               </div>
 
               <div style={{ gridColumn: '1 / -1', display: 'flex', gap: 8 }}>
                 <button type="submit">{editId ? "Update Product" : "Add Product"}</button>
-                <button type="button" onClick={() => { setShowForm(false); setEditId(null); setForm({ name: "", description: "", price: "", salePrice: "", offerPrice: '', offerFrom: '', offerTo: '', category: "", sku: "", brand: "", stock: "", specs: "", specValues: {}, images: [] }); }}>Cancel</button>
+                <button type="button" onClick={() => { setShowForm(false); setEditId(null); setForm({ name: "", description: "", price: "", salePrice: "", offerPrice: '', offerFrom: '', offerTo: '', category: "", sku: "", brand: "", garancia: "", modeli: "", stock: "", specs: "", specValues: {}, images: [], mainImageIndex: 0 }); }}>Cancel</button>
               </div>
             </form>
           </div>
@@ -438,8 +631,8 @@ function ProductsPage({ hidePurchaseActions }) {
               <th style={{ padding: 12 }}>Image</th>
               <th style={{ padding: 12 }}>Name</th>
               <th style={{ padding: 12 }}>Category</th>
-              <th style={{ padding: 12 }}>Brand</th>
-              <th style={{ padding: 12 }}>SKU</th>
+              <th style={{ padding: 12 }}>Marka</th>
+              <th style={{ padding: 12 }}>Kodi i produktit</th>
               <th style={{ padding: 12 }}>Price</th>
               <th style={{ padding: 12 }}>Stock</th>
               <th style={{ padding: 12 }}>Specifications</th>
@@ -472,7 +665,7 @@ function ProductsPage({ hidePurchaseActions }) {
                   </div>
                   <div style={{ color: '#666', fontSize: 13 }}>{p.description}</div>
                 </td>
-                <td style={{ padding: 12, verticalAlign: 'top', whiteSpace: 'normal', wordBreak: 'break-word' }}>{p.category || '—'}</td>
+                <td style={{ padding: 12, verticalAlign: 'top', whiteSpace: 'normal', wordBreak: 'break-word' }}>{getProductCategoryPath(p)}</td>
                 <td style={{ padding: 12, verticalAlign: 'top', whiteSpace: 'normal', wordBreak: 'break-word' }}>{p.brand || '—'}</td>
                 <td style={{ padding: 12, verticalAlign: 'top', whiteSpace: 'normal', wordBreak: 'break-word' }}>{p.sku || '—'}</td>
                 <td style={{ padding: 12, verticalAlign: 'top' }}>
@@ -530,12 +723,14 @@ function ProductsPage({ hidePurchaseActions }) {
       {/* Categories management modal (opens when Manage Categories is clicked) */}
       {showCategoriesPanel ? (
         <div style={{ position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.4)', zIndex: 80 }}>
-          <div style={{ width: '92%', maxWidth: 1000, maxHeight: '90vh', overflow: 'auto', background: '#fff', padding: 18, borderRadius: 8 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+          <div style={{ width: '92%', maxWidth: 1000, maxHeight: '90vh', overflow: 'auto', background: '#fff', padding: 18, borderRadius: 8, position: 'relative' }}>
+            {/* sticky header so close stays visible while body scrolls */}
+            <div style={{ position: 'sticky', top: 0, background: '#fff', paddingBottom: 12, marginBottom: 12, zIndex: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <h3 style={{ margin: 0 }}>Manage Categories</h3>
-              <div style={{ display: 'flex', gap: 8 }}>
-                <button onClick={() => { setShowCategoriesPanel(false); setCatForm({ id: null, name: '', description: '', imageFile: null, image: '', parentId: '', specs: '' }); setAddForm({ name: '', description: '', imageFile: null, image: '', parentId: '', specs: '' }); }}>Close</button>
-              </div>
+              <button aria-label="Close modal" onClick={() => { setShowCategoriesPanel(false); setCatForm({ id: null, name: '', description: '', imageFile: null, image: '', parentId: '', specs: '' }); setAddForm({ name: '', description: '', imageFile: null, image: '', parentId: '', specs: '' }); }}
+                style={{ width: 32, height: 32, borderRadius: 16, border: '1px solid #ddd', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 2px 6px rgba(0,0,0,0.1)' }}>
+                ×
+              </button>
             </div>
 
             <div style={{ display: 'grid', gap: 12 }}>
@@ -671,6 +866,8 @@ function ProductsPage({ hidePurchaseActions }) {
           </div>
         </div>
       ) : null}
+
+      {/* debug panel removed */}
     </div>
   );
 }

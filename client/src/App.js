@@ -3,11 +3,12 @@ import './App.css';
 import Register from './pages/Register';
 import Login from './pages/Login';
 import AuthCallback from './pages/AuthCallback';
-import ProductsPage from "./pages/ProductsPage";
+import PublicProducts from "./pages/PublicProducts";
 import AdminUsers from "./pages/AdminUsers";
 import Dashboard from "./pages/Dashboard";
 import Home from "./pages/Home";
 import Admin, { AdminHome } from "./pages/Admin";
+import AdminSettings from './pages/AdminSettings';
 import AdminOrders from './pages/AdminOrders';
 import AdminReports from './pages/AdminReports';
 import AdminProducts from './pages/AdminProducts';
@@ -45,13 +46,14 @@ function App() {
           <Route path="users" element={<AdminUsers />} />
           <Route path="blogs" element={<BlogsAdmin />} />
           <Route path="categories" element={<CategoriesAdmin />} />
+          <Route path="settings" element={<AdminSettings />} />
         </Route>
         <Route path="/register" element={<Register />} />
   <Route path="/login" element={<Login />} />
   <Route path="/auth/success" element={<AuthCallback />} />
   <Route path="/profile" element={<Profile />} />
   <Route path="/users/:id" element={<UserProfile />} />
-        <Route path="/products" element={<ProductsPage />} />
+  <Route path="/products" element={<PublicProducts />} />
     <Route path="/products/:id" element={<ProductView />} />
     <Route path="/category" element={<Category />} />
         <Route path="/offers" element={<OffersPage />} />

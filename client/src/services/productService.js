@@ -35,11 +35,21 @@ export async function addProduct(productData) {
   const form = new FormData();
   Object.entries(productData).forEach(([key, value]) => {
     if (value === undefined || value === null) return;
-    // If it's a FileList or array of files, append each file as 'images'
-    if ((value instanceof FileList) || (Array.isArray(value) && value.length && value[0] instanceof File)) {
+    // If it's an array, it may contain File objects and/or existing URLs.
+    if (Array.isArray(value)) {
+      const files = value.filter(v => v instanceof File);
+      const nonFiles = value.filter(v => !(v instanceof File));
+      if (files.length) for (const f of files) form.append('images', f);
+      if (nonFiles.length) form.append('existingImages', JSON.stringify(nonFiles));
+      return;
+    }
+
+    // If it's a FileList, append each file
+    if (value instanceof FileList) {
       for (const f of value) form.append('images', f);
       return;
     }
+
     // If it's a plain object (e.g., specs), stringify it
     if (typeof value === 'object' && !(value instanceof File)) {
       form.append(key, JSON.stringify(value));
@@ -62,10 +72,20 @@ export async function updateProduct(id, productData) {
   const form = new FormData();
   Object.entries(productData).forEach(([key, value]) => {
     if (value === undefined || value === null) return;
-    if ((value instanceof FileList) || (Array.isArray(value) && value.length && value[0] instanceof File)) {
+    // If it's an array, it may contain File objects and/or existing URLs.
+    if (Array.isArray(value)) {
+      const files = value.filter(v => v instanceof File);
+      const nonFiles = value.filter(v => !(v instanceof File));
+      if (files.length) for (const f of files) form.append('images', f);
+      if (nonFiles.length) form.append('existingImages', JSON.stringify(nonFiles));
+      return;
+    }
+
+    if (value instanceof FileList) {
       for (const f of value) form.append('images', f);
       return;
     }
+
     if (typeof value === 'object' && !(value instanceof File)) {
       form.append(key, JSON.stringify(value));
     } else {

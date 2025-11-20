@@ -43,7 +43,11 @@ export default function CategoryPage() {
     if (query.size) query["spec_size"] = query.size;
     searchProducts(query)
       .then(setProducts)
-      .catch(() => setError("Failed to load products"))
+      .catch((err) => {
+        // Surface the real error message for easier debugging and log to console
+        console.error('searchProducts failed', err);
+        setError(err && err.message ? err.message : 'Failed to load products');
+      })
       .finally(() => setLoading(false));
     setFilters({
       category: params.category || "",
@@ -116,7 +120,7 @@ export default function CategoryPage() {
               <div style={{ fontWeight: 600, marginBottom: 6 }}>Brand</div>
               <select value={filters.brand} onChange={(e) => setFilters({ ...filters, brand: e.target.value })}>
                 <option value="">All</option>
-                {meta.brands.map((b) => (
+                {(Array.isArray(meta.brands) ? meta.brands : []).map((b) => (
                   <option key={b} value={b}>{b}</option>
                 ))}
               </select>
@@ -188,6 +192,8 @@ export default function CategoryPage() {
     </div>
   );
 }
+
+
 
 
 

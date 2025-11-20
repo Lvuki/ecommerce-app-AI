@@ -7,6 +7,7 @@ const {
   getProducts,
   getProductById,
   getCategories,
+  getProductCategoryPath,
   addProduct,
   updateProduct,
   deleteProduct,
@@ -23,6 +24,8 @@ router.get('/', getProducts);
 // keep the specific categories route before the param route so the literal
 // "categories" path is not captured by the generic :id param
 router.get('/categories/list', getCategories);
+// public debug endpoint: canonical category path (server-calculated)
+router.get('/:id([0-9]+|[0-9a-fA-F]{24})/canonical-path', getProductCategoryPath);
 // restrict :id to a 24-hex ObjectId so strings like "categories" won't match
 // allow either numeric IDs (seed uses numeric ids) or 24-hex ObjectIds
 router.get('/:id([0-9]+|[0-9a-fA-F]{24})', getProductById);

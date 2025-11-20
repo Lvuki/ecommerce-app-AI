@@ -131,8 +131,70 @@ def main():
         'sample_problem_rows': sample_bad,
     }
 
-    import json
-    print(json.dumps(summary, indent=2, ensure_ascii=False))
+    # write detailed preview per row to server/tmp/
+    try:
+        import os, json, time
+        tmp_dir = os.path.join(os.path.dirname(__file__), '..', 'tmp')
+        os.makedirs(tmp_dir, exist_ok=True)
+        ts = int(time.time() * 1000)
+        preview_path = os.path.join(tmp_dir, f'products-import-preview-{ts}.json')
+
+        # Rewind file and re-read to build detailed rows (we already consumed reader)
+        f.seek(0)
+        _ = next(csv.reader(f, delimiter=';', quotechar='"'))
+        detailed = []
+        for i,row in enumerate(reader):
+            # map fields again safely
+            row = [c.strip() for c in row]
+            row_map = {}
+            for j,h in enumerate(headers):
+                if j < len(row):
+                    row_map[h] = row[j]
+                else:
+                    row_map[h] = ''
+
+            name = row_map.get(name_col, '').strip()
+            price_raw = row_map.get(price_col, '').strip()
+            sku = row_map.get(sku_col, '').strip() if sku_col else ''
+            category = row_map.get(category_col, '').strip() if category_col else ''
+            image = row_map.get(detailed_image_col, '').strip() if detailed_image_col else ''
+            desc = row_map.get(description_col, '').strip() if description_col else ''
+            feat = row_map.get(features_col, '').strip() if features_col else ''
+
+            issues = []
+            if not name:
+                issues.append('missing_name')
+            if not price_raw or not is_float(price_raw.replace(',','')):
+                issues.append('missing_or_invalid_price')
+            if not category:
+                issues.append('missing_category')
+            if not image:
+                issues.append('missing_image')
+            if not desc:
+                issues.append('missing_description')
+            if not feat:
+                issues.append('missing_features')
+
+            detailed.append({
+                'row': i+1,
+                'sku': sku,
+                'name': name,
+                'price_raw': price_raw,
+                'category': category,
+                'image': image,
+                'has_description': bool(desc),
+                'has_features': bool(feat),
+                'issues': issues,
+            })
+
+        with open(preview_path, 'w', encoding='utf-8') as pf:
+            json.dump({'summary': summary, 'rows': detailed}, pf, ensure_ascii=False, indent=2)
+        print(json.dumps(summary, indent=2, ensure_ascii=False))
+        print('\nPreview written to', preview_path)
+    except Exception as e:
+        import json
+        print(json.dumps(summary, indent=2, ensure_ascii=False))
+        print('Could not write preview file:', e)
 
 if __name__ == '__main__':
     main()
