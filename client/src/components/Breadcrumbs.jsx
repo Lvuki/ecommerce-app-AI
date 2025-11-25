@@ -32,10 +32,12 @@ export default function Breadcrumbs({ separator = '›', hideOnRoot = true }) {
       const parts = loc.pathname.split('/').filter(Boolean);
       const params = new URLSearchParams(loc.search || '');
       const categoryParam = params.get('category');
-      const base = [{ to: '/', label: 'Home' }];
+      const base = [{ to: '/', label: 'KREU' }];
 
       const isProductView = parts[0] === 'products' && parts[1];
-      const isCategoryView = (loc.pathname === '/category' || parts[0] === 'category') && categoryParam && !isProductView;
+      // If a `category` query param exists (and we're not on a product detail),
+      // treat the page as a category view so breadcrumbs reflect the selected category.
+      const isCategoryView = Boolean(categoryParam) && !isProductView;
 
       // Helper to build a standardized category path from either an array or a string.
       const resolveProductCategoryPath = async (p) => {
@@ -154,7 +156,7 @@ export default function Breadcrumbs({ separator = '›', hideOnRoot = true }) {
 
           if (Array.isArray(productCatPath) && productCatPath.length) {
             // Replace the 'Products' crumb with the category hierarchy
-            const mapped = productCatPath.map(catLabel => ({ to: { pathname: '/category', search: `?category=${encodeURIComponent(catLabel)}` }, label: catLabel }));
+            const mapped = productCatPath.map(catLabel => ({ to: { pathname: '/products', search: `?category=${encodeURIComponent(catLabel)}` }, label: catLabel }));
             // clear out and add mapped
             const idx = out.findIndex(x => normalizeStr(x.label) === normalizeStr('products'));
             if (idx !== -1) out.splice(idx, 1);
@@ -177,27 +179,39 @@ export default function Breadcrumbs({ separator = '›', hideOnRoot = true }) {
         try {
           const tree = await getCategories();
           const decodedTarget = decodeURIComponent(categoryParam || '');
-          const targetNorm = normalizeStr(decodedTarget);
-          function findPath(nodes, target, path = []) {
+          // split common separators in case a path was passed (parent > child)
+          const partsFromParam = String(decodedTarget).split(/\s*[›>\/\\-]\s*/).map(s => s.trim()).filter(Boolean);
+          const targetCandidates = partsFromParam.length ? partsFromParam.slice().reverse() : [decodedTarget];
+
+          // Flexible find: try exact, then includes (fuzzy), returning full path when found
+          function findPath(nodes, targetNorm, path = []) {
             for (const n of nodes || []) {
               const nextPath = path.concat(n.name);
-              if (normalizeStr(n.name) === target) return nextPath;
+              const nameNorm = normalizeStr(n.name || '');
+              if (nameNorm === targetNorm) return nextPath;
+              if (nameNorm.includes(targetNorm) || targetNorm.includes(nameNorm)) return nextPath;
               if (Array.isArray(n.subcategories) && n.subcategories.length) {
-                const found = findPath(n.subcategories, target, nextPath);
+                const found = findPath(n.subcategories, targetNorm, nextPath);
                 if (found) return found;
               }
             }
             return null;
           }
-          const pathArr = findPath(Array.isArray(tree) ? tree : [], targetNorm);
+
+          let pathArr = null;
+          for (const cand of targetCandidates) {
+            const candNorm = normalizeStr(cand || decodedTarget);
+            pathArr = findPath(Array.isArray(tree) ? tree : [], candNorm);
+            if (pathArr && pathArr.length) break;
+          }
           const out = [];
           const seen = new Set();
           const add = (to, label) => { if (!seen.has(normalizeStr(label || ''))) { seen.add(normalizeStr(label || '')); out.push({ to, label }); } };
-          if (pathArr && pathArr.length) {
-            for (const catLabel of pathArr) add({ pathname: '/category', search: `?category=${encodeURIComponent(catLabel)}` }, catLabel);
+            if (pathArr && pathArr.length) {
+            for (const catLabel of pathArr) add({ pathname: '/products', search: `?category=${encodeURIComponent(catLabel)}` }, catLabel);
           } else {
-            // fallback: show the raw category param
-            add({ pathname: '/category', search: `?category=${encodeURIComponent(decodedTarget)}` }, decodedTarget);
+            // fallback: show the raw category param but link into products listing
+            add({ pathname: '/products', search: `?category=${encodeURIComponent(decodedTarget)}` }, decodedTarget);
           }
           if (mounted) setCrumbs(base.concat(out));
           return;
@@ -244,17 +258,34 @@ export default function Breadcrumbs({ separator = '›', hideOnRoot = true }) {
 
   return (
     <>
-      <nav aria-label="Breadcrumb" style={{ padding: '8px 16px', maxWidth: 1200, margin: '0 auto', fontSize: 13, color: '#333' }}>
+      <nav aria-label="Breadcrumb" style={{ padding: '8px 16px', maxWidth: 1200, margin: '0 auto', fontSize: 14, color: '#333' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <ol style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-        {crumbs.map((c, i) => (
+            {crumbs.map((c, i) => (
           <li key={c.label} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            {i < crumbs.length - 1 ? (
-              <Link to={c.to} style={{ color: '#0b74de', textDecoration: 'none' }}>{c.label}</Link>
-            ) : (
-              <span aria-current="page" style={{ color: '#444', fontWeight: 600 }}>{c.label}</span>
-            )}
-            {i < crumbs.length - 1 ? <span style={{ color: '#999' }}>{separator}</span> : null}
+            {(() => {
+              const isHome = i === 0;
+              const Icon = (
+                <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style={{ display: 'inline-block', verticalAlign: 'middle', marginRight: 6 }}>
+                  <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
+                </svg>
+              );
+              if (i < crumbs.length - 1) {
+                return (
+                  <Link to={c.to} style={{ color: '#0b74de', textDecoration: 'none', fontSize: 14, fontWeight: 500, display: 'inline-flex', alignItems: 'center' }}>
+                    {isHome ? Icon : null}
+                    <span>{c.label}</span>
+                  </Link>
+                );
+              }
+              return (
+                <span aria-current="page" style={{ color: '#666', fontWeight: 600, fontSize: 14, display: 'inline-flex', alignItems: 'center' }}>
+                  {isHome ? Icon : null}
+                  <span>{c.label}</span>
+                </span>
+              );
+            })()}
+            {i < crumbs.length - 1 ? <span style={{ color: '#bbb', fontSize: 14 }}>{separator}</span> : null}
           </li>
         ))}
           </ol>
