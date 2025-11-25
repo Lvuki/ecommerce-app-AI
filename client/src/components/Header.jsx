@@ -294,7 +294,7 @@ export default function Header() {
               (() => {
                 const links = [
                   { to: '/offers', label: 'Offers' },
-                  { to: '/sherbim', label: 'Sherbim' },
+                  { to: '/sherbimet', label: 'Sherbimet' },
                   { to: '/financim', label: 'Financim' },
                   { to: '/shkarko-aplikacionin', label: 'Shkarko aplikacionin' },
                   { to: '/dyqani-afer-meje', label: 'Dyqani afer meje' }

@@ -1,0 +1,59 @@
+/* Basic auth card styles to match the provided design */
+.auth-page {
+  min-height: 80vh;
+  display: flex;
+  align-items: flex-start; /* move the card closer to the top */
+  justify-content: center;
+  padding: 12px; /* original reduced side padding */
+  padding-top: 36px; /* add explicit top spacing so card sits a bit down from the viewport top */
+  padding-bottom: 36px; /* match top spacing for symmetric vertical padding */
+  background: #f6f7f8; /* page light grey */
+}
+.auth-card {
+  width: 420px;
+  background: #ffffff; /* card white */
+  border-radius: 16px;
+  box-shadow: 0 12px 40px rgba(15, 23, 42, 0.08);
+  padding: 24px; /* slightly reduced padding to move content upward */
+  padding-top: 18px; /* bring title closer to the top */
+  box-sizing: border-box;
+  text-align: center;
+  min-height: 580px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start; /* align content to top instead of center */
+}
+.auth-title { font-size: 20px; margin: 2px 0 8px; font-weight: 800; }
+.auth-sub { color: #666; font-size: 13px; margin-bottom: 12px }
+
+.social-row { display: flex; gap: 10px; justify-content: center; margin-bottom: 12px }
+.social-btn { display:flex; align-items:center; gap:8px; padding: 8px 12px; border-radius: 8px; border: 1px solid #eee; background: #fff; font-weight: 700; cursor: pointer }
+.social-btn svg { display:inline-block }
+.social-btn .social-label { font-size: 14px }
+.social-btn.google { color: #111; border-color: rgba(0,0,0,0.08) }
+.social-btn.facebook { color: #111; border-color: rgba(24,119,242,0.12) }
+
+.or-sep { margin: 14px 0; position: relative; }
+.or-sep:before { content: ''; height: 1px; background: #eee; position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%); }
+.or-sep span { display: inline-block; background: #fff; padding: 0 10px; position: relative; z-index: 2; color: #888; font-weight: 700 }
+
+.auth-form { display: flex; flex-direction: column; gap: 10px; margin-top: 4px }
+.auth-input { width: 100%; padding: 12px 12px; border-radius: 8px; border: 1px solid #e6e6e6; box-sizing: border-box; font-size: 14px }
+.password-row { display: flex; align-items: center; gap: 8px }
+.password-row .auth-input { flex: 1 }
+.eye-btn { border: none; background: transparent; cursor: pointer; font-size: 18px }
+
+.auth-helpers { display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: #666 }
+.auth-helpers .remember { display:flex; gap:8px; align-items:center }
+.forgot { color: #0b79d0; text-decoration: none }
+
+.auth-submit { margin-top: 6px; background: #111; color: #fff; border: none; padding: 12px; border-radius: 10px; font-weight: 800; cursor: pointer }
+.auth-error { color: #c00; font-size: 13px }
+.auth-footer { margin-top: 12px; color: #666; font-size: 13px }
+.link-btn { background: none; border: none; color: #0b79d0; cursor: pointer; font-weight: 700 }
+
+.file-label input[type=file] { display: block; margin-top: 8px }
+
+@media (max-width: 520px) {
+  .auth-card { width: 100%; padding: 20px }
+}
