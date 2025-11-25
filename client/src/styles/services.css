@@ -1,0 +1,18 @@
+/* Basic services page styling */
+.services-page { padding: 28px 12px; background: #fff; color: #111; }
+.services-page .container { max-width: 960px; margin: 0 auto; }
+.page-title { font-size: 28px; font-weight: 800; margin-bottom: 8px; }
+.lead { color: #444; margin-bottom: 18px; line-height: 1.5 }
+.service-section { border-top: 1px solid #eee; padding: 18px 0; }
+.service-title { margin: 0 0 8px; font-size: 18px; font-weight: 800 }
+.service-intro { margin: 0 0 10px; color: #555 }
+.service-actions { margin-bottom: 8px }
+.read-more { background: none; border: none; color: #0b74de; font-weight: 700; cursor: pointer }
+.service-details { background: #fbfdff; padding: 12px; border-radius: 8px; color: #333 }
+.service-links { display:flex; gap: 10px; margin-top: 10px }
+.link-btn { background: #0b74de; color: #fff; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-weight: 700 }
+
+@media (max-width: 520px) {
+  .services-page { padding: 18px 10px }
+  .page-title { font-size: 22px }
+}

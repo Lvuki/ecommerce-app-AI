@@ -24,6 +24,7 @@ import BlogPost from "./pages/BlogPost";
 import BlogsAdmin from "./pages/BlogsAdmin";
 import CategoriesAdmin from "./pages/CategoriesAdmin";
 import OffersPage from "./pages/Offers";
+import Sherbimet from './pages/Sherbimet';
 import Header from "./components/Header";
 import Breadcrumbs from './components/Breadcrumbs';
 import Footer from "./components/Footer";
@@ -57,6 +58,7 @@ function App() {
     <Route path="/products/:id" element={<ProductView />} />
     <Route path="/category" element={<Category />} />
         <Route path="/offers" element={<OffersPage />} />
+        <Route path="/sherbimet" element={<Sherbimet />} />
     <Route path="/pages/:slug" element={<StaticPage />} />
   <Route path="/cart" element={<CartPage />} />
     <Route path="/wishlist" element={<Wishlist />} />
