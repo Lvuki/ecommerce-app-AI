@@ -26,6 +26,7 @@ import CategoriesAdmin from "./pages/CategoriesAdmin";
 import OffersPage from "./pages/Offers";
 import Sherbimet from './pages/Sherbimet';
 import Financim from './pages/Financim';
+import ShkarkoAplikacionin from './pages/ShkarkoAplikacionin';
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import StaticPage from './pages/StaticPage';
@@ -59,6 +60,7 @@ function App() {
         <Route path="/offers" element={<OffersPage />} />
         <Route path="/sherbimet" element={<Sherbimet />} />
         <Route path="/financim" element={<Financim />} />
+        <Route path="/shkarko-aplikacionin" element={<ShkarkoAplikacionin />} />
     <Route path="/pages/:slug" element={<StaticPage />} />
   <Route path="/cart" element={<CartPage />} />
     <Route path="/wishlist" element={<Wishlist />} />
