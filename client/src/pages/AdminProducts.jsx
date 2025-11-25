@@ -10,10 +10,11 @@ export default function AdminProducts() {
   }, [navigate]);
 
   // Reuse the public ProductsPage for now inside admin layout.
+  // Pass a flag so the public page hides purchase actions in admin context.
   // Later you can replace this with a dedicated admin product editor.
   return (
     <div>
-      <ProductsPage />
+      <ProductsPage hidePurchaseActions={true} />
     </div>
   );
 }

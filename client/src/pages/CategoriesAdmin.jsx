@@ -121,8 +121,15 @@ export default function CategoriesAdmin() {
 
       {showForm && (
         <div style={{ position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.4)' }}>
-          <div style={{ width: '90%', maxWidth: 700, background: '#fff', padding: 16, borderRadius: 8 }}>
-            <h3>{editId ? 'Edit Category' : 'New Category'}</h3>
+          <div style={{ width: '90%', maxWidth: 700, maxHeight: '90vh', overflowY: 'auto', overflowX: 'hidden', background: '#fff', padding: 16, borderRadius: 8, position: 'relative' }}>
+            {/* sticky header so close button remains visible while scrolling */}
+            <div style={{ position: 'sticky', top: 0, background: '#fff', paddingBottom: 12, marginBottom: 12, zIndex: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h3 style={{ margin: 0 }}>{editId ? 'Edit Category' : 'New Category'}</h3>
+              <button aria-label="Close modal" onClick={() => setShowForm(false)}
+                style={{ width: 32, height: 32, borderRadius: 16, border: '1px solid #ddd', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 2px 6px rgba(0,0,0,0.1)' }}>
+                ×
+              </button>
+            </div>
             <form onSubmit={submit} style={{ display: 'grid', gap: 8 }}>
               <input placeholder="Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
               <textarea placeholder="Description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={4} />

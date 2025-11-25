@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { getCategoriesAndBrands, searchProducts } from "../services/productService";
+import { getCategories } from "../services/categoryService";
 import { addItem } from "../services/cartService";
 import wishlistService from "../services/wishlistService";
 
@@ -12,12 +13,24 @@ export default function CategoryPage() {
   const [products, setProducts] = useState([]);
   const [filters, setFilters] = useState({ category: "", brand: "", priceMin: "", priceMax: "", stockMin: "", color: "", size: "" });
   const [meta, setMeta] = useState({ categories: [], brands: [] });
+  const [categoriesTree, setCategoriesTree] = useState([]);
 
-  // Load categories/brands
+  // Load categories tree and brands
   useEffect(() => {
-    getCategoriesAndBrands()
-      .then((m) => setMeta(m || { categories: [], brands: [] }))
-      .catch(() => setMeta({ categories: [], brands: [] }));
+    let mounted = true;
+    (async () => {
+      try {
+        const [tree, brandsRes] = await Promise.all([getCategories(), getCategoriesAndBrands()]);
+        if (!mounted) return;
+        setCategoriesTree(Array.isArray(tree) ? tree : []);
+        setMeta(brandsRes || { categories: [], brands: [] });
+      } catch (e) {
+        if (!mounted) return;
+        setCategoriesTree([]);
+        setMeta({ categories: [], brands: [] });
+      }
+    })();
+    return () => { mounted = false; };
   }, []);
 
   // Load products based on URL params
@@ -30,7 +43,11 @@ export default function CategoryPage() {
     if (query.size) query["spec_size"] = query.size;
     searchProducts(query)
       .then(setProducts)
-      .catch(() => setError("Failed to load products"))
+      .catch((err) => {
+        // Surface the real error message for easier debugging and log to console
+        console.error('searchProducts failed', err);
+        setError(err && err.message ? err.message : 'Failed to load products');
+      })
       .finally(() => setLoading(false));
     setFilters({
       category: params.category || "",
@@ -84,16 +101,26 @@ export default function CategoryPage() {
               <div style={{ fontWeight: 600, marginBottom: 6 }}>Category</div>
               <select value={filters.category} onChange={(e) => setFilters({ ...filters, category: e.target.value })}>
                 <option value="">All</option>
-                {meta.categories.map((c) => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
+                {/* render hierarchical categories flattened with indentation */}
+                {(() => {
+                  const out = [];
+                  function walk(nodes, depth = 0) {
+                    for (const n of nodes || []) {
+                      const label = `${'\u00A0'.repeat(depth * 2)}${n.name}`;
+                      out.push(<option key={`cat-${n.id}`} value={n.name}>{label}</option>);
+                      if (Array.isArray(n.subcategories) && n.subcategories.length) walk(n.subcategories, depth + 1);
+                    }
+                  }
+                  walk(categoriesTree, 0);
+                  return out;
+                })()}
               </select>
             </div>
             <div>
               <div style={{ fontWeight: 600, marginBottom: 6 }}>Brand</div>
               <select value={filters.brand} onChange={(e) => setFilters({ ...filters, brand: e.target.value })}>
                 <option value="">All</option>
-                {meta.brands.map((b) => (
+                {(Array.isArray(meta.brands) ? meta.brands : []).map((b) => (
                   <option key={b} value={b}>{b}</option>
                 ))}
               </select>
@@ -165,6 +192,8 @@ export default function CategoryPage() {
     </div>
   );
 }
+
+
 
 
 

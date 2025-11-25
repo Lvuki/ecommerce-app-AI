@@ -18,6 +18,7 @@ module.exports = (sequelize, DataTypes) => {
     description: DataTypes.TEXT,
     image: DataTypes.STRING,
     parentId: DataTypes.INTEGER,
+    specs: DataTypes.JSON,
   }, {
     sequelize,
     modelName: 'Category',

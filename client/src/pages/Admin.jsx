@@ -26,6 +26,7 @@ export default function Admin() {
           <NavLink to="/admin/orders" style={({ isActive }) => isActive ? { fontWeight: 700, color: '#0b74de' } : undefined}>Orders</NavLink>
           <NavLink to="/admin/reports" style={({ isActive }) => isActive ? { fontWeight: 700, color: '#0b74de' } : undefined}>Reports</NavLink>
           <NavLink to="/admin/pages" style={({ isActive }) => isActive ? { fontWeight: 700, color: '#0b74de' } : undefined}>Pages</NavLink>
+          <NavLink to="/admin/settings" style={({ isActive }) => isActive ? { fontWeight: 700, color: '#0b74de' } : undefined}>Settings</NavLink>
         </nav>
         <div style={{ marginTop: 18, fontSize: 13, color: '#666' }}>
           <div style={{ marginBottom: 6 }}><strong>Tips</strong></div>

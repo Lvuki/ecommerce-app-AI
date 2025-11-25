@@ -51,7 +51,11 @@ export async function addItem(item, qty = 1) {
     method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
     body: JSON.stringify({ productId: item.id, quantity: qty })
   });
-  if (!res.ok) throw new Error('Failed to add item');
+  if (!res.ok) {
+    let errMsg = 'Failed to add item';
+    try { const body = await res.json(); if (body && (body.error || body.message)) errMsg = body.error || body.message; } catch (_) {}
+    throw new Error(errMsg);
+  }
   const data = await res.json();
   const mapped = data.items.map(i => ({ id: i.productId, name: i.name, image: i.image, price: i.price, qty: i.qty }));
   try { window.dispatchEvent(new CustomEvent('cartUpdated', { detail: { items: mapped } })); } catch (_) {}

@@ -1,0 +1,85 @@
+/* Product card styles adapted from user-provided snippet */
+.product-container { display: flex; gap: 20px; padding: 0; }
+/* Keep box-sizing so borders don't change the outer size */
+.product-card {
+	box-sizing: border-box;
+	background-color: white;
+	/* light grey baseline border (1px) so cards have visible edge */
+	border: 1px solid #e6e6e6;
+	border-radius: 6px;
+	width: 250px;
+	max-width: 100%;
+	padding: 14px;
+	text-align: center;
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	/* increased fixed height so all cards match and appear larger */
+	height: 420px;
+	flex: 0 0 250px;
+	align-items: stretch;
+	/* base shadow (same as offer/highlighted cards) */
+	box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+	transition: box-shadow 0.18s ease, border-color 0.12s ease, transform 0.12s ease;
+}
+
+/* Subtle shadow and lift on hover; using transform avoids layout reflow */
+.recommended .product-card:hover {
+	border-color: #006d77;
+	box-shadow: 0 8px 22px rgba(0,0,0,0.08);
+	transform: translateY(-6px);
+}
+
+/* Keep highlighted (offer) cards visually distinct but without the hover border */
+.product-card.highlighted {
+	/* keep same visible border as other cards */
+	border-color: #e6e6e6;
+	box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+}
+.product-card.highlighted:hover {
+	transform: translateY(-4px);
+	box-shadow: 0 8px 20px rgba(0,0,0,0.07);
+}
+
+.badge { background-color: #e9ecef; color: #444; padding: 5px 15px; border-radius: 0 0 15px 15px; position: absolute; top: 0; left: 50%; transform: translateX(-50%) translateY(-6px); font-size: 0.8rem; font-weight: bold; z-index: 10; width: 100px; transition: background-color 0.12s ease, color 0.12s ease, transform 0.12s ease, opacity 0.12s ease; opacity: 0; visibility: hidden; }
+.badge-text { display: block; font-size: 0.7rem; font-weight: normal; opacity: 0.9; }
+.badge-value { display: block; font-size: 0.9rem; }
+.category { color: #4db6ac; font-size: 0.8rem; text-transform: uppercase; margin-bottom: 15px; font-weight: 600; margin-top: 15px; }
+
+/* Make image fill a fixed area so all cards match visually */
+.product-image { width: 100%; height: 220px; object-fit: cover; margin-bottom: 12px; border-radius: 4px; display: block; }
+
+/* fallback placeholder when image missing */
+.product-image[alt=""] { background: #fafafa; }
+
+/* Ensure image area keeps same visible footprint even if image smaller */
+.product-card .product-image,
+.product-card .product-image + div {
+	width: 100%;
+	height: 200px;
+	display: block;
+	overflow: hidden;
+}
+
+.product-name { font-size: 0.95rem; color: #333; margin-bottom: 8px; line-height: 1.35; height: 44px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.price-container { margin-bottom: 10px; min-height: 52px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.old-price { text-decoration: line-through; color: #757575; font-size: 0.8rem; display: block; margin-bottom: 2px; }
+.current-price { font-size: 1.6rem; font-weight: bold; color: #000; }
+.currency { font-size: 1rem; font-weight: normal; vertical-align: middle; }
+.buy-btn { background-color: #b2ebf2; color: #006064; border: none; padding: 10px 0; width: 100%; font-size: 1rem; font-weight: bold; cursor: pointer; border-radius: 4px; text-transform: uppercase; transition: background-color 0.16s ease, color 0.16s ease, transform 0.12s ease; }
+.buy-btn:hover { /* additional hover handled by parent rules (e.g. recommended orange) */ }
+.product-card.highlighted .buy-btn { background-color: #b2ebf2; color: #006064; }
+.product-card.highlighted .buy-btn:hover { background-color: #80deea; }
+
+/* Recommended section: offer-like green border appears on hover but doesn't shift layout */
+.recommended .product-card:hover { /* badge and buy-btn color change on hover */ }
+.recommended .product-card:hover .badge { background-color: #006d77; color: #fff; transform: translateX(-50%) translateY(-1px); opacity: 1; visibility: visible; }
+.product-card.highlighted .badge { /* hide badge for offer cards by default */ opacity: 0; visibility: hidden; transform: translateX(-50%) translateY(-6px); }
+.product-card.highlighted:hover .badge { background-color: #006d77; color: #fff; transform: translateX(-50%) translateY(-1px); opacity: 1; visibility: visible; }
+.recommended .product-card:hover .buy-btn { background-color: #ffa000; color: #fff; transform: translateY(-1px); }
+/* Keep offer cards (highlighted) without the green border even on hover (explicit) */
+.recommended .product-card.highlighted:hover { border-color: transparent; }
+.navigation { display: flex; justify-content: center; margin-top: 20px; gap: 5px; }
+.dot { width: 30px; height: 4px; background-color: #e0e0e0; border-radius: 2px; }
+.dot.active { background-color: #006d77; }

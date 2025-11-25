@@ -31,6 +31,20 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 
+// Simple request logger that writes to `server/logs/requests.log` for debugging
+const logsDir = path.join(__dirname, 'logs');
+if (!fs.existsSync(logsDir)) fs.mkdirSync(logsDir, { recursive: true });
+const requestsLog = path.join(logsDir, 'requests.log');
+app.use((req, res, next) => {
+  try {
+    const line = `${new Date().toISOString()} ${req.method} ${req.originalUrl} query=${JSON.stringify(req.query)}\n`;
+    fs.appendFile(requestsLog, line, () => {});
+  } catch (e) {
+    // ignore logging errors
+  }
+  next();
+});
+
 // Enable CORS for frontend
 app.use(cors({
   origin: 'http://localhost:3000',

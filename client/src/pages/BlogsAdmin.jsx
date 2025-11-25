@@ -103,7 +103,7 @@ export default function BlogsAdmin() {
 
       {showForm && (
         <div style={{ position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.4)', zIndex: 90 }}>
-          <div style={{ width: '90%', maxWidth: 700, background: '#fff', padding: 16, borderRadius: 8 }}>
+          <div style={{ width: '90%', maxWidth: 700, maxHeight: '90vh', overflowY: 'auto', overflowX: 'hidden', background: '#fff', padding: 16, borderRadius: 8, position: 'relative' }}>
             <h3>{form.id ? 'Edit Blog' : 'New Blog'}</h3>
             <form onSubmit={submit} style={{ display: 'grid', gap: 8 }}>
               <input placeholder='Title' value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
@@ -140,12 +140,14 @@ export default function BlogsAdmin() {
         {/* Blog categories management modal (admin only) */}
         {showCategoriesPanel ? (
           <div style={{ position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.4)', zIndex: 90 }}>
-            <div style={{ width: '92%', maxWidth: 1000, maxHeight: '90vh', overflow: 'auto', background: '#fff', padding: 18, borderRadius: 8 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+            <div style={{ width: '92%', maxWidth: 1000, maxHeight: '90vh', overflow: 'auto', background: '#fff', padding: 18, borderRadius: 8, position: 'relative' }}>
+              {/* sticky header so close button stays visible while content scrolls */}
+              <div style={{ position: 'sticky', top: 0, background: '#fff', paddingBottom: 12, marginBottom: 12, zIndex: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <h3 style={{ margin: 0 }}>Manage Blog Categories</h3>
-                <div style={{ display: 'flex', gap: 8 }}>
-                  <button onClick={() => { setShowCategoriesPanel(false); setCatForm({ id: null, name: '', description: '', imageFile: null, image: '', parentId: '' }); }}>Close</button>
-                </div>
+                <button aria-label="Close modal" onClick={() => { setShowCategoriesPanel(false); setCatForm({ id: null, name: '', description: '', imageFile: null, image: '', parentId: '' }); }}
+                  style={{ width: 32, height: 32, borderRadius: 16, border: '1px solid #ddd', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 2px 6px rgba(0,0,0,0.1)' }}>
+                  ×
+                </button>
               </div>
 
               <div style={{ display: 'grid', gap: 12 }}>

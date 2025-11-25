@@ -10,11 +10,20 @@ module.exports = (sequelize, DataTypes) => {
     image: { type: DataTypes.STRING },
   images: { type: DataTypes.JSON },
     category: { type: DataTypes.STRING },
-    sku: { type: DataTypes.STRING },
-    brand: { type: DataTypes.STRING },
+  sku: { type: DataTypes.STRING, field: 'kodi_i_produktit' },
+  brand: { type: DataTypes.STRING, field: 'marka' },
     stock: { type: DataTypes.INTEGER, defaultValue: 0 },
     specs: { type: DataTypes.JSON },
+  garancia: { type: DataTypes.STRING },
+  modeli: { type: DataTypes.STRING },
+    categories: { type: DataTypes.JSON },
+    categoryIds: { type: DataTypes.JSON },
   });
+  Product.associate = (models) => {
+    if (models && models.Rating) {
+      Product.hasMany(models.Rating, { foreignKey: 'productId', as: 'ratings' });
+    }
+  };
 
   return Product;
 };

@@ -193,10 +193,14 @@ const AdminUsers = () => {
 
       {showAddModal && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 60 }}>
-          <div style={{ width: '90%', maxWidth: 640, background: '#fff', borderRadius: 8, padding: 18, boxShadow: '0 8px 24px rgba(0,0,0,0.2)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+          <div style={{ width: '90%', maxWidth: 640, maxHeight: '90vh', overflowY: 'auto', overflowX: 'hidden', background: '#fff', borderRadius: 8, padding: 18, boxShadow: '0 8px 24px rgba(0,0,0,0.2)', position: 'relative' }}>
+            {/* sticky header so close button stays visible */}
+            <div style={{ position: 'sticky', top: 0, background: '#fff', paddingBottom: 12, marginBottom: 12, zIndex: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <h3 style={{ margin: 0 }}>Add User</h3>
-              <button onClick={() => { setShowAddModal(false); setNewUser({ name: '', surname: '', email: '', password: '', role: 'user' }); }}>Close</button>
+              <button aria-label="Close modal" onClick={() => { setShowAddModal(false); setNewUser({ name: '', surname: '', email: '', password: '', role: 'user' }); setFile(null); }}
+                style={{ width: 32, height: 32, borderRadius: 16, border: '1px solid #ddd', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 2px 6px rgba(0,0,0,0.1)' }}>
+                ×
+              </button>
             </div>
             <form onSubmit={async (e) => { await handleAddUser(e); setShowAddModal(false); }} style={{ display: 'grid', gap: 8 }}>
               <input placeholder="Name" value={newUser.name} onChange={(e) => setNewUser({ ...newUser, name: e.target.value })} className="border px-2 py-1" />
@@ -223,12 +227,14 @@ const AdminUsers = () => {
       {/* Roles management modal */}
       {showRolesModal ? (
         <div style={{ position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.4)', zIndex: 80 }}>
-          <div style={{ width: '92%', maxWidth: 640, maxHeight: '90vh', overflow: 'auto', background: '#fff', padding: 18, borderRadius: 8 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+          <div style={{ width: '92%', maxWidth: 640, maxHeight: '90vh', overflowY: 'auto', overflowX: 'hidden', background: '#fff', padding: 18, borderRadius: 8, position: 'relative' }}>
+            {/* sticky header so close button stays visible */}
+            <div style={{ position: 'sticky', top: 0, background: '#fff', paddingBottom: 12, marginBottom: 12, zIndex: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <h3 style={{ margin: 0 }}>Manage Roles</h3>
-              <div style={{ display: 'flex', gap: 8 }}>
-                <button onClick={() => { setShowRolesModal(false); setRoleEditIndex(-1); setRoleEditValue(''); setNewRoleName(''); }}>Close</button>
-              </div>
+              <button aria-label="Close modal" onClick={() => { setShowRolesModal(false); setRoleEditIndex(-1); setRoleEditValue(''); setNewRoleName(''); }}
+                style={{ width: 32, height: 32, borderRadius: 16, border: '1px solid #ddd', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 2px 6px rgba(0,0,0,0.1)' }}>
+                ×
+              </button>
             </div>
 
             <div style={{ display: 'grid', gap: 12 }}>
