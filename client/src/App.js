@@ -25,8 +25,8 @@ import BlogsAdmin from "./pages/BlogsAdmin";
 import CategoriesAdmin from "./pages/CategoriesAdmin";
 import OffersPage from "./pages/Offers";
 import Sherbimet from './pages/Sherbimet';
+import Financim from './pages/Financim';
 import Header from "./components/Header";
-import Breadcrumbs from './components/Breadcrumbs';
 import Footer from "./components/Footer";
 import StaticPage from './pages/StaticPage';
 
@@ -34,7 +34,6 @@ function App() {
   return (
     <Router>
       <Header />
-      <Breadcrumbs />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/dashboard" element={<Dashboard />} />
@@ -59,6 +58,7 @@ function App() {
     <Route path="/category" element={<Category />} />
         <Route path="/offers" element={<OffersPage />} />
         <Route path="/sherbimet" element={<Sherbimet />} />
+        <Route path="/financim" element={<Financim />} />
     <Route path="/pages/:slug" element={<StaticPage />} />
   <Route path="/cart" element={<CartPage />} />
     <Route path="/wishlist" element={<Wishlist />} />
