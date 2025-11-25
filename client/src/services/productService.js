@@ -17,12 +17,28 @@ export async function getCategoriesAndBrands() {
   return res.json();
 }
 
+// Get categories and brands, optionally scoped to a category name
+export async function getCategoriesAndBrandsScoped(category, debug = false) {
+  const qs = new URLSearchParams();
+  if (category) qs.set('category', category);
+  if (debug) qs.set('debug', '1');
+  const res = await fetch(`${API_BASE_URL}/products/categories/list${qs.toString() ? `?${qs.toString()}` : ''}`);
+  return res.json();
+}
+
 export async function searchProducts(params = {}) {
   const qs = new URLSearchParams();
   Object.entries(params).forEach(([k, v]) => {
-    if (v !== undefined && v !== null && v !== "") qs.append(k, v);
+    if (v === undefined || v === null || v === "") return;
+    // If value is an array, append each element separately (brand[]=a&brand[]=b style)
+    if (Array.isArray(v)) {
+      v.forEach(item => { if (item !== undefined && item !== null && item !== '') qs.append(k, item); });
+    } else {
+      qs.append(k, v);
+    }
   });
-  const res = await fetch(`${API_BASE_URL}/products?${qs.toString()}`);
+  const url = `${API_BASE_URL}/products?${qs.toString()}`;
+  const res = await fetch(url);
   if (!res.ok) {
     let err = 'Failed to load products';
     try { const body = await res.json(); if (body && (body.error || body.message)) err = body.error || body.message; } catch (_) {}

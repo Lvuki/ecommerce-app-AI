@@ -203,7 +203,7 @@ export default function Header() {
     if (searchCategory) params.set('category', searchCategory);
     if (searchQuery) params.set('q', searchQuery);
     const qs = params.toString();
-    navigate(`/category${qs ? `?${qs}` : ''}`);
+    navigate(`/products${qs ? `?${qs}` : ''}`);
   };
 
   // Mega menu renderer: show columns of root categories and nested subcategories
@@ -265,7 +265,7 @@ export default function Header() {
   return (
     <header style={{ display: "flex", flexDirection: 'column', gap: 8, padding: "12px 16px", borderBottom: "1px solid #eee" }}>
       {/* inline styles for placeholder and search input border to match image */}
-  <style>{`
+      <style>{`
     .header-search-input::placeholder { color: #0B74DE; opacity: 0.95; }
     /* slightly stronger border for better visibility in the search area */
     .header-search-input { border: 1.5px solid #d6e6f3; }
@@ -283,44 +283,25 @@ export default function Header() {
   /* hamburger overlay and slide-in panel */
   .hamburger-backdrop { position: fixed; top: 64px; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0); z-index: 200; display: flex; align-items: flex-start; justify-content: flex-start; padding-top: 12px; pointer-events: none; transition: background 240ms ease; }
   .hamburger-backdrop.open { background: rgba(0,0,0,0.24); pointer-events: auto; }
-  .hamburger-panel { width: 100%; max-width: 1170px; box-shadow: 0 12px 40px rgba(0,0,0,0.12); border-radius: 6px; display: flex; overflow: hidden; background: #fff; transform: translateX(-100%); transition: transform 320ms cubic-bezier(.2,.8,.2,1); }
+  .hamburger-panel { width: 100%; max-width: 1440px; box-shadow: 0 12px 40px rgba(0,0,0,0.12); border-radius: 6px; display: flex; overflow: hidden; background: #fff; transform: translateX(-100%); transition: transform 320ms cubic-bezier(.2,.8,.2,1); }
   .hamburger-panel.open { transform: translateX(0); }
   `}</style>
       {/* top row: centered nav with full-width right controls */}
       <div style={{ display: 'flex', justifyContent: 'center', width: '100%', position: 'relative' }}>
-          <div style={{ width: '100%', maxWidth: 1170, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <nav style={{ display: 'flex', gap: 48, position: 'relative' }}>
+        <div style={{ width: '100%', maxWidth: 1440, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <nav style={{ display: 'flex', gap: 135, position: 'relative' }}>
             {
               (() => {
-                const isActive = (path) => {
-                  try { return location.pathname === path || location.pathname.startsWith(path + '/'); } catch { return false; }
-                };
-                return (
-                  <>
-                    <Link to="/" className={'top-nav-link' + (isActive('/') ? ' active' : '')}>Home</Link>
-                    <Link to="/dashboard" className={'top-nav-link' + (isActive('/dashboard') ? ' active' : '')}>Dashboard</Link>
-                    <Link to="/products" className={'top-nav-link' + (isActive('/products') ? ' active' : '')}>Products</Link>
-
-                    <Link to="/offers" className={'top-nav-link' + (isActive('/offers') ? ' active' : '')}>Offers</Link>
-
-                    {headerPages.map(pg => (
-                      <Link key={pg.id} to={`/pages/${pg.slug}`} className={'top-nav-link' + (isActive(`/pages/${pg.slug}`) ? ' active' : '')}>{pg.title}</Link>
-                    ))}
-
-                    {/* Category mega menu trigger */}
-                    <div ref={menuRef} style={{ position: 'relative' }}>
-                      <button type="button" className="top-nav-link" onClick={() => setShowCategoryMenu(s => !s)} onMouseEnter={() => setShowCategoryMenu(true)} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>Category ▾</button>
-                      {showCategoryMenu ? (
-                        <div style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)', top: '100%', marginTop: 8, background: '#fff', border: '1px solid #eee', boxShadow: '0 8px 24px rgba(0,0,0,0.08)', padding: 16, zIndex: 80, minWidth: 640 }}>
-                          <CategoryMega nodes={headerCategories} onSelect={(name) => { setShowCategoryMenu(false); navigate(`/category?category=${encodeURIComponent(name)}`); }} />
-                        </div>
-                      ) : null}
-                    </div>
-
-                    <Link to={isAdmin() ? "/admin/blogs" : "/blogs"} className={'top-nav-link' + (isActive('/blogs') ? ' active' : '')}>Blogs</Link>
-                    <Link to="/admin/users" className={'top-nav-link' + (isActive('/admin/users') ? ' active' : '')}>Users</Link>
-                  </>
-                );
+                const links = [
+                  { to: '/offers', label: 'Offers' },
+                  { to: '/sherbim', label: 'Sherbim' },
+                  { to: '/financim', label: 'Financim' },
+                  { to: '/shkarko-aplikacionin', label: 'Shkarko aplikacionin' },
+                  { to: '/dyqani-afer-meje', label: 'Dyqani afer meje' }
+                ];
+                return links.map(l => (
+                  <Link key={l.to} to={l.to} className={'top-nav-link' + (location && (location.pathname === l.to || location.pathname.startsWith(l.to + '/')) ? ' active' : '')}>{l.label}</Link>
+                ));
               })()
             }
           </nav>
@@ -350,18 +331,18 @@ export default function Header() {
           </div>
 
           {isAdministrator ? (
-              <Link to="/admin" style={{ padding: '8px 12px', borderRadius: 6, background: '#0b74de', color: '#fff', textDecoration: 'none', fontSize: 14 }}>Admin Console</Link>
+            <Link to="/admin" style={{ padding: '8px 12px', borderRadius: 6, background: '#0b74de', color: '#fff', textDecoration: 'none', fontSize: 14 }}>Admin Console</Link>
           ) : null}
         </div>
       </div>
 
       {/* bottom row: centered container with hamburger (left), search (center), controls (right) */}
       <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
-        <div style={{ width: '100%', maxWidth: 1170, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+        <div style={{ width: '100%', maxWidth: 1440, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
               <Link to="/" style={{ display: 'inline-flex', alignItems: 'center', textDecoration: 'none' }} aria-label="Home">
-                <img src={logo} alt="GLOBE" style={{ height: 36, display: 'block' }} />
+                <img src={logo} alt="GLOBE" style={{ height: 56, display: 'block' }} />
               </Link>
               <div ref={hamburgerRef} style={{ position: 'relative' }}>
                 <button type="button" onClick={() => {
@@ -407,13 +388,13 @@ export default function Header() {
                                   <div key={sc.id || sc.name} style={{ minWidth: 160 }}>
                                     {/* make level-1 child clickable as well */}
                                     <div style={{ fontWeight: 800, marginBottom: 6 }}>
-                                      <button type="button" onClick={() => { setShowHamburger(false); navigate(`/category?category=${encodeURIComponent(sc.name)}`); }} style={{ color: '#111', textDecoration: 'none', background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontSize: 'inherit', fontWeight: 800 }}>{sc.name}</button>
+                                      <button type="button" onClick={() => { setShowHamburger(false); navigate(`/products?category=${encodeURIComponent(sc.name)}`); }} style={{ color: '#111', textDecoration: 'none', background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontSize: 'inherit', fontWeight: 800 }}>{sc.name}</button>
                                     </div>
                                     {Array.isArray(sc.subcategories) && sc.subcategories.length ? (
                                       <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                                         {sc.subcategories.map(ss => (
                                           <li key={ss.id || ss.name} style={{ marginBottom: 6 }}>
-                                            <button type="button" onClick={() => { setShowHamburger(false); navigate(`/category?category=${encodeURIComponent(ss.name)}`); }} style={{ background: 'none', border: 'none', padding: 0, color: '#444', cursor: 'pointer' }}>{ss.name}</button>
+                                            <button type="button" onClick={() => { setShowHamburger(false); navigate(`/products?category=${encodeURIComponent(ss.name)}`); }} style={{ background: 'none', border: 'none', padding: 0, color: '#444', cursor: 'pointer' }}>{ss.name}</button>
                                           </li>
                                         ))}
                                       </ul>
@@ -428,7 +409,7 @@ export default function Header() {
                         ) : (
                           <div>
                             <h3 style={{ marginTop: 0 }}>All categories</h3>
-                            <CategoryMega nodes={headerCategories} onSelect={(name) => { setShowHamburger(false); navigate(`/category?category=${encodeURIComponent(name)}`); }} />
+                            <CategoryMega nodes={headerCategories} onSelect={(name) => { setShowHamburger(false); navigate(`/products?category=${encodeURIComponent(name)}`); }} />
                           </div>
                         )}
                       </main>
@@ -439,7 +420,7 @@ export default function Header() {
             </div>
           </div>
 
-            <form onSubmit={handleSearch} style={{ display: 'flex', gap: 12, alignItems: 'center', flex: 1 }}>
+          <form onSubmit={handleSearch} style={{ display: 'flex', gap: 12, alignItems: 'center', flex: 1 }}>
             <div style={{ position: 'relative', display: 'flex', alignItems: 'center', width: '100%' }}>
               <input
                 className="header-search-input"
@@ -449,7 +430,7 @@ export default function Header() {
                 style={{ padding: '0 12px', fontSize: 16, borderRadius: 6, flex: 1, height: 40, display: 'inline-block' }}
               />
               {/* B2B toggle/button placed next to search input */}
-                <div style={{ marginLeft: 8, display: 'flex', alignItems: 'center' }}>
+              <div style={{ marginLeft: 8, display: 'flex', alignItems: 'center' }}>
                 <button type="button" onClick={() => setB2bEnabled(s => !s)} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '6px 10px', borderRadius: 20, border: '1.5px solid #bfe6fb', background: '#fff', cursor: 'pointer' }} aria-pressed={b2bEnabled} title="B2B">
                   <div style={{ width: 36, height: 20, borderRadius: 20, background: b2bEnabled ? '#ffb84d' : '#eef6ff', position: 'relative' }}>
                     <div style={{ width: 14, height: 14, borderRadius: 12, background: b2bEnabled ? '#fff' : '#0b74de', position: 'absolute', top: 3, left: (b2bEnabled ? 19 : 3), transition: 'left 140ms linear' }} />
@@ -498,11 +479,11 @@ export default function Header() {
 
       {/* announcement bar like the uploaded design - show only on homepage */}
       {location && location.pathname === '/' ? (
-        <div style={{ width: '100%' }}>
-          <div style={{ maxWidth: 1170, margin: '0 auto' }}>
-            <div style={{ marginTop: 12, background: '#f4f6f8', padding: '14px 18px', borderRadius: 4, display: 'flex', alignItems: 'center', gap: 12, justifyContent: 'flex-start' }}>
-              <div style={{ width: 44, height: 44, borderRadius: 22, border: '1px solid #ddd', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fff', fontSize: 20 }}>!</div>
-              <div style={{ color: '#333', letterSpacing: 0.4, fontSize: 13, textTransform: 'uppercase', fontWeight: 600, textAlign: 'left' }}>LOREM IPSUM DOLOR SIT AMET, CONSECTETUER ADIPISCING ELIT, SED DIAM NONUMMY NIBH EUISMOD EUISMOD IBH EUISMOD EUISMOD</div>
+        <div style={{ width: '100%', background: '#f6f6f6', padding: '20px 0' }}>
+          <div style={{ maxWidth: 1440, margin: '0 auto', padding: '0 18px' }}>
+            <div style={{ marginTop: 0, display: 'flex', alignItems: 'center', gap: 12, justifyContent: 'flex-start' }}>
+              <div style={{ width: 52, height: 52, borderRadius: 26, border: '1px solid #ddd', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fff', fontSize: 22 }}>!</div>
+              <div style={{ color: '#333', letterSpacing: 0.6, fontSize: 14, textTransform: 'uppercase', fontWeight: 600, textAlign: 'left' }}>LOREM IPSUM DOLOR SIT AMET, CONSECTETUER ADIPISCING ELIT, SED DIAM NONUMMY NIBH EUISMOD EUISMOD IBH EUISMOD EUISMOD</div>
             </div>
           </div>
         </div>
@@ -510,5 +491,3 @@ export default function Header() {
     </header>
   );
 }
-
-

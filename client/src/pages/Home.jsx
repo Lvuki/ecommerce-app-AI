@@ -7,6 +7,7 @@ import { isAdmin } from "../services/authService";
 import { addItem } from "../services/cartService";
 import wishlistService from "../services/wishlistService";
 import { getToken } from "../services/authService";
+import '../styles/productCard.css';
 
 
 export default function Home() {
@@ -14,6 +15,9 @@ export default function Home() {
   const [currentPage, setCurrentPage] = useState(1);
   const perPage = 5;
   const [slideIdx, setSlideIdx] = useState(0);
+  // banner slider state (homepage full-bleed banner under announcement)
+  const [bannerIdx, setBannerIdx] = useState(0);
+  const bannerImages = ['/images/hero-story.avif', '/images/hero-2.avif', '/images/hero-3.avif'];
   const isLoggedIn = useMemo(() => !!getToken(), []);
 
   useEffect(() => {
@@ -25,10 +29,11 @@ export default function Home() {
     setCurrentPage(1);
   }, [products.length]);
 
-  useEffect(() => {
-    const id = setInterval(() => setSlideIdx((i) => (i + 1) % Math.max(1, Math.min(5, products.length))), 4000);
-    return () => clearInterval(id);
-  }, [products.length]);
+  // Autoslide disabled: manual control preferred. To re-enable, restore the interval below.
+  // useEffect(() => {
+  //   const id = setInterval(() => setSlideIdx((i) => (i + 1) % Math.max(1, Math.min(5, products.length))), 4000);
+  //   return () => clearInterval(id);
+  // }, [products.length]);
 
   const featured = products.slice(0, 5);
   const current = featured[slideIdx] || {};
@@ -55,6 +60,7 @@ export default function Home() {
     const maxStart = Math.max(0, posts.length - visible);
     setBlogIdx((i) => Math.min(i, maxStart));
   }, [posts.length, cardWidth]);
+  
   
   const [categories, setCategories] = useState([]);
   // Helpers for pricing/offer visuals
@@ -90,6 +96,40 @@ export default function Home() {
   };
   // list of currently active offers
   const offers = products.filter(p => priceInfo(p).isOffer);
+  // recommended: prefer offers, but include more items so slider can show 5 and navigate to others
+  const buildRecommended = () => {
+    const maxVisible = 5;
+    const maxTotal = Math.min(products ? products.length : 0, 12); // keep a reasonable total pool
+    const seed = [];
+    if (offers && offers.length > 0) {
+      // include all offers first (cap to maxTotal)
+      for (let i = 0; i < Math.min(offers.length, maxTotal); i++) seed.push(offers[i]);
+    }
+    if (seed.length < maxTotal && products && products.length > 0) {
+      // pool excludes already included items
+      const pool = products.filter(p => !seed.find(s => String(s.id) === String(p.id)));
+      // shuffle pool (Fisher-Yates)
+      for (let i = pool.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [pool[i], pool[j]] = [pool[j], pool[i]];
+      }
+      const need = Math.min(maxTotal - seed.length, pool.length);
+      for (let i = 0; i < need; i++) seed.push(pool[i]);
+    }
+    // Ensure at least `maxVisible` items when possible
+    return seed.slice(0, Math.max(seed.length, Math.min(maxTotal, maxVisible)));
+  };
+  const recommended = buildRecommended();
+  // Offers slider refs/state (for "Recommended for you")
+  const offersViewportRef = useRef(null);
+  const offersTrackRef = useRef(null);
+  const [offersIdx, setOffersIdx] = useState(0);
+  useEffect(() => {
+    const visible = 5;
+    const total = recommended.length || 0;
+    const maxStart = Math.max(0, total - visible);
+    setOffersIdx((i) => Math.min(i, maxStart));
+  }, [recommended.length]);
   // ref and hover state for offers row (removed for grid layout revert)
   const brands = useMemo(() => {
     const m = new Map();
@@ -100,6 +140,18 @@ export default function Home() {
     });
     return Array.from(m.entries()).map(([name, image]) => ({ name, image }));
   }, [products]);
+
+  // Brands carousel state
+  const brandsViewportRef = useRef(null);
+  const brandsTrackRef = useRef(null);
+  const [brandsIdx, setBrandsIdx] = useState(0);
+  useEffect(() => {
+    const visible = 6;
+    const list = brands.slice(0, Math.min(brands.length, 24));
+    const total = list.length;
+    const maxStart = Math.max(0, total - visible);
+    setBrandsIdx(i => Math.min(i, maxStart));
+  }, [brands.length]);
   const [showBlogForm, setShowBlogForm] = useState(false);
   const [blogForm, setBlogForm] = useState({ title: '', excerpt: '', content: '', category: '', image: '', imageFile: null });
   const admin = isAdmin();
@@ -143,60 +195,63 @@ export default function Home() {
 
   return (
     <div className="page-container">
-      <div style={{ width: '100%' }}>
-    <div style={{ maxWidth: 1170, margin: '0 auto' }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-        <h1 style={{ margin: 0 }}>ShopApp</h1>
-      </div>
-      <div className="two-col" style={{ display: 'flex', gap: 20, borderRadius: 12, background: "#f7f8fa", padding: 16, alignItems: "center", minHeight: 286 }}>
-        <div style={{ flex: '1 1 50%' }}>
-          <div style={{ fontSize: 28, fontWeight: 700 }}>{current.name || "Featured product"}</div>
-          <div style={{ marginTop: 6, color: "#444" }}>{current.brand || current.category || ""}</div>
-          <div style={{ marginTop: 8, fontWeight: 700 }}>
-            {current ? (() => {
-              const info = priceInfo(current);
-              return (
-                <div>
-                  <div style={{ fontSize: 22, color: info.isOffer ? '#b71c1c' : (info.isSale ? '#d32' : '#111'), fontWeight: 800 }}>${Number(info.display).toFixed(2)}</div>
-                  {info.discounted ? <div style={{ textDecoration: 'line-through', color: '#888', fontSize: 14 }}>${Number(info.original).toFixed(2)}</div> : null}
-                  {info.remaining ? <div style={{ marginTop: 6, fontSize: 13, color: '#b71c1c' }}>{info.remaining}</div> : null}
-                  {info.isInvalidSale ? <div style={{ marginTop: 6, display: 'inline-block', background: '#f0ad4e', color: '#fff', padding: '4px 8px', borderRadius: 6, fontSize: 12, fontWeight: 700 }}>Check sale</div> : null}
+      {/* Full-width banner slider under announcement (above the featured slider) */}
+      <div style={{ width: '100%', position: 'relative', overflow: 'hidden', marginTop: 12, display: 'block', background: '#f6f6f6' }}>
+        <div style={{ position: 'relative' }}>
+          <img
+            src={bannerImages[bannerIdx]}
+            alt={`Promo ${bannerIdx + 1}`}
+            style={{ width: '100%', height: 460, objectFit: 'cover', objectPosition: 'center center', display: 'block' }}
+            onError={(e) => { try { e.currentTarget.onerror = null; e.currentTarget.src = 'https://picsum.photos/1800/460?random=1'; } catch (_) {} }}
+          />
+
+          {/* left arrow */}
+          <button aria-label="Previous banner" onClick={(e) => { e.stopPropagation(); setBannerIdx(i => (i - 1 + bannerImages.length) % bannerImages.length); }}
+            style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', width: 44, height: 44, borderRadius: 22, background: 'rgba(0,0,0,0.45)', color: '#fff', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', zIndex: 20, fontSize: 20 }}>
+            ‹
+          </button>
+
+          {/* right arrow */}
+          <button aria-label="Next banner" onClick={(e) => { e.stopPropagation(); setBannerIdx(i => (i + 1) % bannerImages.length); }}
+            style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', width: 44, height: 44, borderRadius: 22, background: 'rgba(0,0,0,0.45)', color: '#fff', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', zIndex: 20, fontSize: 20 }}>
+            ›
+          </button>
+
+          {/* overlay content centered on top of image (keeps same content) */}
+          <div style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
+            <div style={{ maxWidth: 1440, width: '100%', padding: '0 18px', boxSizing: 'border-box', pointerEvents: 'auto' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
+                <div style={{ fontSize: 20, fontWeight: 800, color: '#fff', textShadow: '0 6px 18px rgba(0,0,0,0.45)' }}>Welcome — Free shipping for orders over $50</div>
+                <div style={{ flex: '0 0 auto' }}>
+                  <a href="/products" style={{ background: '#ffb84d', color: '#111', padding: '10px 14px', borderRadius: 8, textDecoration: 'none', fontWeight: 700 }}>Shop Offers</a>
                 </div>
-              );
-            })() : ""}
-          </div>
-          <div style={{ marginTop: 12 }}>
-            <Link to="/products" style={{ background: "#111", color: "#fff", padding: "8px 14px", borderRadius: 6, textDecoration: "none" }}>Shop now</Link>
-          </div>
-          <div style={{ marginTop: 10 }}>
-            {featured.map((p, i) => (
-              <span key={p.id || i} style={{ width: 8, height: 8, borderRadius: 999, background: i === slideIdx ? "#111" : "#bbb", display: "inline-block", marginRight: 6 }} />
-            ))}
-          </div>
-  </div>
-  <div style={{ position: 'relative', flex: '1 1 50%' }}>
-          {current.image ? (
-            <img src={current.image?.startsWith("http") ? current.image : `http://localhost:4000${current.image}`} alt={current.name} style={{ width: "100%", height: 286, objectFit: "cover", borderRadius: 10, background: "#fafafa" }} />
-          ) : (
-            <div style={{ width: "100%", height: 286, borderRadius: 10, background: "#fafafa" }} />
-          )}
-          {/* Badge */}
-          {(() => {
-            const info = priceInfo(current);
-            if (!info || (!info.isOffer && !info.isSale)) return null;
-            return (
-              <div style={{ position: 'absolute', left: 12, top: 12, background: info.isOffer ? '#b71c1c' : '#d32', color: '#fff', padding: '6px 10px', borderRadius: 6, fontWeight: 700, fontSize: 13 }}>
-                {info.isOffer ? 'OFFER' : 'SALE'}
               </div>
-            );
-          })()}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style={{ width: '100%' }}>
+    <div style={{ maxWidth: 1440, margin: '0 auto', padding: '0 18px', boxSizing: 'border-box' }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 48, marginBottom: 56, paddingTop: 8, paddingBottom: 8 }}>
+        <h1 style={{ margin: 0 }}>Fletepalosjet &amp; Ofertat e fundit</h1>
+      </div>
+      {/* Two image slots (left/right) replacing previous slider area */}
+      <div className="hp-two-images" style={{ display: 'flex', gap: 20, borderRadius: 12, background: 'transparent', padding: 16, alignItems: 'stretch', justifyContent: 'center', flexWrap: 'nowrap', boxSizing: 'border-box' }}>
+        {/* left card with its own background - allow shrinking (minWidth: 0) so no horizontal scroll */}
+        <div style={{ flex: '1 1 50%', minWidth: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', height: 420, background: '#ffffff', borderRadius: 10, padding: 12, boxShadow: '0 6px 18px rgba(0,0,0,0.04)', boxSizing: 'border-box' }}>
+          <img src="/images/homepage/shfletepalosje_online.png" alt="Shfleto fletepalosje" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', borderRadius: 6 }} onError={(e) => { try { e.currentTarget.onerror = null; e.currentTarget.src = 'https://picsum.photos/seed/left/800/420'; } catch (_) {} }} />
+        </div>
+
+        {/* right card with a different background - allow shrinking */}
+        <div style={{ flex: '1 1 50%', minWidth: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', height: 420, background: '#fff3e0', borderRadius: 10, padding: 12, boxShadow: '0 6px 18px rgba(0,0,0,0.04)', boxSizing: 'border-box' }}>
+          <img src="/images/homepage/luaj.PNG" alt="Luaj" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', borderRadius: 6 }} onError={(e) => { try { e.currentTarget.onerror = null; e.currentTarget.src = 'https://picsum.photos/seed/right/800/420'; } catch (_) {} }} />
         </div>
       </div>
     </div>
   </div>
   {/* Insert blog slider (3 cards per page) under the featured slider */}
   <div style={{ width: '100%' }}>
-    <div style={{ maxWidth: 1170, margin: '18px auto 0', boxSizing: 'border-box' }}>
+    <div style={{ maxWidth: 1440, margin: '18px auto 0', padding: '0 18px', boxSizing: 'border-box' }}>
       <h2 style={{ marginTop: 0, marginBottom: 12, textAlign: 'center' }}>Latest blog posts</h2>
       <div style={{ position: 'relative', textAlign: 'center' }}>
         {(() => {
@@ -205,8 +260,8 @@ export default function Home() {
           const maxStart = Math.max(0, total - visible);
           return (
             <>
-              <div ref={viewportRef} style={{ overflow: 'hidden', borderRadius: 10 }}>
-                <div ref={trackRef} style={{ display: 'flex', transition: 'transform 420ms ease', width: `${cardWidth * total}px`, transform: `translateX(${-(blogIdx * cardWidth)}px)` }}>
+              <div ref={viewportRef} style={{ overflow: 'hidden', borderRadius: 10, position: 'relative', zIndex: 1, willChange: 'transform' }}>
+                <div ref={trackRef} style={{ display: 'flex', transition: 'transform 420ms ease', width: `${cardWidth * total}px`, transform: `translateX(${-(blogIdx * cardWidth)}px)`, willChange: 'transform' }}>
                   {posts.map((post, i) => (
                     <div key={post.id || i} style={{ width: cardWidth ? `${cardWidth}px` : `${100 / visible}%`, boxSizing: 'border-box', padding: 8 }}>
                       {/* image inside bordered card */}
@@ -225,10 +280,10 @@ export default function Home() {
                 </div>
               </div>
 
-              {total > visible ? (
+                  {total > visible ? (
                 <div style={{ position: 'absolute', right: 12, bottom: -18, display: 'flex', gap: 8, zIndex: 6 }}>
-                  <button aria-label="Previous blog" onClick={() => setBlogIdx(i => Math.max(0, i - 1))} style={{ background: '#fff', border: '1px solid #e6e6e6', width: 28, height: 28, fontSize: 16, borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>‹</button>
-                  <button aria-label="Next blog" onClick={() => setBlogIdx(i => Math.min(maxStart, i + 1))} style={{ background: '#0b79d0', color: '#fff', border: 'none', width: 28, height: 28, fontSize: 16, borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>›</button>
+                  <button aria-label="Previous blog" onClick={(e) => { e.stopPropagation(); setBlogIdx(i => Math.max(0, i - 1)); }} style={{ background: '#fff', border: '1px solid #e6e6e6', width: 28, height: 28, fontSize: 16, borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>‹</button>
+                  <button aria-label="Next blog" onClick={(e) => { e.stopPropagation(); setBlogIdx(i => Math.min(maxStart, i + 1)); }} style={{ background: '#0b79d0', color: '#fff', border: 'none', width: 28, height: 28, fontSize: 16, borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>›</button>
                 </div>
               ) : null}
 
@@ -237,8 +292,8 @@ export default function Home() {
                   {(() => {
                     const maxDots = 4;
                     const positions = maxStart + 1;
-                    if (positions <= maxDots) return Array.from({ length: positions }).map((_, i) => (
-                      <button key={i} aria-label={`Go to blog ${i + 1}`} onClick={() => setBlogIdx(i)} style={{ width: 28, height: 4, borderRadius: 4, border: 'none', background: i === blogIdx ? '#0b79d0' : '#e6e6e6', cursor: 'pointer' }} />
+                      if (positions <= maxDots) return Array.from({ length: positions }).map((_, i) => (
+                      <button key={i} aria-label={`Go to blog ${i + 1}`} onClick={(e) => { e.stopPropagation(); setBlogIdx(i); }} style={{ width: 28, height: 4, borderRadius: 4, border: 'none', background: i === blogIdx ? '#0b79d0' : '#e6e6e6', cursor: 'pointer' }} />
                     ));
 
                     // positions > maxDots: show a window of up to maxDots around the current index
@@ -254,7 +309,7 @@ export default function Home() {
                     }
 
                     return pages.map(i => (
-                      <button key={i} aria-label={`Go to blog ${i + 1}`} onClick={() => setBlogIdx(i)} style={{ width: 28, height: 4, borderRadius: 4, border: 'none', background: i === blogIdx ? '#0b79d0' : '#e6e6e6', cursor: 'pointer' }} />
+                      <button key={i} aria-label={`Go to blog ${i + 1}`} onClick={(e) => { e.stopPropagation(); setBlogIdx(i); }} style={{ width: 28, height: 4, borderRadius: 4, border: 'none', background: i === blogIdx ? '#0b79d0' : '#e6e6e6', cursor: 'pointer' }} />
                     ));
                   })()}
 
@@ -294,54 +349,95 @@ export default function Home() {
   </div>
 
   {/* Redesigned Offers row: horizontal scroller with badge, hover styles and CTA */}
-  {offers && offers.length > 0 ? (
+  {recommended && recommended.length > 0 ? (
     <>
-      <h2 style={{ marginTop: 32, marginBottom: 12, textAlign: 'center' }}>Current offers</h2>
-      <div style={{ width: '100%', maxWidth: 1170, margin: '0 auto', textAlign: 'center' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 20, alignItems: 'stretch', boxSizing: 'border-box', padding: '0 8px' }}>
-          {offers.slice(0, 8).map((p) => {
-            const info = priceInfo(p);
-            const imgSrc = (p.images && p.images.length) ? p.images[0] : p.image;
-            const displaySrc = imgSrc ? (imgSrc.startsWith('http') ? imgSrc : `http://localhost:4000${imgSrc}`) : null;
-            return (
-              <div key={`offer-grid-${p.id}`} style={{ boxSizing: 'border-box', border: '1px solid #eee', borderRadius: 10, overflow: 'hidden', background: '#fff', display: 'flex', flexDirection: 'column' }}>
-                <div style={{ position: 'relative' }}>
-                  {displaySrc ? (
-                    <Link to={`/products/${p.id}`} style={{ display: 'block' }}>
-                      <img src={displaySrc} alt={p.name} style={{ display: 'block', width: '100%', height: 160, objectFit: 'cover', background: '#fafafa' }} />
-                    </Link>
-                  ) : (
-                    <div style={{ width: '100%', height: 160, background: '#fafafa' }} />
-                  )}
-                  {info && (info.isOffer || info.isSale) ? (
-                    <div style={{ position: 'absolute', left: 10, top: 10, background: info.isOffer ? '#b71c1c' : '#d32', color: '#fff', padding: '6px 8px', borderRadius: 6, fontWeight: 700, fontSize: 12 }}>
-                      {info.isOffer ? 'OFFER' : 'SALE'}
-                    </div>
-                  ) : null}
+      <div style={{ width: '100%' }}>
+        <div style={{ maxWidth: 1440, margin: '0 auto', padding: '0 18px', boxSizing: 'border-box' }}>
+          <h2 style={{ marginTop: 48, marginBottom: 36, textAlign: 'left' }}>Recommended for you</h2>
+          {(() => {
+            const visible = 5;
+            const list = recommended;
+            const total = list.length;
+            const maxStart = Math.max(0, total - visible);
+              return (
+              <div className="recommended" style={{ position: 'relative', textAlign: 'center' }}>
+                <div ref={offersViewportRef} style={{ overflow: 'hidden', borderRadius: 10, position: 'relative', zIndex: 1, willChange: 'transform' }}>
+                  <div ref={offersTrackRef} style={{ display: 'flex', transition: 'transform 420ms ease', width: `${(100 * total) / visible}%`, transform: `translateX(${-(offersIdx * (100 / visible))}%)`, willChange: 'transform' }}>
+                    {list.map((p, i) => {
+                      const info = priceInfo(p);
+                      const imgSrc = (p.images && p.images.length) ? p.images[0] : p.image;
+                      const displaySrc = imgSrc ? (imgSrc.startsWith('http') ? imgSrc : `http://localhost:4000${imgSrc}`) : null;
+                      return (
+                        <div key={p.id || i} style={{ width: `${100 / visible}%`, boxSizing: 'border-box', padding: 8 }}>
+                          <Link to={`/products/${p.id}`} style={{ textDecoration: 'none' }}>
+                            <div className={`product-card ${info.isOffer || info.isSale ? 'highlighted' : ''}`}>
+                              {info.discounted ? (
+                                <div className="badge">
+                                  <span className="badge-text">KURSE</span>
+                                  <span className="badge-value">{Math.round((info.original || 0) - (info.display || 0)).toLocaleString('en-US')} Lekë</span>
+                                </div>
+                              ) : null}
+
+                              <div className="category">{(p.category || p.brand || '').toString().toUpperCase()}</div>
+                              {displaySrc ? (
+                                <img src={displaySrc} alt={p.name} className="product-image" />
+                              ) : (
+                                <div className="product-image" style={{ background: '#fafafa' }} />
+                              )}
+
+                              <div style={{ padding: '0 6px' }}>
+                                <div className="product-name">{p.name}</div>
+                                <div className="price-container">
+                                  {info.discounted ? <span className="old-price">{Number(info.original).toLocaleString('en-US')} LEKË</span> : null}
+                                  <div className="current-price">{Number(info.display).toLocaleString('en-US')} <span className="currency">Lekë</span></div>
+                                </div>
+                                <button className="buy-btn" onClick={async (e) => { e.preventDefault(); try { const priceToUse = info.display; await addItem({ id: p.id, name: p.name, price: priceToUse, image: p.image, sku: p.sku }, 1); alert('Added to cart'); } catch (err) { console.error(err); alert('Failed to add to cart'); } }}>BLI TANI</button>
+                              </div>
+                            </div>
+                          </Link>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
 
-                <div style={{ padding: 12, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', flex: '1 1 auto' }}>
-                  <div>
-                    <div style={{ fontWeight: 800, fontSize: 15, overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
-                      <Link to={`/products/${p.id}`} style={{ color: 'inherit', textDecoration: 'none' }}>{p.name}</Link>
-                    </div>
-                    <div style={{ color: '#666', fontSize: 13, marginTop: 6 }}>{p.brand || p.category}</div>
+                {total > visible ? (
+                  <div style={{ position: 'absolute', right: 12, bottom: -18, display: 'flex', gap: 8, zIndex: 6 }}>
+                    <button aria-label="Previous offers" onClick={(e) => { e.stopPropagation(); setOffersIdx(i => Math.max(0, i - 1)); }} style={{ background: '#fff', border: '1px solid #e6e6e6', width: 28, height: 28, fontSize: 16, borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>‹</button>
+                      <button aria-label="Next offers" onClick={(e) => { e.stopPropagation(); setOffersIdx(i => Math.min(maxStart, i + 1)); }} style={{ background: '#0b79d0', color: '#fff', border: 'none', width: 28, height: 28, fontSize: 16, borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>›</button>
                   </div>
+                ) : null}
 
-                  <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <div>
-                      <div style={{ fontWeight: 900, fontSize: 18, color: '#111' }}>${Number(info.display).toFixed(2)}</div>
-                      {info.discounted ? <div style={{ textDecoration: 'line-through', color: '#888', fontSize: 13 }}>${Number(info.original).toFixed(2)}</div> : null}
-                    </div>
-                    <div style={{ display: 'flex', gap: 8 }}>
-                      <button onClick={async () => { try { const priceToUse = info.display; await addItem({ id: p.id, name: p.name, price: priceToUse, image: p.image, sku: p.sku }, 1); alert('Added to cart'); } catch (err) { console.error(err); alert('Failed to add to cart'); } }} style={{ background: '#fff', border: '1px solid #e6e6e6', padding: '8px 10px', borderRadius: 6, fontSize: 14, cursor: 'pointer' }}>🛒 Add</button>
-                      <button onClick={async () => { try { const priceToUse = info.display; await addItem({ id: p.id, name: p.name, price: priceToUse, image: p.image, sku: p.sku }, 1); window.location.href = '/cart'; } catch (err) { console.error(err); alert('Failed to add to cart'); } }} style={{ background: '#0b79d0', color: '#fff', borderRadius: 6, padding: '8px 12px', fontSize: 14, border: 'none', cursor: 'pointer', boxShadow: '0 4px 10px rgba(11,121,208,0.18)' }}>💳 Buy</button>
-                    </div>
+                {total > visible ? (
+                  <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center', width: '100%', paddingLeft: 6, marginTop: 12, gap: 6 }}>
+                    {(() => {
+                      const maxDots = 4;
+                      const positions = maxStart + 1;
+                      if (positions <= maxDots) return Array.from({ length: positions }).map((_, i) => (
+                          <button key={i} aria-label={`Go to offer ${i + 1}`} onClick={(e) => { e.stopPropagation(); setOffersIdx(i); }} style={{ width: 28, height: 4, borderRadius: 4, border: 'none', background: i === offersIdx ? '#0b79d0' : '#e6e6e6', cursor: 'pointer' }} />
+                        ));
+
+                      const pages = [];
+                      if (offersIdx <= 1) {
+                        for (let i = 0; i < maxDots; i++) pages.push(i);
+                      } else if (offersIdx >= positions - 2) {
+                        for (let i = positions - maxDots; i < positions; i++) pages.push(i);
+                      } else {
+                        const start = Math.max(0, offersIdx - 1);
+                        for (let i = start; i < start + maxDots; i++) pages.push(i);
+                      }
+
+                      return pages.map(i => (
+                        <button key={i} aria-label={`Go to offer ${i + 1}`} onClick={(e) => { e.stopPropagation(); setOffersIdx(i); }} style={{ width: 28, height: 4, borderRadius: 4, border: 'none', background: i === offersIdx ? '#0b79d0' : '#e6e6e6', cursor: 'pointer' }} />
+                      ));
+                    })()}
+
+                    <div style={{ marginLeft: 8, color: '#666', fontSize: 12 }}>{Math.min(offersIdx + 1, maxStart + 1)} / {maxStart + 1}</div>
                   </div>
-                </div>
+                ) : null}
               </div>
             );
-          })}
+          })()}
         </div>
       </div>
     </>
@@ -364,61 +460,38 @@ export default function Home() {
 
   <h2 style={{ marginTop: 48, marginBottom: 24, textAlign: 'center' }}>Popular products</h2>
         <div style={{ width: '100%', maxWidth: '100%', margin: '0 auto', textAlign: 'center' }}>
-          {/* Horizontal five-column product row */}
-          <div style={{ display: 'flex', gap: 20, justifyContent: 'center', alignItems: 'stretch', width: '100%', boxSizing: 'border-box', padding: '0 8px' }}>
+          <div style={{ display: 'flex', gap: 20, justifyContent: 'center', alignItems: 'stretch', width: '100%', boxSizing: 'border-box', padding: '0 8px', flexWrap: 'wrap' }}>
             {products.slice(0, 6).map((p) => {
               const info = priceInfo(p);
+              const imgSrc = p.image ? (p.image.startsWith('http') ? p.image : `http://localhost:4000${p.image}`) : null;
               return (
-                <div key={p.id} style={{ flex: '1 1 calc((100% - 80px) / 5)', maxWidth: 'calc((100% - 80px) / 5)', minWidth: 0, boxSizing: 'border-box', border: '1px solid #eee', borderRadius: 10, overflow: 'hidden', background: '#fff' }}>
-                  <div style={{ position: 'relative' }}>
-                        {p.image ? (
-                          <Link to={`/products/${p.id}`} style={{ display: 'block' }}>
-                            <img
-                              src={p.image?.startsWith('http') ? p.image : `http://localhost:4000${p.image}`}
-                              alt={p.name}
-                              style={{ display: 'block', width: '100%', height: 240, objectFit: 'cover', background: '#fafafa' }}
-                            />
-                          </Link>
-                        ) : (
-                          <div style={{ width: '100%', height: 240, background: '#fafafa' }} />
-                        )}
-                    {/* Badge on product image */}
-                    {info && (info.isOffer || info.isSale) ? (
-                      <div style={{ position: 'absolute', left: 10, top: 10, background: info.isOffer ? '#b71c1c' : '#d32', color: '#fff', padding: '6px 8px', borderRadius: 6, fontWeight: 700, fontSize: 12 }}>
-                        {info.isOffer ? 'OFFER' : 'SALE'}
-                      </div>
-                    ) : null}
-                  </div>
-                  <div style={{ padding: 14, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: 150 }}>
-                    <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <div style={{ fontWeight: 700, fontSize: 16, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                          <Link to={`/products/${p.id}`} style={{ color: 'inherit', textDecoration: 'none' }}>{p.name}</Link>
+                <div key={p.id} style={{ boxSizing: 'border-box', padding: 8, display: 'flex', justifyContent: 'center' }}>
+                  <Link to={`/products/${p.id}`} style={{ textDecoration: 'none' }}>
+                    <div className={`product-card ${info.isOffer || info.isSale ? 'highlighted' : ''}`}>
+                      {info.discounted ? (
+                        <div className="badge">
+                          <span className="badge-text">KURSE</span>
+                          <span className="badge-value">{Math.round((info.original || 0) - (info.display || 0)).toLocaleString('en-US')} Lekë</span>
                         </div>
-                        {info && (info.isOffer || info.isSale) ? (
-                          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                            <div style={{ background: info.isOffer ? '#b71c1c' : '#d32', color: '#fff', padding: '4px 8px', borderRadius: 6, fontSize: 12, fontWeight: 700 }}>{info.isOffer ? 'OFFER' : 'SALE'}</div>
-                            {info.isInvalidSale ? <div style={{ background: '#f0ad4e', color: '#fff', padding: '4px 8px', borderRadius: 6, fontSize: 11, fontWeight: 700 }}>Check sale</div> : null}
-                          </div>
-                        ) : null}
-                      </div>
-                      <div style={{ color: '#666', fontSize: 14 }}>{p.brand || p.category}</div>
-                    </div>
-                    <div>
-                      <div style={{ marginTop: 10 }}>
-                        <div>
-                          <div style={{ fontWeight: 800, fontSize: 18, color: info.isOffer ? '#b71c1c' : (info.isSale ? '#d32' : '#111') }}>${Number(info.display).toFixed(2)}</div>
-                          {info.discounted ? <div style={{ textDecoration: 'line-through', color: '#888', fontSize: 13 }}>${Number(info.original).toFixed(2)}</div> : null}
-                          {info.remaining ? <div style={{ marginTop: 6, fontSize: 12, color: '#b71c1c' }}>{info.remaining}</div> : null}
+                      ) : null}
+
+                      <div className="category">{(p.category || p.brand || '').toString().toUpperCase()}</div>
+                      {imgSrc ? (
+                        <img src={imgSrc} alt={p.name} className="product-image" />
+                      ) : (
+                        <div className="product-image" style={{ background: '#fafafa' }} />
+                      )}
+
+                      <div style={{ padding: '0 6px' }}>
+                        <div className="product-name">{p.name}</div>
+                        <div className="price-container">
+                          {info.discounted ? <span className="old-price">{Number(info.original).toLocaleString('en-US')} LEKË</span> : null}
+                          <div className="current-price">{Number(info.display).toLocaleString('en-US')} <span className="currency">Lekë</span></div>
                         </div>
-                      </div>
-                      <div style={{ marginTop: 12, display: 'flex', gap: 10, justifyContent: 'center' }}>
-                        <button onClick={async () => { try { const priceToUse = info.display; await addItem({ id: p.id, name: p.name, price: priceToUse, image: p.image, sku: p.sku }, 1); alert('Added to cart'); } catch (err) { console.error(err); alert('Failed to add to cart'); } }} style={{ background: '#fff', border: '1px solid #e6e6e6', padding: '8px 10px', borderRadius: 6, fontSize: 14, cursor: 'pointer' }}>🛒 Add</button>
-                        <button onClick={async () => { try { const priceToUse = info.display; await addItem({ id: p.id, name: p.name, price: priceToUse, image: p.image, sku: p.sku }, 1); window.location.href = '/cart'; } catch (err) { console.error(err); alert('Failed to add to cart'); } }} style={{ background: '#0b79d0', color: '#fff', borderRadius: 6, padding: '8px 12px', fontSize: 14, border: 'none', cursor: 'pointer', boxShadow: '0 4px 10px rgba(11,121,208,0.18)' }}>💳 Buy</button>
-                        <button onClick={async () => { try { const out = await wishlistService.toggleItem({ id: p.id, name: p.name, image: p.image, price: info.display }); const present = (out || []).find(i => String(i.id) === String(p.id)); alert(present ? 'Added to wishlist' : 'Removed from wishlist'); } catch (err) { console.error(err); alert('Failed to update wishlist'); } }} style={{ background: '#fff', border: '1px solid #e6e6e6', padding: '8px 10px', borderRadius: 6, fontSize: 14, cursor: 'pointer' }}>♡ Wishlist</button>
+                        <button className="buy-btn" onClick={async (e) => { e.preventDefault(); try { const priceToUse = info.display; await addItem({ id: p.id, name: p.name, price: priceToUse, image: p.image, sku: p.sku }, 1); alert('Added to cart'); } catch (err) { console.error(err); alert('Failed to add to cart'); } }}>BLI TANI</button>
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 </div>
               );
             })}
@@ -481,43 +554,62 @@ export default function Home() {
         {/* Brands section (thumbnails) - full width */}
         <section style={{ width: '100%', marginTop: 24, padding: '0', boxSizing: 'border-box' }}>
           <h2 style={{ textAlign: 'center', marginBottom: 12 }}>Brands</h2>
-          <div style={{ width: '100%', margin: '0 auto' }}>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 20, justifyContent: 'center', alignItems: 'flex-start', padding: '12px 24px' }}>
-              {brands.slice(0, 16).map(b => {
-                const productImage = b.image ? (b.image.startsWith('http') ? b.image : `http://localhost:4000${b.image}`) : null;
-                const slug = (b.name || '').toString().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-                const logoPath = `/uploads/brands/${slug}.png`;
-                const picsum = `https://picsum.photos/seed/${encodeURIComponent(b.name)}/300/180`;
-                // We'll try brand logo path first (admin can upload to /uploads/brands/<slug>.png), then product image, then picsum
-                const initialSrc = logoPath;
-                return (
-                  <Link key={b.name} to={`/products?brand=${encodeURIComponent(b.name)}`} style={{ textDecoration: 'none' }}>
-                    <div style={{ width: 180, display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer' }}>
-                      <div style={{ width: 180, height: 110, borderRadius: 8, overflow: 'hidden', border: '1px solid #eee', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <img
-                          src={initialSrc}
-                          alt={b.name}
-                          title={b.name}
-                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                          onError={(e) => {
-                            // try product image then picsum
-                            try {
-                              const el = e.currentTarget;
-                              if (productImage && el.src !== productImage) {
-                                el.src = productImage;
-                                return;
-                              }
-                              if (el.src !== picsum) el.src = picsum;
-                            } catch (_) { /* ignore */ }
-                          }}
-                        />
-                      </div>
-                      <div style={{ marginTop: 8, textAlign: 'center', fontSize: 14, fontWeight: 600, color: '#333' }}>{b.name}</div>
+          <div style={{ width: '100%', margin: '0 auto', padding: '0 18px', boxSizing: 'border-box' }}>
+            {(() => {
+              const visible = 6;
+              const list = brands.slice(0, Math.min(brands.length, 24));
+              const total = list.length;
+              const maxStart = Math.max(0, total - visible);
+              return (
+                <div style={{ position: 'relative' }}>
+                    <div ref={brandsViewportRef} style={{ overflow: 'hidden', borderRadius: 8, position: 'relative', zIndex: 1, willChange: 'transform' }}>
+                    <div ref={brandsTrackRef} style={{ display: 'flex', transition: 'transform 420ms ease', width: `${(100 * total) / visible}%`, transform: `translateX(${-(brandsIdx * (100 / visible))}%)`, willChange: 'transform' }}>
+                      {list.map((b) => {
+                        const productImage = b.image ? (b.image.startsWith('http') ? b.image : `http://localhost:4000${b.image}`) : null;
+                        const slug = (b.name || '').toString().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+                        const logoPath = `/uploads/brands/${slug}.png`;
+                        const picsum = `https://picsum.photos/seed/${encodeURIComponent(b.name)}/300/180`;
+                        const initialSrc = logoPath;
+                        return (
+                          <div key={b.name} style={{ width: `${100 / visible}%`, boxSizing: 'border-box', padding: 8, display: 'flex', justifyContent: 'center' }}>
+                            <Link to={`/products?brand=${encodeURIComponent(b.name)}`} style={{ textDecoration: 'none' }}>
+                              <div style={{ width: '100%', maxWidth: 180, display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer' }}>
+                                <div style={{ width: '100%', height: 110, borderRadius: 8, overflow: 'hidden', border: '1px solid #eee', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                  <img
+                                    src={initialSrc}
+                                    alt={b.name}
+                                    title={b.name}
+                                    style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                                    onError={(e) => {
+                                      try {
+                                        const el = e.currentTarget;
+                                        if (productImage && el.src !== productImage) {
+                                          el.src = productImage;
+                                          return;
+                                        }
+                                        if (el.src !== picsum) el.src = picsum;
+                                      } catch (_) { /* ignore */ }
+                                    }}
+                                  />
+                                </div>
+                                <div style={{ marginTop: 8, textAlign: 'center', fontSize: 14, fontWeight: 600, color: '#333' }}>{b.name}</div>
+                              </div>
+                            </Link>
+                          </div>
+                        );
+                      })}
                     </div>
-                  </Link>
-                );
-              })}
-            </div>
+                  </div>
+
+                  {total > visible ? (
+                    <>
+                      <button aria-label="Previous brands" onClick={(e) => { e.stopPropagation(); setBrandsIdx(i => Math.max(0, i - 1)); }} style={{ position: 'absolute', left: 8, top: '50%', transform: 'translateY(-50%)', width: 36, height: 36, borderRadius: 18, background: '#fff', border: '1px solid #e6e6e6', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', zIndex: 6 }}>‹</button>
+                      <button aria-label="Next brands" onClick={(e) => { e.stopPropagation(); setBrandsIdx(i => Math.min(maxStart, i + 1)); }} style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', width: 36, height: 36, borderRadius: 18, background: '#0b79d0', color: '#fff', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', zIndex: 6 }}>›</button>
+                    </>
+                  ) : null}
+                </div>
+              );
+            })()}
           </div>
         </section>
 

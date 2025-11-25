@@ -17,6 +17,7 @@ module.exports = (sequelize, DataTypes) => {
   garancia: { type: DataTypes.STRING },
   modeli: { type: DataTypes.STRING },
     categories: { type: DataTypes.JSON },
+    categoryIds: { type: DataTypes.JSON },
   });
   Product.associate = (models) => {
     if (models && models.Rating) {

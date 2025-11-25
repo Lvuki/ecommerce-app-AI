@@ -14,8 +14,25 @@ async function buildCategoryPath(identifier) {
   if (!Number.isNaN(asNum) && Number.isFinite(asNum)) {
     cat = await Category.findByPk(asNum);
   }
+  // try exact name match first
   if (!cat) {
     cat = await Category.findOne({ where: { name: identifier } });
+  }
+  // try case-insensitive match and path-last-segment match
+  if (!cat) {
+    try {
+      const norm = String(identifier).toLowerCase().trim();
+      // if identifier looks like a path, try the last segment
+      const last = String(identifier).split(/[\/›>\|\-]/).map(s => s.trim()).filter(Boolean).pop() || identifier;
+      const lastNorm = String(last).toLowerCase().trim();
+      const { Op } = Sequelize;
+      cat = await Category.findOne({ where: Sequelize.where(Sequelize.fn('lower', Sequelize.col('name')), norm) });
+      if (!cat && lastNorm && lastNorm !== norm) {
+        cat = await Category.findOne({ where: Sequelize.where(Sequelize.fn('lower', Sequelize.col('name')), lastNorm) });
+      }
+    } catch (_) {
+      // ignore and leave cat null
+    }
   }
   if (!cat) return null;
   const names = [];
@@ -27,11 +44,19 @@ async function buildCategoryPath(identifier) {
   }
   return names.reverse();
 }
-
 const getProducts = async (req, res) => {
   try {
-  const { category, brand, sku, q, priceMin, priceMax, stockMin, stockMax, ...rest } = req.query;
-  let where = {};
+    let { category, categoryId, brand, sku, q, priceMin, priceMax, stockMin, stockMax, ...rest } = req.query;
+
+    // If categoryId is provided, resolve it to the category name
+    if (categoryId && !category) {
+      const catObj = await models.Category.findByPk(categoryId);
+      if (catObj) {
+        category = catObj.name;
+      }
+    }
+
+    let where = {};
     // support filtering by either product.category string OR the categories JSON array
     if (category) {
       // Support matching by exact category string, by containment inside the
@@ -51,7 +76,39 @@ const getProducts = async (req, res) => {
         ]
       };
     }
-    if (brand) where.brand = brand;
+    if (brand) {
+      // support multiple brands sent as repeated query params (express will parse as array)
+      if (Array.isArray(brand)) {
+        where.brand = { [Op.in]: brand };
+      } else {
+        where.brand = brand;
+      }
+    }
+
+    // Warranty filter: frontend sends `warranty` labels like "12 muaj", "24 muaj".
+    // Products store `garancia` as values like "24" or "0". Support both
+    // numeric and textual matches by extracting digits from the query and
+    // performing a case-insensitive LIKE match on the `garancia` column.
+    if (req.query && req.query.warranty) {
+      const raw = String(req.query.warranty || '').toLowerCase().trim();
+      const digits = (raw.match(/\d+/) || [null])[0];
+      try {
+        where[Op.and] = where[Op.and] || [];
+        if (digits) {
+          // match garancia containing the numeric value (e.g., '24' in '24')
+          const like = `%${digits}%`;
+          where[Op.and].push(Sequelize.where(Sequelize.fn('lower', Sequelize.col('garancia')), { [Op.like]: like }));
+        } else {
+          // fallback to exact case-insensitive match
+          where[Op.and].push(Sequelize.where(Sequelize.fn('lower', Sequelize.col('garancia')), raw));
+        }
+      } catch (e) {
+        // final fallback: assign raw value
+        where.garancia = req.query.warranty;
+      }
+    }
+
+    // built where clause available here for debugging when needed
     if (sku) where.sku = sku;
     if (q) where.name = { [Op.iLike]: `%${q}%` };
     if (priceMin || priceMax) {
@@ -82,7 +139,7 @@ const getProducts = async (req, res) => {
       }
     }
 
-  let products = await Product.findAll({ where });
+    let products = await Product.findAll({ where });
 
     // Specs filtering: any query key starting with spec_
     const specFilters = Object.fromEntries(Object.entries(rest).filter(([k]) => k.startsWith('spec_')));
@@ -235,7 +292,7 @@ const addProduct = async (req, res) => {
     if (typeof body.offerPrice === 'string') body.offerPrice = parseFloat(body.offerPrice);
     if (typeof body.stock === 'string') body.stock = parseInt(body.stock, 10);
     if (body.specs && typeof body.specs === 'string') {
-      try { body.specs = JSON.parse(body.specs); } catch (_) {}
+      try { body.specs = JSON.parse(body.specs); } catch (_) { }
     }
     // normalize offer dates if provided (ISO strings expected)
     if (body.offerFrom) body.offerFrom = new Date(body.offerFrom);
@@ -274,7 +331,7 @@ const updateProduct = async (req, res) => {
     if (typeof body.offerPrice === 'string') body.offerPrice = parseFloat(body.offerPrice);
     if (typeof body.stock === 'string') body.stock = parseInt(body.stock, 10);
     if (body.specs && typeof body.specs === 'string') {
-      try { body.specs = JSON.parse(body.specs); } catch (_) {}
+      try { body.specs = JSON.parse(body.specs); } catch (_) { }
     }
     if (body.offerFrom) body.offerFrom = new Date(body.offerFrom);
     if (body.offerTo) body.offerTo = new Date(body.offerTo);
@@ -341,13 +398,13 @@ const updateProduct = async (req, res) => {
         }
       }
 
-        // If client explicitly provided `image` (main image) prefer it. Otherwise use first image
-        if (body.image) {
-          // ensure it's a trimmed string
-          body.image = String(body.image).trim();
-        } else {
-          body.image = body.images[0];
-        }
+      // If client explicitly provided `image` (main image) prefer it. Otherwise use first image
+      if (body.image) {
+        // ensure it's a trimmed string
+        body.image = String(body.image).trim();
+      } else {
+        body.image = body.images[0];
+      }
     } else if (req.file) {
       body.image = `/uploads/${req.file.filename}`;
       body.images = [body.image];
@@ -405,20 +462,8 @@ const updateProduct = async (req, res) => {
       if (body[k] !== undefined) updatePayload[k] = body[k];
     }
 
-    // collect debug info if requested (before saving)
-    let debugInfo = null;
-    if (body._debug) {
-      debugInfo = {
-        receivedBody: req.body,
-        currentImagesFromDb,
-        computedImages: body.images,
-        selectedImage: body.image,
-        clientExistingImages: body.existingImages || body.images
-      };
-    }
-
-    // remove debug flag from payload to avoid storing it
-    delete updatePayload._debug;
+    // remove any admin debug flag from incoming body to avoid accidental storage
+    if (updatePayload._debug) delete updatePayload._debug;
 
     // --- Delete any removed uploaded files if they're not referenced by other products ---
     try {
@@ -460,9 +505,6 @@ const updateProduct = async (req, res) => {
 
     await Product.update(updatePayload, { where: { id } });
     const updated = await Product.findByPk(id);
-    if (debugInfo) {
-      return res.json({ updated, debug: debugInfo });
-    }
     res.json(updated);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -494,7 +536,7 @@ const deleteProduct = async (req, res) => {
         if (!img) continue;
         const isLocal = String(img).startsWith('/uploads/') || String(img).startsWith('uploads/') || !String(img).startsWith('http');
         if (!isLocal) continue;
-        const used = await Product.findOne({ where: { [Op.or]: [ { image: img }, Sequelize.literal(`images::jsonb @> '${JSON.stringify([img])}'::jsonb`) ] } });
+        const used = await Product.findOne({ where: { [Op.or]: [{ image: img }, Sequelize.literal(`images::jsonb @> '${JSON.stringify([img])}'::jsonb`)] } });
         if (used) continue;
         const rel = String(img).replace(/^\/+/, '');
         const abs = path.join(__dirname, '..', rel);
@@ -515,16 +557,97 @@ module.exports = { getProducts, getProductById, addProduct, updateProduct, delet
 // Extra: categories and brands
 const getCategories = async (req, res) => {
   try {
-    const rows = await Product.findAll({ attributes: ['category', 'categories', 'brand'] });
+    const { category } = req.query || {};
+
+    // If a category is provided, we'll fetch candidates and compute brands
+    // in JS using case-insensitive matching to avoid jsonb case-sensitivity
+    // issues and ensure we capture products regardless of how categories
+    // were stored (string path or array).
+    let rows = await Product.findAll({ attributes: ['category', 'categories', 'brand'] });
     const cats = new Set();
     const brands = new Set();
-    for (const r of rows) {
-      const rec = r && typeof r.toJSON === 'function' ? r.toJSON() : r;
-      if (rec.category) cats.add(rec.category);
-      if (rec.categories && Array.isArray(rec.categories)) rec.categories.forEach(c => c && cats.add(c));
-      if (rec.brand) brands.add(rec.brand);
+    // If category filter present, reduce rows to matching products only
+    let candidateRows = rows;
+    let resolvedPathForDebug = null;
+    if (category) {
+      // Try to resolve the category to an authoritative path from the Category table
+      // so we can match products that store either a path string or an array of
+      // category names. If resolution fails, fall back to simple substring matching.
+      let resolvedPath = null;
+      try {
+        resolvedPath = await buildCategoryPath(category);
+      } catch (_) { resolvedPath = null; }
+      resolvedPathForDebug = resolvedPath;
+
+      // If resolvedPath contains multiple segments (parent -> child -> ...),
+      // prefer matching only the most specific segment (last element). This
+      // avoids matching parent-only products when the user selected a child
+      // or grandchild category.
+      let tgtList = [];
+      if (Array.isArray(resolvedPath) && resolvedPath.length) {
+        const last = String(resolvedPath[resolvedPath.length - 1]).toLowerCase().trim();
+        tgtList = [last];
+      } else {
+        tgtList = [String(category).toLowerCase().trim()];
+      }
+
+      // helper: normalize a string
+      const norm = s => (s === undefined || s === null) ? '' : String(s).toLowerCase().trim();
+      // helper: split a category path into components for exact match
+      const splitComponents = (pathStr) => {
+        if (!pathStr) return [];
+        // split on common separators like '/', '›', '>' and '|', '-' (keep simple)
+        return String(pathStr).split(/\s*[\/›>\|\-]\s*/).map(p => norm(p)).filter(Boolean);
+      };
+
+      candidateRows = rows.filter(r => {
+        const rec = r && typeof r.toJSON === 'function' ? r.toJSON() : r;
+        // check product.category string: try exact match against any path component
+        if (rec.category) {
+          const comps = splitComponents(rec.category);
+          // include the whole normalized string as a fallback
+          comps.push(norm(rec.category));
+          if (tgtList.some(t => comps.includes(t))) return true;
+        }
+        // check categories array or string for exact matches
+        if (rec.categories) {
+          let catsArr = [];
+          if (typeof rec.categories === 'string') {
+            try { catsArr = JSON.parse(rec.categories); } catch (_) { catsArr = [rec.categories]; }
+          } else if (Array.isArray(rec.categories)) catsArr = rec.categories;
+          for (const c of catsArr || []) {
+            if (!c) continue;
+            if (tgtList.some(t => norm(c) === t)) return true;
+          }
+        }
+        return false;
+      });
     }
-    res.json({ categories: Array.from(cats), brands: Array.from(brands) });
+
+    // Debug: log how many total rows and how many matched the category
+    // (dev) removed verbose server-side debug logging
+
+    // sampleMatchedRows removed; debug output disabled in production
+
+    for (const r of candidateRows) {
+      const rec = r && typeof r.toJSON === 'function' ? r.toJSON() : r;
+      if (rec.category) cats.add(String(rec.category));
+      if (rec.categories && Array.isArray(rec.categories)) {
+        rec.categories.forEach(c => {
+          if (!c) return;
+          // support categories stored as objects { id, name } or strings
+          let name = c;
+          if (typeof c === 'object') {
+            name = c.name || c.title || String(c);
+          }
+          if (name) cats.add(String(name));
+        });
+      }
+      if (rec.brand) brands.add(String(rec.brand));
+    }
+    const result = { categories: Array.from(cats), brands: Array.from(brands) };
+    // Do not include debug payloads in normal responses
+    res.json(result);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

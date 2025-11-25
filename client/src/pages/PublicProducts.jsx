@@ -1,7 +1,9 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { searchProducts, getCategoriesAndBrands, searchWithFilters } from '../services/productService';
+import { useLocation } from 'react-router-dom';
+import { searchProducts, getCategoriesAndBrands, getCategoriesAndBrandsScoped, searchWithFilters } from '../services/productService';
 import { getCategories } from '../services/categoryService';
 import Filters from '../components/Filters/Filters';
+import * as filterService from '../services/filterService';
 import { addItem } from '../services/cartService';
 import { priceInfo } from '../utils/priceUtils';
 import { Link } from 'react-router-dom';
@@ -16,6 +18,8 @@ export default function PublicProducts() {
   const [filters, setFilters] = useState({});
   const [meta, setMeta] = useState({ categories: [], brands: [] });
   const [categoriesTree, setCategoriesTree] = useState([]);
+  const location = useLocation();
+  const [initialFilters, setInitialFilters] = useState({});
 
   useEffect(() => {
     (async () => {
@@ -33,6 +37,8 @@ export default function PublicProducts() {
         setMeta({ categories: [], brands: [] });
       }
     })();
+
+    
 
     // listen for product updates from admin UI so the public listing refreshes automatically
     const onProductUpdated = (e) => {
@@ -52,7 +58,7 @@ export default function PublicProducts() {
         } else {
           loadProducts();
         }
-      } catch (err) {}
+      } catch (err) { }
     };
 
     window.addEventListener('product-updated', onProductUpdated);
@@ -63,16 +69,29 @@ export default function PublicProducts() {
     };
   }, []);
 
+  // Watch for URL query changes (e.g., when navigating from the header/hamburger)
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(location.search || '');
+      const cat = params.get('category');
+      const q = params.get('q');
+      const init = {};
+      if (cat) {
+        init.category = String(cat);
+        init.categoryName = String(cat);
+      }
+      if (q) setSearchQ(q);
+      setInitialFilters(init);
+      if (Object.keys(init).length) loadProducts(init);
+    } catch (err) {
+      // ignore
+    }
+  }, [location.search]);
+
   const loadProducts = async (opts = {}) => {
     try {
-      const params = { ...opts };
-      if (filters.category) params.category = filters.category;
-      if (filters.brand) params.brand = filters.brand;
-      if (filters.priceMin) params.priceMin = filters.priceMin;
-      if (filters.priceMax) params.priceMax = filters.priceMax;
-      if (filters.stockMin) params.stockMin = filters.stockMin;
-      if (filters.color) params.spec_color = filters.color;
-      if (filters.size) params.spec_size = filters.size;
+      const mergedFilters = { ...filters, ...opts };
+      const params = filterService.buildParams(mergedFilters);
       if (searchQ) params.q = searchQ;
       const prods = await searchProducts(params);
       setProducts(prods || []);
@@ -91,7 +110,7 @@ export default function PublicProducts() {
   const renderSpecs = (specs) => {
     let obj = specs;
     if (typeof specs === 'string') {
-      try { obj = JSON.parse(specs); } catch (_) {}
+      try { obj = JSON.parse(specs); } catch (_) { }
     }
     if (!obj) return null;
     if (typeof obj === 'string') return <div style={{ fontStyle: 'italic' }}>{obj}</div>;
@@ -136,7 +155,8 @@ export default function PublicProducts() {
       <div className="sidebar-layout">
         <aside style={{ padding: 8 }}>
           <Filters
-            initial={{}}
+            key={JSON.stringify(initialFilters)}
+            initial={initialFilters}
             categories={categoriesTree}
             brands={Array.isArray(meta.brands) ? meta.brands : []}
             onChange={(f) => {
@@ -152,99 +172,120 @@ export default function PublicProducts() {
                   console.error('Filter search failed', err);
                 }
               }, 250);
+              // update brands meta scoped to the selected category (only when category present)
+              (async () => {
+                try {
+                  // Prefer deepest selected category name (child2 -> child1 -> parent)
+                  const catName = f && (f.category_child2_name || f.category_child1_name || f.categoryName);
+                  const catIdOrName = f && (f.category_child2 || f.category_child1 || f.category);
+                  const cat = catName || catIdOrName || null;
+                  let scoped = null;
+                  if (cat) {
+                    scoped = await getCategoriesAndBrandsScoped(cat);
+                  } else {
+                    // no specific category selected -> fetch the global categories/brands list
+                    const all = await getCategoriesAndBrands();
+                    scoped = all;
+                  }
+                  setMeta(scoped || { categories: [], brands: [] });
+                } catch (err) {
+                  console.error('PublicProducts - scoped brands fetch error', err);
+                  // ignore
+                }
+              })();
             }}
           />
         </aside>
         <main>
           <div style={{ background: '#fff', border: '1px solid #eee', borderRadius: 8 }} className="table-responsive">
-        <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'auto', minWidth: 700 }}>
-          <thead>
-            <tr style={{ textAlign: 'left', borderBottom: '1px solid #eee' }}>
-              <th style={{ padding: 12 }}>Image</th>
-              <th style={{ padding: 12 }}>Name</th>
-              <th style={{ padding: 12 }}>Category</th>
-              <th style={{ padding: 12 }}>Brand</th>
-              <th style={{ padding: 12 }}>SKU</th>
-              <th style={{ padding: 12 }}>Price</th>
-              <th style={{ padding: 12 }}>Stock</th>
-              <th style={{ padding: 12 }}>Specifications</th>
-              <th style={{ padding: 12 }}>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {(() => {
-              const total = products.length;
-              const totalPages = Math.max(1, Math.ceil(total / perPage));
-              const current = Math.min(page, totalPages);
-              const start = (current - 1) * perPage;
-              const end = start + perPage;
-              const pageItems = products.slice(start, end);
-              return pageItems.map((p) => (
-                <tr key={p.id} style={{ borderBottom: '1px solid #f3f3f3' }}>
-                  <td style={{ padding: 12, width: 140, maxWidth: 140, verticalAlign: 'top' }}>
-                    { (p.images && p.images.length) || p.image ? (
-                      <Link to={`/products/${p.id}`} style={{ display: 'inline-block' }}>
-                        <img src={(p.images && p.images.length ? (p.images[0].startsWith('http') ? p.images[0] : `http://localhost:4000${p.images[0]}`) : (p.image && p.image.startsWith('http') ? p.image : `http://localhost:4000${p.image}`))} alt={p.name} style={{ height: 80, objectFit: 'cover', borderRadius: 4 }} />
-                      </Link>
-                    ) : (
-                      <div style={{ color: '#999' }}>No image</div>
-                    )}
-                  </td>
-                  <td style={{ padding: 12, verticalAlign: 'top', whiteSpace: 'normal', wordBreak: 'break-word' }}>
-                    <div style={{ fontWeight: 700 }}>
-                      <Link to={`/products/${p.id}`} style={{ color: 'inherit', textDecoration: 'none' }}>{p.name}</Link>
-                    </div>
-                    <div style={{ color: '#666', fontSize: 13 }}>{p.description}</div>
-                  </td>
-                  <td style={{ padding: 12, verticalAlign: 'top', whiteSpace: 'normal', wordBreak: 'break-word' }}>{getProductCategoryPath(p)}</td>
-                  <td style={{ padding: 12, verticalAlign: 'top', whiteSpace: 'normal', wordBreak: 'break-word' }}>{p.brand || '—'}</td>
-                  <td style={{ padding: 12, verticalAlign: 'top', whiteSpace: 'normal', wordBreak: 'break-word' }}>{p.sku || '—'}</td>
-                  <td style={{ padding: 12, verticalAlign: 'top' }}>
-                    {(() => {
-                      const info = priceInfo(p);
-                      return (
-                        <div>
-                          <div style={{ fontWeight: info.discounted ? 800 : 700, color: info.isOffer ? '#d32' : (info.isSale ? '#d32' : '#111') }}>${Number(info.display).toFixed(2)}</div>
-                          {info.discounted ? <div style={{ textDecoration: 'line-through', color: '#888', fontSize: 13 }}>${Number(info.original).toFixed(2)}</div> : null}
-                          {info.remaining ? <div style={{ marginTop: 6, color: '#c00', fontSize: 12 }}>{info.remaining}</div> : null}
-                          {info.isInvalidSale ? <div style={{ marginTop: 6, display: 'inline-block', background: '#f0ad4e', color: '#fff', padding: '4px 8px', borderRadius: 6, fontSize: 12, fontWeight: 700 }}>Check sale</div> : null}
-                        </div>
-                      );
-                    })()}
-                  </td>
-                  <td style={{ padding: 12, verticalAlign: 'top' }}>{p.stock ?? '—'}</td>
-                  <td style={{ padding: 12, verticalAlign: 'top', whiteSpace: 'normal', wordBreak: 'break-word' }}>{renderSpecs(p.specs)}</td>
-                  <td style={{ padding: 12, verticalAlign: 'top' }}>
-                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                      <button onClick={async () => { try { const info = priceInfo(p); const priceToUse = info.display; await addItem({ id: p.id, name: p.name, price: priceToUse, image: p.image, sku: p.sku }, 1); window.alert('Added to cart'); } catch (err) { console.error(err); alert('Failed to add to cart'); } }}>🛒 Add to Cart</button>
-                      <button onClick={async () => { try { const info = priceInfo(p); const priceToUse = info.display; await addItem({ id: p.id, name: p.name, price: priceToUse, image: p.image, sku: p.sku }, 1); window.location.href = '/cart'; } catch (err) { console.error(err); alert('Failed to add to cart'); } }} style={{ background: '#0b79d0', color: '#fff' }}>💳 Buy Now</button>
-                    </div>
-                  </td>
+            <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'auto', minWidth: 700 }}>
+              <thead>
+                <tr style={{ textAlign: 'left', borderBottom: '1px solid #eee' }}>
+                  <th style={{ padding: 12 }}>Image</th>
+                  <th style={{ padding: 12 }}>Name</th>
+                  <th style={{ padding: 12 }}>Category</th>
+                  <th style={{ padding: 12 }}>Brand</th>
+                  <th style={{ padding: 12 }}>SKU</th>
+                  <th style={{ padding: 12 }}>Price</th>
+                  <th style={{ padding: 12 }}>Stock</th>
+                  <th style={{ padding: 12 }}>Specifications</th>
+                  <th style={{ padding: 12 }}>Actions</th>
                 </tr>
-              ));
-            })()}
-          </tbody>
-        </table>
-      </div>
+              </thead>
+              <tbody>
+                {(() => {
+                  const total = products.length;
+                  const totalPages = Math.max(1, Math.ceil(total / perPage));
+                  const current = Math.min(page, totalPages);
+                  const start = (current - 1) * perPage;
+                  const end = start + perPage;
+                  const pageItems = products.slice(start, end);
+                  return pageItems.map((p) => (
+                    <tr key={p.id} style={{ borderBottom: '1px solid #f3f3f3' }}>
+                      <td style={{ padding: 12, width: 140, maxWidth: 140, verticalAlign: 'top' }}>
+                        {(p.images && p.images.length) || p.image ? (
+                          <Link to={`/products/${p.id}`} style={{ display: 'inline-block' }}>
+                            <img src={(p.images && p.images.length ? (p.images[0].startsWith('http') ? p.images[0] : `http://localhost:4000${p.images[0]}`) : (p.image && p.image.startsWith('http') ? p.image : `http://localhost:4000${p.image}`))} alt={p.name} style={{ height: 80, objectFit: 'cover', borderRadius: 4 }} />
+                          </Link>
+                        ) : (
+                          <div style={{ color: '#999' }}>No image</div>
+                        )}
+                      </td>
+                      <td style={{ padding: 12, verticalAlign: 'top', whiteSpace: 'normal', wordBreak: 'break-word' }}>
+                        <div style={{ fontWeight: 700 }}>
+                          <Link to={`/products/${p.id}`} style={{ color: 'inherit', textDecoration: 'none' }}>{p.name}</Link>
+                        </div>
+                        <div style={{ color: '#666', fontSize: 13 }}>{p.description}</div>
+                      </td>
+                      <td style={{ padding: 12, verticalAlign: 'top', whiteSpace: 'normal', wordBreak: 'break-word' }}>{getProductCategoryPath(p)}</td>
+                      <td style={{ padding: 12, verticalAlign: 'top', whiteSpace: 'normal', wordBreak: 'break-word' }}>{p.brand || '—'}</td>
+                      <td style={{ padding: 12, verticalAlign: 'top', whiteSpace: 'normal', wordBreak: 'break-word' }}>{p.sku || '—'}</td>
+                      <td style={{ padding: 12, verticalAlign: 'top' }}>
+                        {(() => {
+                          const info = priceInfo(p);
+                          return (
+                            <div>
+                              <div style={{ fontWeight: info.discounted ? 800 : 700, color: info.isOffer ? '#d32' : (info.isSale ? '#d32' : '#111') }}>${Number(info.display).toFixed(2)}</div>
+                              {info.discounted ? <div style={{ textDecoration: 'line-through', color: '#888', fontSize: 13 }}>${Number(info.original).toFixed(2)}</div> : null}
+                              {info.remaining ? <div style={{ marginTop: 6, color: '#c00', fontSize: 12 }}>{info.remaining}</div> : null}
+                              {info.isInvalidSale ? <div style={{ marginTop: 6, display: 'inline-block', background: '#f0ad4e', color: '#fff', padding: '4px 8px', borderRadius: 6, fontSize: 12, fontWeight: 700 }}>Check sale</div> : null}
+                            </div>
+                          );
+                        })()}
+                      </td>
+                      <td style={{ padding: 12, verticalAlign: 'top' }}>{p.stock ?? '—'}</td>
+                      <td style={{ padding: 12, verticalAlign: 'top', whiteSpace: 'normal', wordBreak: 'break-word' }}>{renderSpecs(p.specs)}</td>
+                      <td style={{ padding: 12, verticalAlign: 'top' }}>
+                        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                          <button onClick={async () => { try { const info = priceInfo(p); const priceToUse = info.display; await addItem({ id: p.id, name: p.name, price: priceToUse, image: p.image, sku: p.sku }, 1); window.alert('Added to cart'); } catch (err) { console.error(err); alert('Failed to add to cart'); } }}>🛒 Add to Cart</button>
+                          <button onClick={async () => { try { const info = priceInfo(p); const priceToUse = info.display; await addItem({ id: p.id, name: p.name, price: priceToUse, image: p.image, sku: p.sku }, 1); window.location.href = '/cart'; } catch (err) { console.error(err); alert('Failed to add to cart'); } }} style={{ background: '#0b79d0', color: '#fff' }}>💳 Buy Now</button>
+                        </div>
+                      </td>
+                    </tr>
+                  ));
+                })()}
+              </tbody>
+            </table>
+          </div>
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 12 }}>
-        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-          <div>Show</div>
-          <select value={perPage} onChange={(e) => { setPerPage(Number(e.target.value)); setPage(1); }}>
-            <option value={20}>20</option>
-            <option value={50}>50</option>
-            <option value={100}>100</option>
-          </select>
-          <div>products</div>
-        </div>
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-          <button onClick={() => setPage((p) => Math.max(1, p - 1))}>Prev</button>
-          <div>Page {page} of {Math.max(1, Math.ceil(products.length / perPage))}</div>
-          <button onClick={() => setPage((p) => Math.min(Math.max(1, Math.ceil(products.length / perPage)), p + 1))}>Next</button>
-        </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 12 }}>
+            <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+              <div>Show</div>
+              <select value={perPage} onChange={(e) => { setPerPage(Number(e.target.value)); setPage(1); }}>
+                <option value={20}>20</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+              </select>
+              <div>products</div>
+            </div>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <button onClick={() => setPage((p) => Math.max(1, p - 1))}>Prev</button>
+              <div>Page {page} of {Math.max(1, Math.ceil(products.length / perPage))}</div>
+              <button onClick={() => setPage((p) => Math.min(Math.max(1, Math.ceil(products.length / perPage)), p + 1))}>Next</button>
+            </div>
+          </div>
+        </main>
       </div>
-    </main>
-  </div>
     </div>
   );
 }
