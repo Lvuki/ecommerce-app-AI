@@ -46,4 +46,5 @@ export function buildParams(filters = {}) {
   return params;
 }
 
-export default { buildParams };
+const filterService = { buildParams };
+export default filterService;

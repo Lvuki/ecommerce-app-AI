@@ -16,6 +16,9 @@ export default function ProductView() {
   const [error, setError] = useState("");
   const [inWishlist, setInWishlist] = useState(false);
   const [ratingLoading, setRatingLoading] = useState(false);
+  const [selectedServiceIds, setSelectedServiceIds] = useState([]);
+  const [availableServices, setAvailableServices] = useState([]);
+  const [showServicesModal, setShowServicesModal] = useState(false);
   const navigate = useNavigate();
 
   const [filters, setFilters] = useState({ category: "", brand: "", priceMin: "", priceMax: "", stockMin: "", color: "", size: "" });
@@ -49,6 +52,18 @@ export default function ProductView() {
           setError(p.error);
         } else {
           setProduct(p);
+          // preload available services for selection
+          (async () => {
+            try {
+              const svcModule = await import('../services/serviceService');
+              const arr = await svcModule.listServices();
+              setAvailableServices(arr || []);
+              // preset selected services from product
+              if (Array.isArray(p.services)) setSelectedServiceIds(p.services.map(s => s.id));
+            } catch (e) {
+              setAvailableServices([]);
+            }
+          })();
         }
       })
       .catch(() => setError("Failed to load product"))
@@ -284,12 +299,26 @@ export default function ProductView() {
             <p style={{ marginTop: 16, lineHeight: 1.6 }}>{product.description}</p>
 
             <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
-              <button onClick={async () => { try { const priceToUse = (product.offerPrice && Number(product.offerPrice) > 0) ? product.offerPrice : ((product.salePrice && Number(product.salePrice) > 0) ? product.salePrice : product.price); await addItem({ id: product.id, name: product.name, price: priceToUse, image: product.image, sku: product.sku }, 1); alert('Added to cart'); } catch (err) { console.error(err); alert('Failed to add to cart'); } }}>
+              <button onClick={async () => {
+                try {
+                  const priceToUse = (product.offerPrice && Number(product.offerPrice) > 0) ? product.offerPrice : ((product.salePrice && Number(product.salePrice) > 0) ? product.salePrice : product.price);
+                  // send full service objects so local (unauthenticated) cart can compute totals
+                  await addItem({ id: product.id, name: product.name, price: priceToUse, image: product.image, sku: product.sku, services: availableServices.filter(s => (selectedServiceIds || []).includes(s.id)) }, 1);
+                  alert('Added to cart');
+                } catch (err) { console.error(err); alert('Failed to add to cart'); }
+              }}>
                 🛒 Add to Cart
               </button>
-              <button onClick={async () => { try { const priceToUse = (product.offerPrice && Number(product.offerPrice) > 0) ? product.offerPrice : ((product.salePrice && Number(product.salePrice) > 0) ? product.salePrice : product.price); await addItem({ id: product.id, name: product.name, price: priceToUse, image: product.image, sku: product.sku }, 1); window.location.href = '/cart'; } catch (err) { console.error(err); alert('Failed to add to cart'); } }} style={{ background: '#0b79d0', color: '#fff' }}>
+              <button onClick={async () => {
+                try {
+                  const priceToUse = (product.offerPrice && Number(product.offerPrice) > 0) ? product.offerPrice : ((product.salePrice && Number(product.salePrice) > 0) ? product.salePrice : product.price);
+                  await addItem({ id: product.id, name: product.name, price: priceToUse, image: product.image, sku: product.sku, services: availableServices.filter(s => (selectedServiceIds || []).includes(s.id)) }, 1);
+                  window.location.href = '/cart';
+                } catch (err) { console.error(err); alert('Failed to add to cart'); }
+              }} style={{ background: '#0b79d0', color: '#fff' }}>
                 💳 Buy Now
               </button>
+              <button onClick={() => setShowServicesModal(true)}>Select Services ({(selectedServiceIds || []).length})</button>
               <button onClick={async () => { try { await wishlistService.toggleItem({ id: product.id, name: product.name, image: product.image, price: product.price }); /* toggle will fire wishlistUpdated event */ } catch (err) { console.error(err); alert('Failed to update wishlist'); } }} style={{ border: '1px solid #e6eef6', padding: '8px 12px', background: inWishlist ? '#ffecec' : 'transparent' }} aria-pressed={inWishlist}>
                 {inWishlist ? '❤️ In Wishlist' : '♡ Wishlist'}
               </button>
@@ -307,6 +336,40 @@ export default function ProductView() {
                 </ul>
               </div>
             ) : null}
+
+              {/* Services selection modal */}
+              {showServicesModal && (
+                <div style={{ position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.4)', zIndex: 80 }}>
+                  <div style={{ width: 600, maxHeight: '80vh', overflow: 'auto', background: '#fff', padding: 18, borderRadius: 8 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                      <h4 style={{ margin: 0 }}>Select Services</h4>
+                      <button onClick={() => setShowServicesModal(false)}>×</button>
+                    </div>
+                    <div style={{ display: 'grid', gap: 8 }}>
+                      {availableServices.map(s => {
+                        const checked = (selectedServiceIds || []).includes(s.id);
+                        return (
+                          <label key={s.id} style={{ display: 'flex', alignItems: 'center', gap: 8, border: '1px solid #eee', padding: 8, borderRadius: 6 }}>
+                            <input type="checkbox" checked={checked} onChange={(e) => {
+                              const next = new Set(selectedServiceIds || []);
+                              if (e.target.checked) next.add(s.id); else next.delete(s.id);
+                              setSelectedServiceIds(Array.from(next));
+                            }} />
+                            <div style={{ flex: 1 }}>
+                              <div style={{ fontWeight: 700 }}>{s.name}</div>
+                              <div style={{ color: '#666', fontSize: 13 }}>{s.description}</div>
+                            </div>
+                            <div style={{ fontWeight: 700 }}>${Number(s.price || 0).toFixed(2)}</div>
+                          </label>
+                        );
+                      })}
+                      <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+                        <button onClick={() => setShowServicesModal(false)}>Done</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
           </section>
         </main>
       </div>

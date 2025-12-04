@@ -60,10 +60,15 @@ export async function addProduct(productData) {
     if (value === undefined || value === null) return;
     // If it's an array, it may contain File objects and/or existing URLs.
     if (Array.isArray(value)) {
-      const files = value.filter(v => v instanceof File);
-      const nonFiles = value.filter(v => !(v instanceof File));
-      if (files.length) for (const f of files) form.append('images', f);
-      if (nonFiles.length) form.append('existingImages', JSON.stringify(nonFiles));
+      // special-case images handled elsewhere; otherwise serialize arrays as JSON
+      if (key === 'images') {
+        const files = value.filter(v => v instanceof File);
+        const nonFiles = value.filter(v => !(v instanceof File));
+        if (files.length) for (const f of files) form.append('images', f);
+        if (nonFiles.length) form.append('existingImages', JSON.stringify(nonFiles));
+        return;
+      }
+      form.append(key, JSON.stringify(value));
       return;
     }
 
@@ -97,10 +102,14 @@ export async function updateProduct(id, productData) {
     if (value === undefined || value === null) return;
     // If it's an array, it may contain File objects and/or existing URLs.
     if (Array.isArray(value)) {
-      const files = value.filter(v => v instanceof File);
-      const nonFiles = value.filter(v => !(v instanceof File));
-      if (files.length) for (const f of files) form.append('images', f);
-      if (nonFiles.length) form.append('existingImages', JSON.stringify(nonFiles));
+      if (key === 'images') {
+        const files = value.filter(v => v instanceof File);
+        const nonFiles = value.filter(v => !(v instanceof File));
+        if (files.length) for (const f of files) form.append('images', f);
+        if (nonFiles.length) form.append('existingImages', JSON.stringify(nonFiles));
+        return;
+      }
+      form.append(key, JSON.stringify(value));
       return;
     }
 

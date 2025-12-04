@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './Filters.css';
 
 // Icons
@@ -64,6 +65,8 @@ export default function Filters({ initial = {}, onChange = () => { }, categories
     spec5: true,
     rating: true,
   });
+  const navigate = useNavigate();
+  const prevDeepestRef = useRef('');
 
   // Notify parent of changes
   useEffect(() => {
@@ -87,6 +90,23 @@ export default function Filters({ initial = {}, onChange = () => { }, categories
 
     // emit payload to parent
     onChange(payload);
+
+    // Update URL when the deepest category selection changes so breadcrumbs can react
+    try {
+      // Prefer human-readable names (categoryName fields) to ensure the breadcrumbs resolve the full path
+      const deepestName = filters.category_child2_name || filters.category_child1_name || filters.categoryName || '';
+      const prev = prevDeepestRef.current || '';
+      if (deepestName !== prev) {
+        prevDeepestRef.current = deepestName;
+        if (deepestName) {
+          navigate(`/products?category=${encodeURIComponent(deepestName)}`, { replace: true });
+        } else {
+          navigate('/products', { replace: true });
+        }
+      }
+    } catch (e) {
+      // ignore navigation errors
+    }
   }, [filters]);
 
   const toggleSection = (section) => {

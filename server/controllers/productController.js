@@ -139,7 +139,7 @@ const getProducts = async (req, res) => {
       }
     }
 
-    let products = await Product.findAll({ where });
+    let products = await Product.findAll({ where, include: [{ model: models.Service, as: 'services', through: { attributes: [] } }] });
 
     // Specs filtering: any query key starting with spec_
     const specFilters = Object.fromEntries(Object.entries(rest).filter(([k]) => k.startsWith('spec_')));
@@ -194,7 +194,7 @@ const getProducts = async (req, res) => {
 
 const getProductById = async (req, res) => {
   try {
-    const product = await Product.findByPk(req.params.id);
+    const product = await Product.findByPk(req.params.id, { include: [{ model: models.Service, as: 'services', through: { attributes: [] } }] });
     if (!product) return res.status(404).json({ error: 'Product not found' });
     const obj = product && typeof product.toJSON === 'function' ? product.toJSON() : product;
     // normalize numeric fields
@@ -287,6 +287,10 @@ const rateProduct = async (req, res) => {
 const addProduct = async (req, res) => {
   try {
     const body = { ...req.body };
+    // parse serviceIds if sent as JSON string (FormData serializes arrays)
+    if (body.serviceIds && typeof body.serviceIds === 'string') {
+      try { body.serviceIds = JSON.parse(body.serviceIds); } catch (_) { /* leave as-is */ }
+    }
     if (typeof body.price === 'string') body.price = parseFloat(body.price);
     if (typeof body.salePrice === 'string') body.salePrice = parseFloat(body.salePrice);
     if (typeof body.offerPrice === 'string') body.offerPrice = parseFloat(body.offerPrice);
@@ -316,6 +320,10 @@ const addProduct = async (req, res) => {
       body.images = [body.image];
     }
     const product = await Product.create(body);
+    // associate services if provided (array of ids)
+    if (body.serviceIds && Array.isArray(body.serviceIds) && body.serviceIds.length) {
+      try { await product.setServices(body.serviceIds); } catch (_) { /* ignore association errors */ }
+    }
     res.json(product);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -326,6 +334,9 @@ const updateProduct = async (req, res) => {
   try {
     const { id } = req.params;
     const body = { ...req.body };
+    if (body.serviceIds && typeof body.serviceIds === 'string') {
+      try { body.serviceIds = JSON.parse(body.serviceIds); } catch (_) { /* ignore */ }
+    }
     if (typeof body.price === 'string') body.price = parseFloat(body.price);
     if (typeof body.salePrice === 'string') body.salePrice = parseFloat(body.salePrice);
     if (typeof body.offerPrice === 'string') body.offerPrice = parseFloat(body.offerPrice);
@@ -504,7 +515,16 @@ const updateProduct = async (req, res) => {
     }
 
     await Product.update(updatePayload, { where: { id } });
-    const updated = await Product.findByPk(id);
+    const updated = await Product.findByPk(id, { include: [{ model: models.Service, as: 'services', through: { attributes: [] } }] });
+    // update service associations if provided
+    if (body.serviceIds && Array.isArray(body.serviceIds)) {
+      try {
+        const prodInstance = await Product.findByPk(id);
+        if (prodInstance) await prodInstance.setServices(body.serviceIds);
+      } catch (e) { /* ignore */ }
+      // reload updated to include services
+      // (client receives updated above but ensure services persisted)
+    }
     res.json(updated);
   } catch (err) {
     res.status(500).json({ error: err.message });

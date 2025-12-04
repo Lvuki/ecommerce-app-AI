@@ -5,6 +5,7 @@ import { getCount, getCart } from "../services/cartService";
 import wishlistService from '../services/wishlistService';
 import API_BASE_URL from "../config";
 import logo from '../assets/globe-logo.png';
+import Breadcrumbs from './Breadcrumbs';
 
 export default function Header() {
   const navigate = useNavigate();
@@ -477,7 +478,7 @@ export default function Header() {
         </div>
       </div>
 
-      {/* announcement bar like the uploaded design - show only on homepage */}
+      {/* announcement bar: on homepage show announcement; on other pages show breadcrumbs */}
       {location && location.pathname === '/' ? (
         <div style={{ width: '100%', background: '#f6f6f6', padding: '20px 0' }}>
           <div style={{ maxWidth: 1440, margin: '0 auto', padding: '0 18px' }}>
@@ -487,7 +488,13 @@ export default function Header() {
             </div>
           </div>
         </div>
-      ) : null}
+      ) : (
+        <div style={{ width: '100%', background: '#f6f6f6', padding: '20px 0' }}>
+          <div style={{ maxWidth: 1440, margin: '0 auto', padding: '0 18px' }}>
+            <Breadcrumbs />
+          </div>
+        </div>
+      )}
     </header>
   );
 }

@@ -19,7 +19,8 @@ OrderItem.belongsTo(models.Product, { foreignKey: 'productId', as: 'product' });
     orderId: DataTypes.INTEGER,
     productId: DataTypes.INTEGER,
     quantity: DataTypes.INTEGER,
-    price: DataTypes.DECIMAL
+    price: DataTypes.DECIMAL,
+    services: DataTypes.JSON
   }, {
     sequelize,
     modelName: 'OrderItem',

@@ -22,6 +22,7 @@ export default function Admin() {
           <NavLink to="/admin" style={({ isActive }) => isActive ? { fontWeight: 700, color: '#0b74de' } : undefined}>Dashboard</NavLink>
           <NavLink to="/admin/users" style={({ isActive }) => isActive ? { fontWeight: 700, color: '#0b74de' } : undefined}>Users</NavLink>
           <NavLink to="/admin/blogs" style={({ isActive }) => isActive ? { fontWeight: 700, color: '#0b74de' } : undefined}>Blogs</NavLink>
+          <NavLink to="/admin/services" style={({ isActive }) => isActive ? { fontWeight: 700, color: '#0b74de' } : undefined}>Services</NavLink>
           <NavLink to="/admin/products" style={({ isActive }) => isActive ? { fontWeight: 700, color: '#0b74de' } : undefined}>Products</NavLink>
           <NavLink to="/admin/orders" style={({ isActive }) => isActive ? { fontWeight: 700, color: '#0b74de' } : undefined}>Orders</NavLink>
           <NavLink to="/admin/reports" style={({ isActive }) => isActive ? { fontWeight: 700, color: '#0b74de' } : undefined}>Reports</NavLink>

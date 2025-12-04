@@ -23,6 +23,10 @@ module.exports = (sequelize, DataTypes) => {
     if (models && models.Rating) {
       Product.hasMany(models.Rating, { foreignKey: 'productId', as: 'ratings' });
     }
+    // Many-to-many with services
+    if (models && models.Service) {
+      Product.belongsToMany(models.Service, { through: 'ProductServices', foreignKey: 'productId', otherKey: 'serviceId', as: 'services' });
+    }
   };
 
   return Product;

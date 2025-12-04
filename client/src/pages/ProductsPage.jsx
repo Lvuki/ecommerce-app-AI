@@ -25,6 +25,7 @@ function ProductsPage({ hidePurchaseActions }) {
     specs: "",
     specValues: {},
     images: [],
+    serviceIds: [],
   });
   const [categories, setCategories] = useState([]);
   const [filterCategory, setFilterCategory] = useState('');
@@ -33,6 +34,8 @@ function ProductsPage({ hidePurchaseActions }) {
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(20);
   const [showCategoriesPanel, setShowCategoriesPanel] = useState(false);
+  const [showServicesModal, setShowServicesModal] = useState(false);
+  const [availableServices, setAvailableServices] = useState([]);
   const [catForm, setCatForm] = useState({ id: null, name: '', description: '', imageFile: null, image: '', parentId: '' });
   const [addForm, setAddForm] = useState({ name: '', description: '', imageFile: null, image: '', parentId: '', specs: '' });
   const [editId, setEditId] = useState(null);
@@ -56,6 +59,16 @@ function ProductsPage({ hidePurchaseActions }) {
         }
       })();
       getCategories().then((c) => { console.debug('DEBUG: loaded categories', c); setCategories(c || []); });
+      // load available services for product editor
+      (async () => {
+        try {
+          const svcModule = await import('../services/serviceService');
+          const arr = await svcModule.listServices();
+          setAvailableServices(arr || []);
+        } catch (e) {
+          setAvailableServices([]);
+        }
+      })();
     }
   }, [navigate]);
 
@@ -184,6 +197,7 @@ function ProductsPage({ hidePurchaseActions }) {
 
   setForm({ name: "", description: "", price: "", category: "", sku: "", brand: "", garancia: "", modeli: "", stock: "", specs: "", specValues: {}, images: [], mainImageIndex: 0 });
     
+    
   };
 
   const handleEdit = (product) => {
@@ -240,6 +254,7 @@ function ProductsPage({ hidePurchaseActions }) {
       specs: product.specs ? (typeof product.specs === 'string' ? product.specs : JSON.stringify(product.specs, null, 2)) : "",
       specValues: initialSpecValues,
       images: product.images && product.images.length ? product.images.slice() : [],
+      serviceIds: Array.isArray(product.services) ? product.services.map(s => s.id) : [],
       mainImageIndex: mainIndex,
     });
     setShowForm(true);
@@ -271,6 +286,7 @@ function ProductsPage({ hidePurchaseActions }) {
       specs: "",
       specValues: {},
       images: [],
+      serviceIds: [],
       mainImageIndex: 0,
     });
     setShowForm(true);
@@ -582,11 +598,55 @@ function ProductsPage({ hidePurchaseActions }) {
                 ) : null}
               </div>
 
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <label style={{ fontWeight: 600, marginBottom: 6 }}>Services</label>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                  <div style={{ fontSize: 13, color: '#444' }}>{(form.serviceIds || []).length} selected</div>
+                  <button type="button" onClick={async () => { setShowServicesModal(true); if (!availableServices.length) {
+                      try { const svcModule = await import('../services/serviceService'); const arr = await svcModule.listServices(); setAvailableServices(arr || []); } catch (e) { setAvailableServices([]); }
+                    } }}>
+                    Manage Services
+                  </button>
+                </div>
+              </div>
+
               <div style={{ gridColumn: '1 / -1', display: 'flex', gap: 8 }}>
                 <button type="submit">{editId ? "Update Product" : "Add Product"}</button>
                 <button type="button" onClick={() => { setShowForm(false); setEditId(null); setForm({ name: "", description: "", price: "", salePrice: "", offerPrice: '', offerFrom: '', offerTo: '', category: "", sku: "", brand: "", garancia: "", modeli: "", stock: "", specs: "", specValues: {}, images: [], mainImageIndex: 0 }); }}>Cancel</button>
               </div>
             </form>
+            {showServicesModal && (
+              <div style={{ position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.4)', zIndex: 80 }}>
+                <div style={{ width: 600, maxHeight: '80vh', overflow: 'auto', background: '#fff', padding: 18, borderRadius: 8 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                    <h4 style={{ margin: 0 }}>Select Services</h4>
+                    <button onClick={() => setShowServicesModal(false)}>×</button>
+                  </div>
+                  <div style={{ display: 'grid', gap: 8 }}>
+                    {availableServices.map(s => {
+                      const checked = (form.serviceIds || []).includes(s.id);
+                      return (
+                        <label key={s.id} style={{ display: 'flex', alignItems: 'center', gap: 8, border: '1px solid #eee', padding: 8, borderRadius: 6 }}>
+                          <input type="checkbox" checked={checked} onChange={(e) => {
+                            const next = new Set(form.serviceIds || []);
+                            if (e.target.checked) next.add(s.id); else next.delete(s.id);
+                            setForm({ ...form, serviceIds: Array.from(next) });
+                          }} />
+                          <div style={{ flex: 1 }}>
+                            <div style={{ fontWeight: 700 }}>{s.name}</div>
+                            <div style={{ color: '#666', fontSize: 13 }}>{s.description}</div>
+                          </div>
+                          <div style={{ fontWeight: 700 }}>${Number(s.price || 0).toFixed(2)}</div>
+                        </label>
+                      );
+                    })}
+                    <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+                      <button onClick={() => setShowServicesModal(false)}>Done</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
