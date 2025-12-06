@@ -2,3 +2,5 @@ Commit: spec add
 Date: 2025-12-06
 Purpose: marker file — created to produce a safe, minimal commit named "spec add" and push to origin/main.
 Notes: no functional changes. If you want this removed, delete `server/SPEC_ADD_COMMIT.txt` and commit.
+ 
+Run: 2025-12-06T00:00:00Z — appended to create a new commit 'spec add'
