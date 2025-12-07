@@ -343,3 +343,27 @@
   color: #888;
   font-size: 12px;
 }
+
+/* Specs */
+.spec-values-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 220px;
+  overflow-y: auto;
+}
+.spec-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.spec-value {
+  flex: 1;
+  font-size: 14px;
+  color: #444;
+}
+.spec-placeholder {
+  color: #888;
+  font-size: 13px;
+  font-style: italic;
+}

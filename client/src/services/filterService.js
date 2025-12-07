@@ -39,7 +39,19 @@ export function buildParams(filters = {}) {
   if (filters.priceMin) params.priceMin = filters.priceMin;
   if (filters.priceMax) params.priceMax = filters.priceMax;
   if (filters.warranty) params.warranty = filters.warranty;
-  if (filters.specKey && filters.specValue) params[`spec_${filters.specKey}`] = filters.specValue;
+  // Support multi-select specs via `filters.specs` object: { specKey: ['v1','v2'] }
+  if (filters.specs && typeof filters.specs === 'object') {
+    Object.entries(filters.specs).forEach(([k, v]) => {
+      if (v === undefined || v === null || v === '') return;
+      if (Array.isArray(v)) {
+        if (v.length) params[`spec_${k}`] = v.slice();
+      } else {
+        params[`spec_${k}`] = v;
+      }
+    });
+  } else if (filters.specKey && filters.specValue) {
+    params[`spec_${filters.specKey}`] = filters.specValue;
+  }
   if (filters.ratingMin) params.ratingMin = filters.ratingMin;
 
   // return built params

@@ -36,7 +36,7 @@ const IconChevronUp = () => (
   </svg>
 );
 
-export default function Filters({ initial = {}, onChange = () => { }, categories = [], brands = [] }) {
+export default function Filters({ initial = {}, onChange = () => { }, categories = [], brands = [], specsMeta = [] }) {
   const [filters, setFilters] = useState({
     category: initial.category || '',
     category_child1: initial.category_child1 || '',
@@ -52,6 +52,7 @@ export default function Filters({ initial = {}, onChange = () => { }, categories
   });
 
   const [brandSearch, setBrandSearch] = useState('');
+  const [specs, setSpecs] = useState({});
   const [openSections, setOpenSections] = useState({
     categories: true,
     focus: true,
@@ -88,6 +89,20 @@ export default function Filters({ initial = {}, onChange = () => { }, categories
       if (k === 'brand' && payload[k] === '') delete payload[k];
     });
 
+    // attach specs selections (if any)
+    if (specs && typeof specs === 'object') {
+      const specCopy = {};
+      Object.entries(specs).forEach(([k, v]) => {
+        if (!v) return;
+        if (Array.isArray(v)) {
+          const filtered = v.filter(x => x !== undefined && x !== null && String(x) !== '');
+          if (filtered.length) specCopy[k] = filtered.slice();
+        } else if (String(v) !== '') {
+          specCopy[k] = v;
+        }
+      });
+      if (Object.keys(specCopy).length) payload.specs = specCopy;
+    }
     // emit payload to parent
     onChange(payload);
 
@@ -107,7 +122,7 @@ export default function Filters({ initial = {}, onChange = () => { }, categories
     } catch (e) {
       // ignore navigation errors
     }
-  }, [filters]);
+  }, [filters, specs]);
 
   const toggleSection = (section) => {
     setOpenSections(prev => ({ ...prev, [section]: !prev[section] }));
@@ -185,6 +200,24 @@ export default function Filters({ initial = {}, onChange = () => { }, categories
       }
     }
   }, [initial, categories]);
+
+  // Initialize specs selection from initial if provided
+  useEffect(() => {
+    if (initial && initial.specs && typeof initial.specs === 'object') {
+      // sanitize initial.specs: remove empty arrays/values
+      const clean = {};
+      Object.entries(initial.specs).forEach(([k, v]) => {
+        if (v === undefined || v === null) return;
+        if (Array.isArray(v)) {
+          const filtered = v.filter(x => x !== undefined && x !== null && String(x) !== '');
+          if (filtered.length) clean[k] = filtered.slice();
+        } else if (String(v) !== '') {
+          clean[k] = v;
+        }
+      });
+      setSpecs(clean);
+    }
+  }, [initial]);
 
   // (dev) removed verbose console debug logging to keep console clean
 
@@ -417,17 +450,48 @@ export default function Filters({ initial = {}, onChange = () => { }, categories
 
       <div className="divider"></div>
 
-      {/* Specs Sections (Mocked) */}
-      {[1, 2, 3, 4, 5].map(i => (
-        <React.Fragment key={i}>
+      {/* Specs Sections (Top 5 from specsMeta) */}
+      {(specsMeta || []).map((s, idx) => (
+        <React.Fragment key={s.key || idx}>
           <div className="filter-section">
-            <div className="filter-header" onClick={() => toggleSection(`spec${i}`)}>
-              <span className="section-title">Specifika {i}</span>
-              {openSections[`spec${i}`] ? <IconChevronUp /> : <IconChevronDown />}
+            <div className="filter-header" onClick={() => toggleSection(`spec${idx}`)}>
+              <span className="section-title">{s.key}</span>
+              {openSections[`spec${idx}`] ? <IconChevronUp /> : <IconChevronDown />}
             </div>
-            {openSections[`spec${i}`] && (
+            {openSections[`spec${idx}`] && (
               <div className="filter-content">
-                <div className="spec-placeholder">No options available</div>
+                {(Array.isArray(s.values) && s.values.length) ? (
+                    <div>
+                      <div className="spec-values-list">
+                        {s.values.map(v => {
+                          const sel = Array.isArray(specs[s.key]) ? specs[s.key] : (specs[s.key] ? [specs[s.key]] : []);
+                          const checked = sel.includes(v);
+                          return (
+                            <label key={v} className="checkbox-item spec-item">
+                              <input
+                                type="checkbox"
+                                checked={checked}
+                                onChange={() => {
+                                  setSpecs(prev => {
+                                    const cur = Array.isArray(prev[s.key]) ? prev[s.key].slice() : (prev[s.key] ? [prev[s.key]] : []);
+                                    const exists = cur.includes(v);
+                                    const next = exists ? cur.filter(x => x !== v) : [...cur, v];
+                                    const out = { ...prev };
+                                    if (Array.isArray(next) && next.length) out[s.key] = next;
+                                    else delete out[s.key];
+                                    return out;
+                                  });
+                                }}
+                              />
+                              <span className="spec-value">{v}</span>
+                            </label>
+                          );
+                        })}
+                      </div>
+                    </div>
+                ) : (
+                  <div className="spec-placeholder">No options available</div>
+                )}
               </div>
             )}
           </div>

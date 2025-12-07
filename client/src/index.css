@@ -11,3 +11,94 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+/* Standardized product image styles */
+.product-image {
+  width: 100%;
+  height: 260px;
+  object-fit: cover;
+  display: block;
+  border-radius: 8px;
+  background: #fafafa;
+}
+
+.product-main-image {
+  width: 100%;
+  height: 520px;
+  object-fit: cover;
+  display: block;
+  border-radius: 12px;
+  background: #fafafa;
+}
+
+.product-thumb-small {
+  width: 96px;
+  height: 72px;
+  object-fit: cover;
+  display: block;
+  border-radius: 6px;
+}
+
+.product-specs-table {
+  width: 100%;
+}
+
+/* Price / buy box styles */
+.buybox {
+  background: #fff;
+  padding: 18px;
+  border-radius: 8px;
+}
+.price-old {
+  color: #888;
+  text-decoration: line-through;
+  font-size: 13px;
+}
+.price-large {
+  font-weight: 900;
+  color: #ff8c00;
+  line-height: 1;
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-end;
+}
+.price-int {
+  font-size: 44px;
+}
+.price-dec {
+  font-size: 20px;
+  margin-left: 6px;
+}
+.price-subtext {
+  color: #0b74de;
+  font-size: 13px;
+  text-align: right;
+  margin-top: 6px;
+}
+.buy-cta {
+  background: #ff8c00;
+  color: #fff;
+  border: none;
+  padding: 12px 16px;
+  font-weight: 800;
+  border-radius: 8px;
+  width: 100%;
+}
+.qty-control {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.qty-control button { background: #fff; border: none; padding: 8px 12px; cursor: pointer; }
+.icon-btn {
+  border: 1px solid #eee;
+  border-radius: 8px;
+  padding: 8px 12px;
+  background: #fff;
+  cursor: pointer;
+}
+.service-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 4px; }
+.service-left { display:flex; align-items:center; gap:10px }
+.service-price { font-size:13px; color:#666 }

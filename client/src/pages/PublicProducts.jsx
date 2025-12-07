@@ -164,6 +164,27 @@ export default function PublicProducts() {
             initial={initialFilters}
             categories={categoriesTree}
             brands={Array.isArray(meta.brands) ? meta.brands : []}
+            // pass computed specs metadata (top keys + their values)
+            specsMeta={(() => {
+              try {
+                const counts = {};
+                const values = {};
+                for (const p of products || []) {
+                  const s = p && p.specs ? p.specs : null;
+                  if (!s || typeof s !== 'object') continue;
+                  for (const [k, v] of Object.entries(s)) {
+                    const key = String(k).trim();
+                    if (!key) continue;
+                    counts[key] = (counts[key] || 0) + 1;
+                    values[key] = values[key] || new Set();
+                    if (v !== undefined && v !== null) values[key].add(String(v));
+                  }
+                }
+                // pick top 5 keys by count
+                const keys = Object.keys(counts).sort((a, b) => counts[b] - counts[a]).slice(0, 5);
+                return keys.map(k => ({ key: k, count: counts[k], values: Array.from(values[k] || []) }));
+              } catch (e) { return []; }
+            })()}
             onChange={(f) => {
               setFilters(f);
               if (searchDebounce.current) clearTimeout(searchDebounce.current);
