@@ -19,6 +19,9 @@ const { authenticate, adminOnly } = require('../middleware/authMiddleware');
 
 // Routes
 
+// Search suggestions
+router.get('/search/suggestions', require('../controllers/productController').getSearchSuggestions);
+
 // Anyone can fetch products
 router.get('/', getProducts);
 // keep the specific categories route before the param route so the literal

@@ -30,14 +30,14 @@ export default function PublicProducts() {
   useEffect(() => {
     (async () => {
       try {
-        const [prods, tree, brandsRes] = await Promise.all([searchProducts({}), getCategories(), getCategoriesAndBrands()]);
-        setProducts(prods || []);
+        // Only fetch categories and brands initially. Products are handled by the location-based useEffect.
+        const [tree, brandsRes] = await Promise.all([getCategories(), getCategoriesAndBrands()]);
+        // setProducts(prods || []); // Removed to avoid race condition
         setCategories(tree || []);
         setCategoriesTree(tree || []);
         setMeta(brandsRes || { categories: [], brands: [] });
       } catch (e) {
-        console.error('Failed to load products', e);
-        setProducts([]);
+        console.error('Failed to load initial metadata', e);
         setCategories([]);
         setCategoriesTree([]);
         setMeta({ categories: [], brands: [] });
@@ -80,10 +80,17 @@ export default function PublicProducts() {
         init.category = String(cat);
         init.categoryName = String(cat);
       }
-      if (q) setSearchQ(q);
+      if (q) {
+        setSearchQ(q);
+        init.q = q;
+      } else {
+        setSearchQ('');
+        init.q = '';
+      }
       setInitialFilters(init);
-      if (Object.keys(init).length) loadProducts(init);
+      loadProducts(init);
     } catch (err) {
+      console.error(err);
     }
   }, [location.search]);
 
@@ -91,7 +98,10 @@ export default function PublicProducts() {
     try {
       const mergedFilters = { ...filters, ...opts };
       const params = filterService.buildParams(mergedFilters);
-      if (searchQ) params.q = searchQ;
+      // Use query from opts if present (handling URL updates), otherwise fallback to state
+      if (opts.q !== undefined) params.q = opts.q;
+      else if (searchQ) params.q = searchQ;
+
       const prods = await searchProducts(params);
       setProducts(prods || []);
       setPage(1);
@@ -188,14 +198,8 @@ export default function PublicProducts() {
             onChange={(f) => {
               setFilters(f);
               if (searchDebounce.current) clearTimeout(searchDebounce.current);
-              searchDebounce.current = setTimeout(async () => {
-                try {
-                  const res = await searchWithFilters(f);
-                  setProducts(res || []);
-                  setPage(1);
-                } catch (err) {
-                  console.error('Filter search failed', err);
-                }
+              searchDebounce.current = setTimeout(() => {
+                loadProducts(f);
               }, 250);
               (async () => {
                 try {

@@ -24,11 +24,14 @@ export default function Header() {
   const [headerCategories, setHeaderCategories] = useState([]);
   const [headerPages, setHeaderPages] = useState([]);
   const [showCategoryMenu, setShowCategoryMenu] = useState(false);
+  const [suggestions, setSuggestions] = useState({ products: [], categories: [] });
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const [b2bEnabled, setB2bEnabled] = useState(() => localStorage.getItem('b2b_enabled') === '1');
   const menuRef = useRef(null);
   const hamburgerRef = useRef(null);
   const profileRef = useRef(null);
   const langRef = useRef(null);
+  const suggestionsRef = useRef(null);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const location = useLocation();
 
@@ -156,6 +159,9 @@ export default function Header() {
       if (langRef.current && !langRef.current.contains(e.target)) {
         setShowLangMenu(false);
       }
+      if (suggestionsRef.current && !suggestionsRef.current.contains(e.target)) {
+        setShowSuggestions(false);
+      }
     }
     document.addEventListener('mousedown', onDoc);
     return () => document.removeEventListener('mousedown', onDoc);
@@ -175,6 +181,30 @@ export default function Header() {
   useEffect(() => {
     localStorage.setItem('b2b_enabled', b2bEnabled ? '1' : '0');
   }, [b2bEnabled]);
+
+  // Debounce search suggestions
+  useEffect(() => {
+    const timer = setTimeout(async () => {
+      if (!searchQuery || searchQuery.length < 2) {
+        setSuggestions({ products: [], categories: [] });
+        setShowSuggestions(false);
+        return;
+      }
+      try {
+        const res = await fetch(`${API_BASE_URL}/products/search/suggestions?q=${encodeURIComponent(searchQuery)}`);
+        const data = await res.json();
+        if (data && (data.products?.length || data.categories?.length)) {
+          setSuggestions(data);
+          setShowSuggestions(true);
+        } else {
+          setShowSuggestions(false);
+        }
+      } catch (err) {
+        console.error('Suggestion fetch failed', err);
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   // flatten hierarchical categories into a flat list of {id,name}
   const flattenCategories = (nodes) => {
@@ -286,6 +316,8 @@ export default function Header() {
   .hamburger-backdrop.open { background: rgba(0,0,0,0.24); pointer-events: auto; }
   .hamburger-panel { width: 100%; max-width: 1440px; box-shadow: 0 12px 40px rgba(0,0,0,0.12); border-radius: 6px; display: flex; overflow: hidden; background: #fff; transform: translateX(-100%); transition: transform 320ms cubic-bezier(.2,.8,.2,1); }
   .hamburger-panel.open { transform: translateX(0); }
+  
+  .suggestion-item:hover { background: #f7fbff; }
   `}</style>
       {/* top row: centered nav with full-width right controls */}
       <div style={{ display: 'flex', justifyContent: 'center', width: '100%', position: 'relative' }}>
@@ -430,6 +462,80 @@ export default function Header() {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 style={{ padding: '0 12px', fontSize: 16, borderRadius: 6, flex: 1, height: 40, display: 'inline-block' }}
               />
+              {showSuggestions && (suggestions.products.length > 0 || suggestions.categories.length > 0) && (
+                <div ref={suggestionsRef} style={{
+                  position: 'absolute',
+                  top: '100%',
+                  left: 0,
+                  right: 0,
+                  background: '#fff',
+                  border: '1px solid #d6e6f3',
+                  borderTop: 'none',
+                  borderRadius: '0 0 6px 6px',
+                  boxShadow: '0 12px 32px rgba(0,0,0,0.1)',
+                  zIndex: 200,
+                  overflow: 'hidden',
+                  marginTop: 4
+                }}>
+                  {suggestions.categories.length > 0 && (
+                    <div style={{ padding: '6px 0', borderBottom: '1px solid #eaeff5' }}>
+                      <div style={{ fontSize: 11, fontWeight: 700, color: '#99aab5', padding: '4px 14px', textTransform: 'uppercase', letterSpacing: 0.5 }}>Categories</div>
+                      {suggestions.categories.map(cat => (
+                        <button
+                          key={cat.id || cat.name}
+                          type="button"
+                          className="suggestion-item"
+                          onClick={() => {
+                            navigate(`/products?category=${encodeURIComponent(cat.name)}`);
+                            setShowSuggestions(false);
+                            setSearchQuery('');
+                          }}
+                          style={{ display: 'block', width: '100%', textAlign: 'left', padding: '8px 14px', background: 'none', border: 'none', cursor: 'pointer', fontSize: 14, color: '#111', fontWeight: 500 }}
+                        >
+                          {cat.name}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  {suggestions.products.length > 0 && (
+                    <div style={{ padding: '6px 0' }}>
+                      <div style={{ fontSize: 11, fontWeight: 700, color: '#99aab5', padding: '4px 14px', textTransform: 'uppercase', letterSpacing: 0.5 }}>Products</div>
+                      {suggestions.products.map(prod => (
+                        <button
+                          key={prod.id}
+                          type="button"
+                          className="suggestion-item"
+                          onClick={() => {
+                            navigate(`/product/${prod.id}`);
+                            setShowSuggestions(false);
+                            setSearchQuery('');
+                          }}
+                          style={{ display: 'flex', alignItems: 'center', gap: 12, width: '100%', textAlign: 'left', padding: '8px 14px', background: 'none', border: 'none', cursor: 'pointer' }}
+                        >
+                          <img
+                            src={prod.images && prod.images[0] ? (prod.images[0].startsWith('http') ? prod.images[0] : `${API_BASE_URL}${prod.images[0]}`) : 'https://via.placeholder.com/40'}
+                            alt=""
+                            style={{ width: 36, height: 36, objectFit: 'contain', borderRadius: 4, background: '#fff', border: '1px solid #eee' }}
+                          />
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ fontSize: 14, color: '#222', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: 500 }}>{prod.name}</div>
+                            <div style={{ fontSize: 13, fontWeight: 700, color: '#0b74de', marginTop: 1 }}>
+                              {prod.offerPrice ? (
+                                <span>
+                                  <span style={{ textDecoration: 'line-through', color: '#999', marginRight: 6, fontWeight: 400, fontSize: 12 }}>{prod.price} L</span>
+                                  {prod.offerPrice} L
+                                </span>
+                              ) : (
+                                <span>{prod.price} L</span>
+                              )}
+                            </div>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
               {/* B2B toggle/button placed next to search input */}
               <div style={{ marginLeft: 8, display: 'flex', alignItems: 'center' }}>
                 <button type="button" onClick={() => setB2bEnabled(s => !s)} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '6px 10px', borderRadius: 20, border: '1.5px solid #bfe6fb', background: '#fff', cursor: 'pointer' }} aria-pressed={b2bEnabled} title="B2B">

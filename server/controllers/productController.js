@@ -110,7 +110,16 @@ const getProducts = async (req, res) => {
 
     // built where clause available here for debugging when needed
     if (sku) where.sku = sku;
-    if (q) where.name = { [Op.iLike]: `%${q}%` };
+    if (q) {
+      const term = `%${q}%`;
+      where[Op.or] = [
+        { name: { [Op.iLike]: term } },
+        { description: { [Op.iLike]: term } },
+        { brand: { [Op.iLike]: term } },
+        { category: { [Op.iLike]: term } },
+        { sku: { [Op.iLike]: term } }
+      ];
+    }
     if (priceMin || priceMax) {
       where.price = {};
       if (priceMin) where.price[Op.gte] = Number(priceMin);
@@ -572,7 +581,62 @@ const deleteProduct = async (req, res) => {
   }
 };
 
-module.exports = { getProducts, getProductById, addProduct, updateProduct, deleteProduct, rateProduct };
+const getSearchSuggestions = async (req, res) => {
+  try {
+    const { q } = req.query;
+    if (!q || q.length < 2) return res.json({ products: [], categories: [] });
+
+    const term = `%${q}%`;
+    const productLimit = 5;
+
+    // specific search for suggestions
+    const products = await Product.findAll({
+      where: {
+        [Op.or]: [
+          { name: { [Op.iLike]: term } },
+          { brand: { [Op.iLike]: term } }
+        ]
+      },
+      attributes: ['id', 'name', 'image', 'images', 'price', 'salePrice', 'offerPrice', 'category', 'sku'],
+      limit: productLimit
+    });
+
+    // normalize images/price for suggestions
+    const normalizedProducts = products.map(p => {
+      const obj = p.toJSON();
+      if (obj.images && typeof obj.images === 'string') {
+        try { obj.images = JSON.parse(obj.images); } catch (_) { obj.images = [obj.images]; }
+      }
+      if ((!obj.images || !obj.images.length) && obj.image) obj.images = [obj.image];
+      if (Array.isArray(obj.images)) obj.images = obj.images.map(i => (i || '').toString().trim()).filter(Boolean);
+      return obj;
+    });
+
+    // Find matching categories
+    // We can search the Category table directly if available, or infer from products
+    let categories = [];
+    try {
+      const { Category } = models;
+      if (Category) {
+        categories = await Category.findAll({
+          where: {
+            name: { [Op.iLike]: term }
+          },
+          limit: 3,
+          attributes: ['id', 'name']
+        });
+      }
+    } catch (e) {
+      // ignore
+    }
+
+    res.json({ products: normalizedProducts, categories });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+module.exports = { getProducts, getProductById, addProduct, updateProduct, deleteProduct, rateProduct, getSearchSuggestions };
 
 // Extra: categories and brands
 const getCategories = async (req, res) => {
