@@ -75,28 +75,34 @@ export default function PublicProducts() {
       const params = new URLSearchParams(location.search || '');
       const cat = params.get('category');
       const q = params.get('q');
-      const init = {};
-      if (cat) {
-        init.category = String(cat);
-        init.categoryName = String(cat);
-      }
+
+      // If there is a search query, prioritize it and clear other filters
       if (q) {
         setSearchQ(q);
-        init.q = q;
+        const resetFilters = { q };
+        setFilters(resetFilters);
+        setInitialFilters(resetFilters);
+        loadProducts(resetFilters, true);
       } else {
+        // No search query
         setSearchQ('');
-        init.q = '';
+        const init = {};
+        if (cat) {
+          init.category = String(cat);
+          init.categoryName = String(cat);
+        }
+        setFilters(init); // Reset filters to category or empty
+        setInitialFilters(init);
+        loadProducts(init, true);
       }
-      setInitialFilters(init);
-      loadProducts(init);
     } catch (err) {
       console.error(err);
     }
   }, [location.search]);
 
-  const loadProducts = async (opts = {}) => {
+  const loadProducts = async (opts = {}, replace = false) => {
     try {
-      const mergedFilters = { ...filters, ...opts };
+      const mergedFilters = replace ? opts : { ...filters, ...opts };
       const params = filterService.buildParams(mergedFilters);
       // Use query from opts if present (handling URL updates), otherwise fallback to state
       if (opts.q !== undefined) params.q = opts.q;
@@ -199,7 +205,7 @@ export default function PublicProducts() {
               setFilters(f);
               if (searchDebounce.current) clearTimeout(searchDebounce.current);
               searchDebounce.current = setTimeout(() => {
-                loadProducts(f);
+                loadProducts(f, true);
               }, 250);
               (async () => {
                 try {

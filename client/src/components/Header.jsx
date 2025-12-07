@@ -230,8 +230,10 @@ export default function Header() {
 
   const handleSearch = (e) => {
     e.preventDefault();
+    setShowSuggestions(false);
     const params = new URLSearchParams();
-    if (searchCategory) params.set('category', searchCategory);
+    // Reset filters: Only send 'q', effectively searching all categories.
+    // If we wanted to search within category, we'd append it here, but user asked for reset.
     if (searchQuery) params.set('q', searchQuery);
     const qs = params.toString();
     navigate(`/products${qs ? `?${qs}` : ''}`);
@@ -454,7 +456,7 @@ export default function Header() {
           </div>
 
           <form onSubmit={handleSearch} style={{ display: 'flex', gap: 12, alignItems: 'center', flex: 1 }}>
-            <div style={{ position: 'relative', display: 'flex', alignItems: 'center', width: '100%' }}>
+            <div style={{ position: 'relative', display: 'flex', alignItems: 'center', flex: 1 }}>
               <input
                 className="header-search-input"
                 placeholder="Search products..."
@@ -506,14 +508,14 @@ export default function Header() {
                           type="button"
                           className="suggestion-item"
                           onClick={() => {
-                            navigate(`/product/${prod.id}`);
+                            navigate(`/products/${prod.id}`);
                             setShowSuggestions(false);
                             setSearchQuery('');
                           }}
                           style={{ display: 'flex', alignItems: 'center', gap: 12, width: '100%', textAlign: 'left', padding: '8px 14px', background: 'none', border: 'none', cursor: 'pointer' }}
                         >
                           <img
-                            src={prod.images && prod.images[0] ? (prod.images[0].startsWith('http') ? prod.images[0] : `${API_BASE_URL}${prod.images[0]}`) : 'https://via.placeholder.com/40'}
+                            src={prod.images && prod.images[0] ? (prod.images[0].startsWith('http') ? prod.images[0] : `${API_BASE_URL.replace('/api', '')}${prod.images[0]}`) : 'https://via.placeholder.com/40'}
                             alt=""
                             style={{ width: 36, height: 36, objectFit: 'contain', borderRadius: 4, background: '#fff', border: '1px solid #eee' }}
                           />
@@ -536,46 +538,46 @@ export default function Header() {
                   )}
                 </div>
               )}
-              {/* B2B toggle/button placed next to search input */}
-              <div style={{ marginLeft: 8, display: 'flex', alignItems: 'center' }}>
-                <button type="button" onClick={() => setB2bEnabled(s => !s)} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '6px 10px', borderRadius: 20, border: '1.5px solid #bfe6fb', background: '#fff', cursor: 'pointer' }} aria-pressed={b2bEnabled} title="B2B">
-                  <div style={{ width: 36, height: 20, borderRadius: 20, background: b2bEnabled ? '#ffb84d' : '#eef6ff', position: 'relative' }}>
-                    <div style={{ width: 14, height: 14, borderRadius: 12, background: b2bEnabled ? '#fff' : '#0b74de', position: 'absolute', top: 3, left: (b2bEnabled ? 19 : 3), transition: 'left 140ms linear' }} />
-                  </div>
-                  <div style={{ fontSize: 13, fontWeight: 600 }}>B2B</div>
-                </button>
-              </div>
-              {/* action icons moved next to B2B */}
-              <div style={{ marginLeft: 8, display: 'flex', gap: 8, alignItems: 'center' }}>
-                <Link to="/wishlist" className="header-action" style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 40, height: 40, borderRadius: 20, border: '1.5px solid #d6e6f3', textDecoration: 'none' }} aria-label="Wishlist">
-                  <svg className="header-icon" width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                    <path fill="currentColor" d="M12.1 21.3c-.4-.3-8.1-5.6-9.9-8.1C.5 11.2 2.4 7 6 7c1.9 0 3.2.9 4.1 2.2.9-1.3 2.2-2.2 4.1-2.2 3.6 0 5.5 4.2 3.8 6.2-1.8 2.5-9.5 7.9-9.9 8.1z" />
-                  </svg>
-                  {wishlistCount ? (
-                    <span style={{ position: 'absolute', top: -6, right: -6, background: '#0b74de', color: '#fff', borderRadius: 10, padding: '2px 6px', fontSize: 12 }}>{wishlistCount}</span>
-                  ) : null}
-                </Link>
-                <Link to="/cart" className="header-action" style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 40, height: 40, borderRadius: 20, border: '1.5px solid #d6e6f3', textDecoration: 'none' }} aria-label="Cart">
-                  <svg className="header-icon" width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                    <path fill="currentColor" d="M7 4h-2l-1 2h2l3.6 7.6-1.35 2.4A1.99 1.99 0 0 0 10.25 18h7.45v-2H10.9l.6-1h7.05c.78 0 1.42-.55 1.58-1.3l1.25-6.7H6.21L5.27 4H7zM9 20a1 1 0 1 0 0 2 1 1 0 0 0 0-2zm8 0a1 1 0 1 0 0 2 1 1 0 0 0 0-2z" />
-                  </svg>
-                  {cartCount ? (
-                    <span style={{ position: 'absolute', top: -6, right: -6, background: '#d32', color: '#fff', borderRadius: 10, padding: '2px 6px', fontSize: 12 }}>{cartCount}</span>
-                  ) : null}
-                </Link>
-                <div ref={profileRef} style={{ position: 'relative' }}>
-                  <button className="header-action" type="button" onClick={() => { if (!hasToken) navigate('/login'); else setShowProfileMenu(s => !s); }} title="Profile" aria-label="Profile" aria-haspopup="true" aria-expanded={showProfileMenu} style={{ width: 40, height: 40, borderRadius: 20, border: '1.5px solid #d6e6f3', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <svg className="header-icon" width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                      <path fill="currentColor" d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm0 2c-4.4 0-8 2.2-8 4.9V22h16v-3.1c0-2.7-3.6-4.9-8-4.9z" />
-                    </svg>
-                  </button>
-                  {showProfileMenu && hasToken ? (
-                    <div style={{ position: 'absolute', right: 0, top: '100%', marginTop: 8, background: '#fff', border: '1px solid #eee', boxShadow: '0 8px 24px rgba(0,0,0,0.08)', padding: 8, zIndex: 95, minWidth: 160 }}>
-                      <Link to="/profile" onClick={() => setShowProfileMenu(false)} style={{ display: 'block', padding: '8px 12px', textDecoration: 'none', color: '#111' }}>Profile</Link>
-                      <button type="button" onClick={() => { setShowProfileMenu(false); handleLogout(); }} style={{ display: 'block', width: '100%', textAlign: 'left', padding: '8px 12px', background: 'none', border: 'none', cursor: 'pointer' }}>Logout</button>
-                    </div>
-                  ) : null}
+            </div>
+            {/* B2B toggle/button placed next to search input */}
+            <div style={{ marginLeft: 8, display: 'flex', alignItems: 'center' }}>
+              <button type="button" onClick={() => setB2bEnabled(s => !s)} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '6px 10px', borderRadius: 20, border: '1.5px solid #bfe6fb', background: '#fff', cursor: 'pointer' }} aria-pressed={b2bEnabled} title="B2B">
+                <div style={{ width: 36, height: 20, borderRadius: 20, background: b2bEnabled ? '#ffb84d' : '#eef6ff', position: 'relative' }}>
+                  <div style={{ width: 14, height: 14, borderRadius: 12, background: b2bEnabled ? '#fff' : '#0b74de', position: 'absolute', top: 3, left: (b2bEnabled ? 19 : 3), transition: 'left 140ms linear' }} />
                 </div>
+                <div style={{ fontSize: 13, fontWeight: 600 }}>B2B</div>
+              </button>
+            </div>
+            {/* action icons moved next to B2B */}
+            <div style={{ marginLeft: 8, display: 'flex', gap: 8, alignItems: 'center' }}>
+              <Link to="/wishlist" className="header-action" style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 40, height: 40, borderRadius: 20, border: '1.5px solid #d6e6f3', textDecoration: 'none' }} aria-label="Wishlist">
+                <svg className="header-icon" width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <path fill="currentColor" d="M12.1 21.3c-.4-.3-8.1-5.6-9.9-8.1C.5 11.2 2.4 7 6 7c1.9 0 3.2.9 4.1 2.2.9-1.3 2.2-2.2 4.1-2.2 3.6 0 5.5 4.2 3.8 6.2-1.8 2.5-9.5 7.9-9.9 8.1z" />
+                </svg>
+                {wishlistCount ? (
+                  <span style={{ position: 'absolute', top: -6, right: -6, background: '#0b74de', color: '#fff', borderRadius: 10, padding: '2px 6px', fontSize: 12 }}>{wishlistCount}</span>
+                ) : null}
+              </Link>
+              <Link to="/cart" className="header-action" style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 40, height: 40, borderRadius: 20, border: '1.5px solid #d6e6f3', textDecoration: 'none' }} aria-label="Cart">
+                <svg className="header-icon" width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <path fill="currentColor" d="M7 4h-2l-1 2h2l3.6 7.6-1.35 2.4A1.99 1.99 0 0 0 10.25 18h7.45v-2H10.9l.6-1h7.05c.78 0 1.42-.55 1.58-1.3l1.25-6.7H6.21L5.27 4H7zM9 20a1 1 0 1 0 0 2 1 1 0 0 0 0-2zm8 0a1 1 0 1 0 0 2 1 1 0 0 0 0-2z" />
+                </svg>
+                {cartCount ? (
+                  <span style={{ position: 'absolute', top: -6, right: -6, background: '#d32', color: '#fff', borderRadius: 10, padding: '2px 6px', fontSize: 12 }}>{cartCount}</span>
+                ) : null}
+              </Link>
+              <div ref={profileRef} style={{ position: 'relative' }}>
+                <button className="header-action" type="button" onClick={() => { if (!hasToken) navigate('/login'); else setShowProfileMenu(s => !s); }} title="Profile" aria-label="Profile" aria-haspopup="true" aria-expanded={showProfileMenu} style={{ width: 40, height: 40, borderRadius: 20, border: '1.5px solid #d6e6f3', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <svg className="header-icon" width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path fill="currentColor" d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm0 2c-4.4 0-8 2.2-8 4.9V22h16v-3.1c0-2.7-3.6-4.9-8-4.9z" />
+                  </svg>
+                </button>
+                {showProfileMenu && hasToken ? (
+                  <div style={{ position: 'absolute', right: 0, top: '100%', marginTop: 8, background: '#fff', border: '1px solid #eee', boxShadow: '0 8px 24px rgba(0,0,0,0.08)', padding: 8, zIndex: 95, minWidth: 160 }}>
+                    <Link to="/profile" onClick={() => setShowProfileMenu(false)} style={{ display: 'block', padding: '8px 12px', textDecoration: 'none', color: '#111' }}>Profile</Link>
+                    <button type="button" onClick={() => { setShowProfileMenu(false); handleLogout(); }} style={{ display: 'block', width: '100%', textAlign: 'left', padding: '8px 12px', background: 'none', border: 'none', cursor: 'pointer' }}>Logout</button>
+                  </div>
+                ) : null}
               </div>
             </div>
           </form>
