@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { getToken, logout, isAdmin } from "../services/authService";
 import { getCount, getCart } from "../services/cartService";
 import wishlistService from '../services/wishlistService';
+import { useCurrency } from '../context/CurrencyContext';
 import API_BASE_URL from "../config";
 import logo from '../assets/globe-logo.png';
 import Breadcrumbs from './Breadcrumbs';
@@ -14,7 +15,7 @@ export default function Header() {
   const [selectedHamburgerCategory, setSelectedHamburgerCategory] = useState(null);
   const [showLangMenu, setShowLangMenu] = useState(false);
   const [lang, setLang] = useState(() => localStorage.getItem('site_lang') || 'English');
-  const [currency, setCurrency] = useState(() => localStorage.getItem('site_currency') || 'All');
+  const { currency, changeCurrency } = useCurrency();
   const [hasToken, setHasToken] = useState(!!getToken());
   const [isAdministrator, setIsAdministrator] = useState(isAdmin());
   const [cartCount, setCartCount] = useState(getCount());
@@ -343,11 +344,11 @@ export default function Header() {
         </div>
 
         {/* full-width right controls pinned to the far right of the header */}
-        <div ref={langRef} style={{ position: 'absolute', right: 16, top: '50%', transform: 'translateY(-50%)', display: 'flex', alignItems: 'center', gap: 12 }}>
+        <div ref={langRef} style={{ position: 'absolute', right: 16, top: '50%', transform: 'translateY(-50%)', display: 'flex', alignItems: 'center', gap: 12, zIndex: 9999 }}>
           <div style={{ position: 'relative' }}>
             <button type="button" onClick={() => setShowLangMenu(s => !s)} style={{ background: 'none', border: '1px solid #eee', padding: '6px 10px', borderRadius: 6, cursor: 'pointer' }}>Lang / Curr ▾</button>
             {showLangMenu ? (
-              <div style={{ position: 'absolute', right: 0, top: '100%', marginTop: 8, background: '#fff', border: '1px solid #eee', boxShadow: '0 8px 24px rgba(0,0,0,0.08)', padding: 12, zIndex: 95, minWidth: 220 }}>
+              <div style={{ position: 'absolute', right: 0, top: '100%', marginTop: 8, background: '#fff', border: '1px solid #eee', boxShadow: '0 8px 24px rgba(0,0,0,0.08)', padding: 12, zIndex: 10001, minWidth: 220 }}>
                 <div style={{ display: 'grid', gap: 8 }}>
                   <label style={{ fontSize: 13 }}>Language</label>
                   <select value={lang} onChange={(e) => { setLang(e.target.value); localStorage.setItem('site_lang', e.target.value); }}>
@@ -355,10 +356,10 @@ export default function Header() {
                     <option value="Albanian">Albanian</option>
                   </select>
                   <label style={{ fontSize: 13 }}>Currency</label>
-                  <select value={currency} onChange={(e) => { setCurrency(e.target.value); localStorage.setItem('site_currency', e.target.value); }}>
-                    <option value="All">All</option>
-                    <option value="EUR">Euro</option>
-                    <option value="USD">USD</option>
+                  <select value={currency} onChange={(e) => changeCurrency(e.target.value)}>
+                    <option value="ALL">ALL (Lek)</option>
+                    <option value="EUR">EUR (€)</option>
+                    <option value="USD">USD ($)</option>
                   </select>
                 </div>
               </div>
