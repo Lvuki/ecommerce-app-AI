@@ -25,6 +25,7 @@ const serviceRoutes = require('./routes/services');
 const adminRoutes = require('./routes/admin');
 const rolesRoutes = require('./routes/roles');
 const pagesRoutes = require('./routes/pages');
+const settingsRoutes = require('./routes/settings');
 
 const app = express();
 
@@ -39,7 +40,7 @@ const requestsLog = path.join(logsDir, 'requests.log');
 app.use((req, res, next) => {
   try {
     const line = `${new Date().toISOString()} ${req.method} ${req.originalUrl} query=${JSON.stringify(req.query)}\n`;
-    fs.appendFile(requestsLog, line, () => {});
+    fs.appendFile(requestsLog, line, () => { });
   } catch (e) {
     // ignore logging errors
   }
@@ -66,6 +67,7 @@ app.use('/api/users', userRoutes); // includes admin-only routes
 app.use('/api/admin', adminRoutes);
 app.use('/api/roles', rolesRoutes);
 app.use('/api/pages', pagesRoutes);
+app.use('/api/settings', settingsRoutes);
 
 // Serve uploaded images
 const uploadsDir = path.join(__dirname, 'uploads');

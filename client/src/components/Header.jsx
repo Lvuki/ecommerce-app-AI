@@ -21,10 +21,9 @@ export default function Header() {
   const [cartCount, setCartCount] = useState(getCount());
   const [wishlistCount, setWishlistCount] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchCategory, setSearchCategory] = useState('');
   const [headerCategories, setHeaderCategories] = useState([]);
-  const [headerPages, setHeaderPages] = useState([]);
-  const [showCategoryMenu, setShowCategoryMenu] = useState(false);
+  const [, setHeaderPages] = useState([]);
+  const [, setShowCategoryMenu] = useState(false);
   const [suggestions, setSuggestions] = useState({ products: [], categories: [] });
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [b2bEnabled, setB2bEnabled] = useState(() => localStorage.getItem('b2b_enabled') === '1');
@@ -220,7 +219,7 @@ export default function Header() {
     walk(nodes);
     return out;
   };
-  const flatHeaderCategories = flattenCategories(headerCategories);
+  // intentionally not storing flattened categories (unused in current markup)
 
   const handleLogout = () => {
     logout();

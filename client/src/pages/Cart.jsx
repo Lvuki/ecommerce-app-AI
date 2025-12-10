@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { getCart, updateQty, removeItem, clearCart, updateItemServices } from '../services/cartService';
 import API_BASE_URL from '../config';
+import { useCurrency } from '../context/CurrencyContext';
 import { Link, useNavigate } from 'react-router-dom';
 
 export default function CartPage() {
+  const { formatPrice } = useCurrency();
   const [items, setItems] = useState([]);
   const navigate = useNavigate();
 
@@ -45,11 +47,13 @@ export default function CartPage() {
     const newServices = (item.services || []).filter(s => String((s && s.id) || s) !== String((svc && svc.id) || svc));
     const optimistic = items.map(it => {
       if (it === item || (String(it.id) === String(item.id) && JSON.stringify(it.services || []) === JSON.stringify(item.services || []))) {
-        return { ...it, services: newServices, price: (() => {
-          const servicesSum = Array.isArray(newServices) ? newServices.reduce((ss, sv) => ss + Number((sv && sv.price) || 0), 0) : 0;
-          const productPrice = (it.productPrice !== undefined && it.productPrice !== null) ? Number(it.productPrice) : (Number(it.price || 0) - (Array.isArray(it.services) ? it.services.reduce((s, sv) => s + Number((sv && sv.price) || 0), 0) : 0));
-          return Number(productPrice) + Number(servicesSum || 0);
-        })() };
+        return {
+          ...it, services: newServices, price: (() => {
+            const servicesSum = Array.isArray(newServices) ? newServices.reduce((ss, sv) => ss + Number((sv && sv.price) || 0), 0) : 0;
+            const productPrice = (it.productPrice !== undefined && it.productPrice !== null) ? Number(it.productPrice) : (Number(it.price || 0) - (Array.isArray(it.services) ? it.services.reduce((s, sv) => s + Number((sv && sv.price) || 0), 0) : 0));
+            return Number(productPrice) + Number(servicesSum || 0);
+          })()
+        };
       }
       return it;
     });
@@ -62,7 +66,7 @@ export default function CartPage() {
       console.error('Failed to update services', err);
       alert(err && err.message ? err.message : 'Failed to update services');
       // revert optimistic update by reloading cart
-      try { const d = await getCart(); setItems(d); } catch (_) {}
+      try { const d = await getCart(); setItems(d); } catch (_) { }
     }
   };
 
@@ -125,7 +129,7 @@ export default function CartPage() {
                           <ul style={{ margin: '6px 0 0 14px' }}>
                             {it.services.map(s => (
                               <li key={s.id || s} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                <span style={{ flex: 1 }}>{s.name || s} - {Number(s.price || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} L</span>
+                                <span style={{ flex: 1 }}>{s.name || s} - {formatPrice(s.price || 0)}</span>
                                 <button type="button" onClick={() => handleRemoveService(it, s)} aria-label={`Remove service ${s.name || s}`} title="Remove service" style={{ color: '#c00', background: 'transparent', border: 'none', cursor: 'pointer', fontSize: 14, lineHeight: '1', padding: 2 }}>✕</button>
                               </li>
                             ))}
@@ -139,7 +143,7 @@ export default function CartPage() {
                   {(() => {
                     const servicesSum = Array.isArray(it.services) ? it.services.reduce((ss, sv) => ss + Number((sv && sv.price) || 0), 0) : 0;
                     const productPrice = (it.productPrice !== undefined && it.productPrice !== null) ? Number(it.productPrice) : (Number(it.price || 0) - servicesSum);
-                    return `${productPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} L`;
+                    return formatPrice(productPrice);
                   })()}
                 </td>
                 <td style={{ padding: '20px', textAlign: 'center', borderBottom: '1px solid #eee' }}>
@@ -149,7 +153,7 @@ export default function CartPage() {
                   {(() => {
                     const servicesSum = Array.isArray(it.services) ? it.services.reduce((ss, sv) => ss + Number((sv && sv.price) || 0), 0) : 0;
                     const productPrice = (it.productPrice !== undefined && it.productPrice !== null) ? Number(it.productPrice) : (Number(it.price || 0) - servicesSum);
-                    return `${((productPrice + servicesSum) * (it.qty || 0)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} L`;
+                    return formatPrice((productPrice + servicesSum) * (it.qty || 0));
                   })()}
                 </td>
                 <td style={{ padding: '20px', textAlign: 'center', borderBottom: '1px solid #eee' }}>
@@ -164,7 +168,7 @@ export default function CartPage() {
       </div>
 
       <div style={{ marginTop: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div style={{ fontWeight: 700 }}>Total: {total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} L</div>
+        <div style={{ fontWeight: 700 }}>Total: {formatPrice(total)}</div>
         <div>
           <button onClick={async () => { try { await clearCart(); setItems([]); } catch (err) { console.error(err); alert('Failed to clear cart'); } }} style={{ background: 'transparent', color: '#c00', border: '1px solid #c00', padding: '8px 16px', borderRadius: 20, cursor: 'pointer', fontWeight: 600 }}>Clear</button>
           <button onClick={handleCheckout} style={{ marginLeft: 8, background: '#0b79d0', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: 20, cursor: 'pointer', fontWeight: 600 }}>Checkout</button>

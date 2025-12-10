@@ -9,10 +9,12 @@ import wishlistService from "../services/wishlistService";
 import { getToken } from "../services/authService";
 import '../styles/productCard.css';
 import { useCompare } from '../context/CompareContext';
+import { useCurrency } from '../context/CurrencyContext';
 
 
 export default function Home() {
   const { addToCompare, removeFromCompare, isInCompare } = useCompare();
+  const { formatPrice } = useCurrency();
   const [products, setProducts] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const perPage = 5;
@@ -376,7 +378,7 @@ export default function Home() {
                                   {info.discounted ? (
                                     <div className="badge">
                                       <span className="badge-text">KURSE</span>
-                                      <span className="badge-value">{Math.round((info.original || 0) - (info.display || 0)).toLocaleString('en-US')} Lekë</span>
+                                      <span className="badge-value">{formatPrice((info.original || 0) - (info.display || 0))}</span>
                                     </div>
                                   ) : null}
 
@@ -418,8 +420,8 @@ export default function Home() {
                                   <div style={{ padding: '0 6px' }}>
                                     <div className="product-name">{p.name}</div>
                                     <div className="price-container">
-                                      {info.discounted ? <span className="old-price">{Number(info.original).toLocaleString('en-US')} LEKË</span> : null}
-                                      <div className="current-price">{Number(info.display).toLocaleString('en-US')} <span className="currency">Lekë</span></div>
+                                      {info.discounted ? <span className="old-price">{formatPrice(info.original)}</span> : null}
+                                      <div className="current-price">{formatPrice(info.display)}</div>
                                     </div>
                                     <button className="buy-btn" onClick={async (e) => { e.preventDefault(); try { const priceToUse = info.display; await addItem({ id: p.id, name: p.name, price: priceToUse, image: p.image, sku: p.sku }, 1); alert('Added to cart'); } catch (err) { console.error(err); alert('Failed to add to cart'); } }}>BLI TANI</button>
                                   </div>
@@ -502,7 +504,7 @@ export default function Home() {
                     {info.discounted ? (
                       <div className="badge">
                         <span className="badge-text">KURSE</span>
-                        <span className="badge-value">{Math.round((info.original || 0) - (info.display || 0)).toLocaleString('en-US')} Lekë</span>
+                        <span className="badge-value">{formatPrice((info.original || 0) - (info.display || 0))}</span>
                       </div>
                     ) : null}
 
@@ -544,8 +546,8 @@ export default function Home() {
                     <div style={{ padding: '0 6px' }}>
                       <div className="product-name">{p.name}</div>
                       <div className="price-container">
-                        {info.discounted ? <span className="old-price">{Number(info.original).toLocaleString('en-US')} LEKË</span> : null}
-                        <div className="current-price">{Number(info.display).toLocaleString('en-US')} <span className="currency">Lekë</span></div>
+                        {info.discounted ? <span className="old-price">{formatPrice(info.original)}</span> : null}
+                        <div className="current-price">{formatPrice(info.display)}</div>
                       </div>
                       <button className="buy-btn" onClick={async (e) => { e.preventDefault(); try { const priceToUse = info.display; await addItem({ id: p.id, name: p.name, price: priceToUse, image: p.image, sku: p.sku }, 1); alert('Added to cart'); } catch (err) { console.error(err); alert('Failed to add to cart'); } }}>BLI TANI</button>
                     </div>

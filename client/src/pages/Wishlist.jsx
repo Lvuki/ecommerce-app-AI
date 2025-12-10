@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import wishlistService from '../services/wishlistService';
 import cartService from '../services/cartService';
+import { useCurrency } from '../context/CurrencyContext';
 import { Link, useNavigate } from 'react-router-dom';
 
 export default function Wishlist() {
+  const { formatPrice } = useCurrency();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const nav = useNavigate();
@@ -55,7 +57,7 @@ export default function Wishlist() {
                     </div>
                   </td>
                   <td style={{ padding: '20px', textAlign: 'center', fontWeight: 700, borderBottom: '1px solid #eee' }}>
-                    {Number(it.price || 0).toLocaleString('en-US').replace(/,/g, ' ')} L
+                    {formatPrice(it.price || 0)}
                   </td>
                   <td style={{ padding: '20px', textAlign: 'center', borderBottom: '1px solid #eee' }}>
                     <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>

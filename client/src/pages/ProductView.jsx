@@ -3,9 +3,11 @@ import { useParams, useNavigate } from "react-router-dom";
 import { addItem } from "../services/cartService";
 import wishlistService from '../services/wishlistService';
 import { getProductById, rateProduct } from "../services/productService";
+import { useCurrency } from '../context/CurrencyContext';
 
 export default function ProductView() {
   const { id } = useParams();
+  const { formatPrice } = useCurrency();
   const navigate = useNavigate();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -108,7 +110,7 @@ export default function ProductView() {
       const price = Number(product.offerPrice || product.salePrice || product.price || 0);
       const item = { id: product.id, name: product.name, image: imageUrl || '', price, services: servicesPayload };
       await addItem(item, 1);
-      try { navigate('/cart'); } catch (_) {}
+      try { navigate('/cart'); } catch (_) { }
     } catch (err) {
       console.error(err);
       alert('Failed to add to cart');
@@ -189,7 +191,7 @@ export default function ProductView() {
                             setMainImagePortrait(w < h);
                             setMainImageFit(w < h ? 'contain' : 'cover');
                           }
-                        } catch (_) {}
+                        } catch (_) { }
                       }}
                     />
                   </div>
@@ -207,7 +209,7 @@ export default function ProductView() {
                           setMainImagePortrait(w < h);
                           setMainImageFit(w < h ? 'contain' : 'cover');
                         }
-                      } catch (_) {}
+                      } catch (_) { }
                     }}
                   />
                 )
@@ -264,81 +266,74 @@ export default function ProductView() {
                 {/* Price block */}
                 <div>
                   {product.offerPrice ? (
-                    <div className="price-old">{Number(product.price).toLocaleString('en-US')} LEKË</div>
+                    <div className="price-old">{formatPrice(product.price)}</div>
                   ) : null}
                   <div className="price-large">
-                    {(() => {
-                      const value = Number(product.offerPrice || product.salePrice || product.price || 0);
-                      const parts = value.toFixed(2).split('.');
-                      return (<>
-                        <div className="price-int">{parts[0]}</div>
-                        <div className="price-dec">{parts[1]}</div>
-                      </>);
-                    })()}
+                    {formatPrice(product.offerPrice || product.salePrice || product.price || 0)}
                   </div>
-                  <div className="price-subtext">Kosto shtesë shërbime: {(() => { const sum = (selectedServiceIds || []).reduce((s, id) => { const svc = availableServices.find(x => String(x.id) === String(id)); return s + (svc ? Number(svc.price || 0) : 0); }, 0); return `${String(sum.toLocaleString('en-US')).replace(/,/g, ' ')} L`; })()}</div>
+                  <div className="price-subtext">Kosto shtesë shërbime: {(() => { const sum = (selectedServiceIds || []).reduce((s, id) => { const svc = availableServices.find(x => String(x.id) === String(id)); return s + (svc ? Number(svc.price || 0) : 0); }, 0); return formatPrice(sum); })()}</div>
                 </div>
 
                 {/* Services list (product-linked) */}
-              {availableServices && availableServices.length > 0 && (
-                <div style={{ marginTop: 14 }}>
-                  <div style={{ fontWeight: 700, marginBottom: 8 }}>Shërbimet</div>
-                  <div style={{ display: 'grid', gap: 6 }}>
-                    {availableServices.map(s => {
-                      const checked = (selectedServiceIds || []).includes(s.id);
-                      return (
-                        <div key={s.id} className="service-row">
-                          <div className="service-left">
-                            <div style={{ fontWeight: 700 }}>{s.name}</div>
-                            {s.description ? <div style={{ fontSize: 12, color: '#666' }}>{s.description}</div> : null}
+                {availableServices && availableServices.length > 0 && (
+                  <div style={{ marginTop: 14 }}>
+                    <div style={{ fontWeight: 700, marginBottom: 8 }}>Shërbimet</div>
+                    <div style={{ display: 'grid', gap: 6 }}>
+                      {availableServices.map(s => {
+                        const checked = (selectedServiceIds || []).includes(s.id);
+                        return (
+                          <div key={s.id} className="service-row">
+                            <div className="service-left">
+                              <div style={{ fontWeight: 700 }}>{s.name}</div>
+                              {s.description ? <div style={{ fontSize: 12, color: '#666' }}>{s.description}</div> : null}
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+                              <div className="service-price">{formatPrice(s.price)}</div>
+                              <button
+                                onClick={() => {
+                                  const next = new Set(selectedServiceIds || []);
+                                  if (next.has(s.id)) next.delete(s.id); else next.add(s.id);
+                                  setSelectedServiceIds(Array.from(next));
+                                }}
+                                aria-pressed={checked}
+                                aria-label={checked ? `Selected ${s.name}` : `Select ${s.name}`}
+                                style={{
+                                  width: 20,
+                                  height: 20,
+                                  borderRadius: 999,
+                                  border: checked ? '6px solid #0b74de' : '2px solid #cfe8ff',
+                                  background: checked ? '#0b74de' : '#fff',
+                                  padding: 0,
+                                  cursor: 'pointer'
+                                }}
+                              />
+                            </div>
                           </div>
-                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
-                            <div className="service-price">{String(Number(s.price || 0).toLocaleString('en-US')).replace(/,/g, ' ')} L</div>
-                            <button
-                              onClick={() => {
-                                const next = new Set(selectedServiceIds || []);
-                                if (next.has(s.id)) next.delete(s.id); else next.add(s.id);
-                                setSelectedServiceIds(Array.from(next));
-                              }}
-                              aria-pressed={checked}
-                              aria-label={checked ? `Selected ${s.name}` : `Select ${s.name}`}
-                              style={{
-                                width: 20,
-                                height: 20,
-                                borderRadius: 999,
-                                border: checked ? '6px solid #0b74de' : '2px solid #cfe8ff',
-                                background: checked ? '#0b74de' : '#fff',
-                                padding: 0,
-                                cursor: 'pointer'
-                              }}
-                            />
-                          </div>
-                        </div>
-                      );
-                    })}
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* CTA, qty and wishlist */}
+                <div style={{ marginTop: 16 }}>
+                  <button onClick={handleAddToCart} className="buy-cta">BLI TANI</button>
+                  <div style={{ marginTop: 12, display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'center' }}>
+                    <div className="qty-control">
+                      <button onClick={() => setQty(q => Math.max(1, q - 1))}>-</button>
+                      <div style={{ padding: '8px 12px', minWidth: 44, textAlign: 'center' }}>{qty}</div>
+                      <button onClick={() => setQty(q => q + 1)}>+</button>
+                    </div>
+                    <button onClick={toggleWishlist} className="icon-btn">{inWishlist ? '❤️' : '♡'}</button>
+                    <button onClick={handleAddToCart} title="Add to cart" className="icon-btn">🛒</button>
                   </div>
                 </div>
-              )}
 
-              {/* CTA, qty and wishlist */}
-              <div style={{ marginTop: 16 }}>
-                <button onClick={handleAddToCart} className="buy-cta">BLI TANI</button>
-                <div style={{ marginTop: 12, display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'center' }}>
-                  <div className="qty-control">
-                    <button onClick={() => setQty(q => Math.max(1, q - 1))}>-</button>
-                    <div style={{ padding: '8px 12px', minWidth: 44, textAlign: 'center' }}>{qty}</div>
-                    <button onClick={() => setQty(q => q + 1)}>+</button>
-                  </div>
-                  <button onClick={toggleWishlist} className="icon-btn">{inWishlist ? '❤️' : '♡'}</button>
-                  <button onClick={handleAddToCart} title="Add to cart" className="icon-btn">🛒</button>
+                <div style={{ marginTop: 12, color: '#666', fontSize: 13 }}>
+                  {product.ratingAvg ? `${product.ratingAvg} / 5 (${product.ratingCount || 0} votes)` : 'No rating yet'}
                 </div>
-              </div>
-
-              <div style={{ marginTop: 12, color: '#666', fontSize: 13 }}>
-                {product.ratingAvg ? `${product.ratingAvg} / 5 (${product.ratingCount || 0} votes)` : 'No rating yet'}
               </div>
             </div>
-          </div>
           </aside>
         </div>
 
@@ -364,7 +359,7 @@ export default function ProductView() {
                         <div style={{ fontWeight: 700 }}>{s.name}</div>
                         <div style={{ color: '#666', fontSize: 13 }}>{s.description}</div>
                       </div>
-                      <div style={{ fontWeight: 700 }}>${Number(s.price || 0).toFixed(2)}</div>
+                      <div style={{ fontWeight: 700 }}>{formatPrice(s.price)}</div>
                     </label>
                   );
                 })}
